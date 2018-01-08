@@ -23,7 +23,7 @@ var util = require('@google-cloud/common').util;
 var fakeModelo = {
   inherits: function() {
     this.calledWith_ = arguments;
-  }
+  },
 };
 
 var decorateGrpcStatusOverride_;
@@ -41,7 +41,7 @@ function FakeOperation() {
 
 describe('GrpcOperation', function() {
   var FAKE_SERVICE = {
-    Promise: Promise
+    Promise: Promise,
   };
   var OPERATION_ID = '/a/b/c/d';
 
@@ -51,7 +51,7 @@ describe('GrpcOperation', function() {
   before(function() {
     GrpcOperation = proxyquire('../src/operation.js', {
       '@google-cloud/common': {
-        Operation: FakeOperation
+        Operation: FakeOperation,
       },
       modelo: fakeModelo,
       './service-object.js': FakeGrpcServiceObject,
@@ -72,24 +72,24 @@ describe('GrpcOperation', function() {
         delete: {
           protoOpts: {
             service: 'Operations',
-            method: 'deleteOperation'
+            method: 'deleteOperation',
           },
           reqOpts: {
-            name: OPERATION_ID
-          }
+            name: OPERATION_ID,
+          },
         },
         exists: true,
         get: true,
         getMetadata: {
           protoOpts: {
             service: 'Operations',
-            method: 'getOperation'
+            method: 'getOperation',
           },
           reqOpts: {
-            name: OPERATION_ID
-          }
-        }
-      }
+            name: OPERATION_ID,
+          },
+        },
+      },
     };
 
     it('should extend GrpcServiceObject and Operation', function() {
@@ -118,7 +118,7 @@ describe('GrpcOperation', function() {
       grpcOperation.request = function(protoOpts, reqOpts, callback) {
         assert.deepEqual(protoOpts, {
           service: 'Operations',
-          method: 'cancelOperation'
+          method: 'cancelOperation',
         });
 
         assert.strictEqual(reqOpts.name, OPERATION_ID);
@@ -163,7 +163,7 @@ describe('GrpcOperation', function() {
 
       it('should callback with the operation error', function(done) {
         var apiResponse = {
-          error: {}
+          error: {},
         };
 
         grpcOperation.getMetadata = function(callback) {
@@ -184,7 +184,7 @@ describe('GrpcOperation', function() {
       });
     });
     describe('operation incomplete', function() {
-      var apiResponse = { done: false };
+      var apiResponse = {done: false};
 
       beforeEach(function() {
         grpcOperation.getMetadata = function(callback) {
@@ -202,7 +202,7 @@ describe('GrpcOperation', function() {
     });
 
     describe('operation complete', function() {
-      var apiResponse = { done: true };
+      var apiResponse = {done: true};
 
       beforeEach(function() {
         grpcOperation.getMetadata = function(callback) {
