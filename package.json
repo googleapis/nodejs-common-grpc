@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/common-grpc",
   "description": "Common components for Cloud APIs Node.js Client Libraries that require gRPC",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -17,6 +17,7 @@
   ],
   "contributors": [
     "Adri Van Houdt <adri.van.houdt@gmail.com>",
+    "Alexander Fenster <fenster@google.com>",
     "Ali Ijaz Sheikh <ofrobots@google.com>",
     "Dave Gramlich <callmehiphop@gmail.com>",
     "Eric Uldall <ericuldall@gmail.com>",
