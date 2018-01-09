@@ -1,0 +1,13 @@
+{
+  "_product": "common-grpc",
+  "id": "common-grpc",
+  "name": "Google Cloud Common GRPC Module",
+  "short_name": "common-grpc",
+  "docs_url": "https://cloud.google.com/nodejs/docs/",
+  "description": "Common components for Cloud APIs Node.js Client Libraries that require gRPC",
+  "api_id": "",
+  "requiresKeyFile": true,
+  "requiresProjectId": true,
+  "client_reference_url": "https://cloud.google.com/nodejs/docs/",
+  "release_quality": "beta"
+}

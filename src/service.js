@@ -44,88 +44,88 @@ var protoObjectCache = {};
 var GRPC_ERROR_CODE_TO_HTTP = {
   0: {
     code: 200,
-    message: 'OK'
+    message: 'OK',
   },
 
   1: {
     code: 499,
-    message: 'Client Closed Request'
+    message: 'Client Closed Request',
   },
 
   2: {
     code: 500,
-    message: 'Internal Server Error'
+    message: 'Internal Server Error',
   },
 
   3: {
     code: 400,
-    message: 'Bad Request'
+    message: 'Bad Request',
   },
 
   4: {
     code: 504,
-    message: 'Gateway Timeout'
+    message: 'Gateway Timeout',
   },
 
   5: {
     code: 404,
-    message: 'Not Found'
+    message: 'Not Found',
   },
 
   6: {
     code: 409,
-    message: 'Conflict'
+    message: 'Conflict',
   },
 
   7: {
     code: 403,
-    message: 'Forbidden'
+    message: 'Forbidden',
   },
 
   8: {
     code: 429,
-    message: 'Too Many Requests'
+    message: 'Too Many Requests',
   },
 
   9: {
     code: 412,
-    message: 'Precondition Failed'
+    message: 'Precondition Failed',
   },
 
   10: {
     code: 409,
-    message: 'Conflict'
+    message: 'Conflict',
   },
 
   11: {
     code: 400,
-    message: 'Bad Request'
+    message: 'Bad Request',
   },
 
   12: {
     code: 501,
-    message: 'Not Implemented'
+    message: 'Not Implemented',
   },
 
   13: {
     code: 500,
-    message: 'Internal Server Error'
+    message: 'Internal Server Error',
   },
 
   14: {
     code: 503,
-    message: 'Service Unavailable'
+    message: 'Service Unavailable',
   },
 
   15: {
     code: 500,
-    message: 'Internal Server Error'
+    message: 'Internal Server Error',
   },
 
   16: {
     code: 401,
-    message: 'Unauthorized'
-  }
+    message: 'Unauthorized',
+  },
 };
 
 /**
@@ -145,7 +145,7 @@ var GRPC_SERVICE_OPTIONS = {
   // RE: https://github.com/grpc/grpc/issues/8839
   // RE: https://github.com/grpc/grpc/issues/8382
   // RE: https://github.com/GoogleCloudPlatform/google-cloud-node/issues/1991
-  'grpc.initial_reconnect_backoff_ms': 5000
+  'grpc.initial_reconnect_backoff_ms': 5000,
 };
 
 /**
@@ -182,11 +182,14 @@ function GrpcService(config, options) {
 
   this.grpcMetadata = new grpc.Metadata();
 
-  this.grpcMetadata.add('x-goog-api-client', [
-    'gl-node/' + process.versions.node,
-    'gccl/' + config.packageJson.version,
-    'grpc/' + require('grpc/package.json').version
-  ].join(' '));
+  this.grpcMetadata.add(
+    'x-goog-api-client',
+    [
+      'gl-node/' + process.versions.node,
+      'gccl/' + config.packageJson.version,
+      'grpc/' + require('grpc/package.json').version,
+    ].join(' ')
+  );
 
   if (config.grpcMetadata) {
     for (var prop in config.grpcMetadata) {
@@ -263,7 +266,7 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
 
   try {
     reqOpts = this.decorateRequest_(reqOpts);
-  } catch(e) {
+  } catch (e) {
     callback(e);
     return;
   }
@@ -272,23 +275,23 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
   // executed with this as the "response", we return it to the user as an error.
   var respError;
 
-  var retryOpts = extend({
-    retries: this.maxRetries,
-    currentRetryAttempt: 0,
-    shouldRetryFn: GrpcService.shouldRetryRequest_,
+  var retryOpts = extend(
+    {
+      retries: this.maxRetries,
+      currentRetryAttempt: 0,
+      shouldRetryFn: GrpcService.shouldRetryRequest_,
 
-    // retry-request determines if it should retry from the incoming HTTP
-    // response status. gRPC always returns an error proto message. We pass that
-    // "error" into retry-request to act as the HTTP response, so it can use the
-    // status code to determine if it should retry.
-    request: function(_, onResponse) {
-      respError = null;
+      // retry-request determines if it should retry from the incoming HTTP
+      // response status. gRPC always returns an error proto message. We pass that
+      // "error" into retry-request to act as the HTTP response, so it can use the
+      // status code to determine if it should retry.
+      request: function(_, onResponse) {
+        respError = null;
 
-      return service[protoOpts.method](
-        reqOpts,
-        metadata,
-        grpcOpts,
-        function(err, resp) {
+        return service[protoOpts.method](reqOpts, metadata, grpcOpts, function(
+          err,
+          resp
+        ) {
           if (err) {
             respError = GrpcService.decorateError_(err);
 
@@ -303,8 +306,10 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
 
           onResponse(null, resp);
         });
-    }
-  }, protoOpts.retryOpts);
+      },
+    },
+    protoOpts.retryOpts
+  );
 
   return retryRequest(null, retryOpts, function(err, resp) {
     if (!err && resp === respError) {
@@ -366,34 +371,39 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
 
   try {
     reqOpts = this.decorateRequest_(reqOpts);
-  } catch(e) {
+  } catch (e) {
     setImmediate(function() {
       stream.destroy(e);
     });
     return stream;
   }
 
-  var retryOpts = extend({
-    retries: this.maxRetries,
-    currentRetryAttempt: 0,
-    objectMode: objectMode,
-    shouldRetryFn: GrpcService.shouldRetryRequest_,
+  var retryOpts = extend(
+    {
+      retries: this.maxRetries,
+      currentRetryAttempt: 0,
+      objectMode: objectMode,
+      shouldRetryFn: GrpcService.shouldRetryRequest_,
 
-    request: function() {
-      return service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts)
-        .on('metadata', function() {
-          // retry-request requires a server response before it starts emitting
-          // data. The closest mechanism grpc provides is a metadata event, but
-          // this does not provide any kind of response status. So we're faking
-          // it here with code `0` which translates to HTTP 200.
-          //
-          // https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1444#discussion_r71812636
-          var grcpStatus = GrpcService.decorateStatus_({ code: 0 });
+      request: function() {
+        return service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts).on(
+          'metadata',
+          function() {
+            // retry-request requires a server response before it starts emitting
+            // data. The closest mechanism grpc provides is a metadata event, but
+            // this does not provide any kind of response status. So we're faking
+            // it here with code `0` which translates to HTTP 200.
+            //
+            // https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1444#discussion_r71812636
+            var grcpStatus = GrpcService.decorateStatus_({code: 0});
 
-          this.emit('response', grcpStatus);
-        });
-    }
-  }, protoOpts.retryOpts);
+            this.emit('response', grcpStatus);
+          }
+        );
+      },
+    },
+    protoOpts.retryOpts
+  );
 
   return retryRequest(null, retryOpts)
     .on('error', function(err) {
@@ -416,7 +426,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
  * @param {object} reqOpts - The request options.
  */
 GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
-  var stream = protoOpts.stream = protoOpts.stream || duplexify.obj();
+  var stream = (protoOpts.stream = protoOpts.stream || duplexify.obj());
 
   if (global.GCLOUD_SANDBOX_ENV) {
     return stream;
@@ -564,14 +574,14 @@ GrpcService.decorateGrpcResponse_ = function(obj, response) {
       // gRPC error messages can be either stringified JSON or strings.
       try {
         message = JSON.parse(response.message).description;
-      } catch(e) {
+      } catch (e) {
         message = response.message;
       }
     }
 
     return extend(true, obj, response, {
       code: defaultResponseDetails.code,
-      message: message
+      message: message,
     });
   }
 
@@ -752,26 +762,30 @@ GrpcService.prototype.getGrpcCredentials_ = function(callback) {
 GrpcService.prototype.loadProtoFile_ = function(protoConfig, config) {
   var grpcOpts = {
     binaryAsBase64: true,
-    convertFieldsToCamelCase: true
+    convertFieldsToCamelCase: true,
   };
 
   if (is.string(protoConfig)) {
     protoConfig = {
-      path: protoConfig
+      path: protoConfig,
     };
   }
 
   var protoObjectCacheKey = [
     config.protosDir,
     protoConfig.path,
-    protoConfig.service
+    protoConfig.service,
   ].join('$');
 
   if (!protoObjectCache[protoObjectCacheKey]) {
-    var services = grpc.load({
-      root: config.protosDir,
-      file: protoConfig.path
-    }, 'proto', grpcOpts);
+    var services = grpc.load(
+      {
+        root: config.protosDir,
+        file: protoConfig.path,
+      },
+      'proto',
+      grpcOpts
+    );
     var service = dotProp.get(services.google, protoConfig.service);
     protoObjectCache[protoObjectCacheKey] = service;
   }
@@ -795,9 +809,12 @@ GrpcService.prototype.getService_ = function(protoOpts) {
     service = new proto[protoOpts.service](
       proto.baseUrl || this.baseUrl,
       this.grpcCredentials,
-      extend({
-        'grpc.primary_user_agent': this.userAgent
-      }, GRPC_SERVICE_OPTIONS)
+      extend(
+        {
+          'grpc.primary_user_agent': this.userAgent,
+        },
+        GRPC_SERVICE_OPTIONS
+      )
     );
 
     this.activeServiceMap_.set(protoOpts.service, service);
@@ -847,7 +864,7 @@ function ObjectToStructConverter(options) {
  */
 ObjectToStructConverter.prototype.convert = function(obj) {
   var convertedObject = {
-    fields: {}
+    fields: {},
   };
 
   this.seenObjects.add(obj);
@@ -888,46 +905,48 @@ ObjectToStructConverter.prototype.encodeValue_ = function(value) {
 
   if (is.null(value)) {
     convertedValue = {
-      nullValue: 0
+      nullValue: 0,
     };
   } else if (is.number(value)) {
     convertedValue = {
-      numberValue: value
+      numberValue: value,
     };
   } else if (is.string(value)) {
     convertedValue = {
-      stringValue: value
+      stringValue: value,
     };
   } else if (is.boolean(value)) {
     convertedValue = {
-      boolValue: value
+      boolValue: value,
     };
   } else if (Buffer.isBuffer(value)) {
     convertedValue = {
-      blobValue: value
+      blobValue: value,
     };
   } else if (is.object(value)) {
     if (this.seenObjects.has(value)) {
       // Circular reference.
       if (!this.removeCircular) {
-        throw new Error([
-          'This object contains a circular reference. To automatically',
-          'remove it, set the `removeCircular` option to true.'
-        ].join(' '));
+        throw new Error(
+          [
+            'This object contains a circular reference. To automatically',
+            'remove it, set the `removeCircular` option to true.',
+          ].join(' ')
+        );
       }
       convertedValue = {
-        stringValue: '[Circular]'
+        stringValue: '[Circular]',
       };
     } else {
       convertedValue = {
-        structValue: this.convert(value)
+        structValue: this.convert(value),
       };
     }
   } else if (is.array(value)) {
     convertedValue = {
       listValue: {
-        values: value.map(this.encodeValue_.bind(this))
-      }
+        values: value.map(this.encodeValue_.bind(this)),
+      },
     };
   } else {
     if (!this.stringify) {
@@ -935,7 +954,7 @@ ObjectToStructConverter.prototype.encodeValue_ = function(value) {
     }
 
     convertedValue = {
-      stringValue: String(value)
+      stringValue: String(value),
     };
   }
 

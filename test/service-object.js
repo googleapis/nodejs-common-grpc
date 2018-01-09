@@ -27,7 +27,7 @@ var fakeUtil = extend({}, util, {
     if (Class.name === 'GrpcServiceObject') {
       promisified = true;
     }
-  }
+  },
 });
 
 function FakeServiceObject() {
@@ -46,8 +46,8 @@ describe('GrpcServiceObject', function() {
     GrpcServiceObject = proxyquire('../src/service-object.js', {
       '@google-cloud/common': {
         ServiceObject: FakeServiceObject,
-        util: fakeUtil
-      }
+        util: fakeUtil,
+      },
     });
   });
 
@@ -57,16 +57,16 @@ describe('GrpcServiceObject', function() {
     grpcServiceObject.methods = {
       delete: {
         protoOpts: PROTO_OPTS,
-        reqOpts: REQ_OPTS
+        reqOpts: REQ_OPTS,
       },
       getMetadata: {
         protoOpts: PROTO_OPTS,
-        reqOpts: REQ_OPTS
+        reqOpts: REQ_OPTS,
       },
       setMetadata: {
         protoOpts: PROTO_OPTS,
-        reqOpts: REQ_OPTS
-      }
+        reqOpts: REQ_OPTS,
+      },
     };
   });
 
@@ -166,8 +166,8 @@ describe('GrpcServiceObject', function() {
   });
 
   describe('setMetadata', function() {
-    var DEFAULT_REQ_OPTS = { a: 'b' };
-    var METADATA = { a: 'c' };
+    var DEFAULT_REQ_OPTS = {a: 'b'};
+    var METADATA = {a: 'c'};
 
     it('should make the correct request', function(done) {
       var setMetadataMethod = grpcServiceObject.methods.setMetadata;
@@ -204,7 +204,7 @@ describe('GrpcServiceObject', function() {
           assert.strictEqual(this, grpcServiceObject.parent);
           assert.deepEqual([].slice.call(arguments), args);
           return expectedReturnValue;
-        }
+        },
       };
 
       var ret = grpcServiceObject.request.apply(grpcServiceObject, args);
@@ -222,7 +222,7 @@ describe('GrpcServiceObject', function() {
           assert.strictEqual(this, grpcServiceObject.parent);
           assert.deepEqual([].slice.call(arguments), args);
           return expectedReturnValue;
-        }
+        },
       };
 
       var ret = grpcServiceObject.requestStream.apply(grpcServiceObject, args);
@@ -240,7 +240,7 @@ describe('GrpcServiceObject', function() {
           assert.strictEqual(this, grpcServiceObject.parent);
           assert.deepEqual([].slice.call(arguments), args);
           return expectedReturnValue;
-        }
+        },
       };
 
       var ret = grpcServiceObject.requestWritableStream.apply(

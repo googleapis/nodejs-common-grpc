@@ -32,7 +32,7 @@ describe('grpc-common', function() {
       './operation.js': fakeOperation,
       './service.js': fakeService,
       './service-object.js': fakeServiceObject,
-      grpc: fakeGrpc
+      grpc: fakeGrpc,
     });
   });
 
@@ -41,7 +41,7 @@ describe('grpc-common', function() {
       Operation: fakeOperation,
       Service: fakeService,
       ServiceObject: fakeServiceObject,
-      grpc: fakeGrpc
+      grpc: fakeGrpc,
     });
   });
 });
