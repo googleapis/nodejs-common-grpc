@@ -1375,7 +1375,7 @@ describe('GrpcService', function() {
         var error = new Error('Error.');
         var expectedDecoratedError = new Error('Decorated error.');
 
-        sinon.stub(GrpcService, 'decorateError_', function() {
+        sinon.stub(GrpcService, 'decorateError_').callsFake(function() {
           return expectedDecoratedError;
         });
 
@@ -1406,7 +1406,7 @@ describe('GrpcService', function() {
 
         var error = new Error('Error.');
 
-        sinon.stub(GrpcService, 'decorateError_', function() {
+        sinon.stub(GrpcService, 'decorateError_').callsFake(function() {
           return null;
         });
 
@@ -1474,7 +1474,7 @@ describe('GrpcService', function() {
     var expectedDecoratedError = new Error('err.');
 
     beforeEach(function() {
-      sinon.stub(GrpcService, 'decorateGrpcResponse_', function() {
+      sinon.stub(GrpcService, 'decorateGrpcResponse_').callsFake(function() {
         return expectedDecoratedError;
       });
     });
@@ -1561,7 +1561,7 @@ describe('GrpcService', function() {
     var fakeStatus = {status: 'a'};
 
     beforeEach(function() {
-      sinon.stub(GrpcService, 'decorateGrpcResponse_', function() {
+      sinon.stub(GrpcService, 'decorateGrpcResponse_').callsFake(function() {
         return fakeStatus;
       });
     });

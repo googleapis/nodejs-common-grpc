@@ -37,8 +37,8 @@
     "docs": "repo-tools exec -- jsdoc -c .jsdoc.js"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.13.6",
-    "dot-prop": "^2.4.0",
+    "@google-cloud/common": "^0.15.1",
+    "dot-prop": "^4.2.0",
     "duplexify": "^3.5.1",
     "extend": "^3.0.1",
     "grpc": "^1.7.1",
@@ -63,6 +63,6 @@
     "power-assert": "^1.4.4",
     "prettier": "^1.9.2",
     "proxyquire": "^1.7.10",
-    "sinon": "^1.17.7"
+    "sinon": "^4.1.4"
   }
 }
