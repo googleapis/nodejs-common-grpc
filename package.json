@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/common-grpc",
   "description": "Common components for Cloud APIs Node.js Client Libraries that require gRPC",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -37,7 +37,7 @@
     "docs": "repo-tools exec -- jsdoc -c .jsdoc.js"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.16.0",
+    "@google-cloud/common": "^0.16.1",
     "dot-prop": "^4.2.0",
     "duplexify": "^3.5.1",
     "extend": "^3.0.1",
