@@ -1381,13 +1381,13 @@ describe('GrpcService', function() {
 
         var stream = grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS);
 
-        stream.destroy = function(err) {
+        stream.on('error', function(err) {
           assert.strictEqual(err, expectedDecoratedError);
           assert.equal(GrpcService.decorateError_.callCount, 1);
           assert(GrpcService.decorateError_.calledWith(error));
           GrpcService.decorateError_.restore();
           done();
-        };
+        });
 
         setImmediate(function() {
           grpcStream.emit('error', error);
@@ -1412,13 +1412,13 @@ describe('GrpcService', function() {
 
         var stream = grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS);
 
-        stream.destroy = function(err) {
+        stream.on('error', function(err) {
           assert.strictEqual(err, error);
           assert.equal(GrpcService.decorateError_.callCount, 1);
           assert(GrpcService.decorateError_.calledWith(error));
           GrpcService.decorateError_.restore();
           done();
-        };
+        });
 
         setImmediate(function() {
           grpcStream.emit('error', error);
