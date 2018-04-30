@@ -8,9 +8,10 @@
     "node": ">=4.0.0"
   },
   "repository": "googleapis/nodejs-common-grpc",
-  "main": "./src/index.js",
+  "main": "./build/src/index.js",
+  "types": "./build/src/index.d.ts",
   "files": [
-    "src",
+    "build/src",
     "AUTHORS",
     "CONTRIBUTORS",
     "LICENSE"
@@ -30,11 +31,15 @@
   "scripts": {
     "test": "repo-tools test run --cmd npm -- run cover",
     "generate-scaffolding": "repo-tools generate all",
-    "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader test/*.js && nyc report",
+    "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader build/test/*.js && nyc report",
     "test-no-cover": "repo-tools test run --cmd mocha -- test/*.js --no-timeouts",
-    "lint": "repo-tools lint --cmd eslint -- src/ test/",
-    "prettier": "repo-tools exec -- prettier --write src/*.js src/*/*.js test/*.js test/*/*.js",
-    "docs": "repo-tools exec -- jsdoc -c .jsdoc.js"
+    "docs": "repo-tools exec -- jsdoc -c .jsdoc.js",
+    "check": "gts check",
+    "clean": "gts clean",
+    "compile": "tsc -p .",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile"
   },
   "dependencies": {
     "@google-cloud/common": "^0.18.2",
@@ -49,12 +54,15 @@
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.1.3",
+    "@types/mocha": "^5.2.0",
+    "@types/node": "^10.0.0",
     "async": "^2.6.0",
     "codecov": "^3.0.0",
     "eslint": "^4.15.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-node": "^6.0.0",
     "eslint-plugin-prettier": "^2.4.0",
+    "gts": "^0.5.4",
     "ink-docstrap": "^1.3.2",
     "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.5.5",
@@ -63,6 +71,7 @@
     "power-assert": "^1.4.4",
     "prettier": "^1.9.2",
     "proxyquire": "^2.0.0",
-    "sinon": "^5.0.0"
+    "sinon": "^5.0.0",
+    "typescript": "~2.8.3"
   }
 }
