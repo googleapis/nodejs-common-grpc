@@ -20,15 +20,15 @@ var assert = require('assert');
 var proxyquire = require('proxyquire');
 var util = require('@google-cloud/common').util;
 
-var fakeModelo = {
+var fakeModelo: any = {
   inherits: function() {
     this.calledWith_ = arguments;
   },
 };
 
 var decorateGrpcStatusOverride_;
-function FakeGrpcService() {}
-FakeGrpcService.decorateGrpcStatus_ = function() {
+function FakeGrpcService() {};
+(FakeGrpcService as any).decorateGrpcStatus_ = function() {
   return (decorateGrpcStatusOverride_ || util.noop).apply(null, arguments);
 };
 
