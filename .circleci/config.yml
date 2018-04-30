@@ -19,12 +19,12 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - lint:
-          requires:
-            - node4
-            - node6
-            - node8
-            - node9
+      # - lint:
+      #     requires:
+      #       - node4
+      #       - node6
+      #       - node8
+      #       - node9
           filters:
             tags:
               only: /.*/
