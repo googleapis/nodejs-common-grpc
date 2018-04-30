@@ -167,11 +167,11 @@ var GRPC_SERVICE_OPTIONS = {
  * @param {object} options - [Configuration object](#/docs/?method=gcloud).
  */
 function GrpcService(config, options) {
-  if (global.GCLOUD_SANDBOX_ENV) {
+  if (global['GCLOUD_SANDBOX_ENV']) {
     // gRPC has a tendency to cause our doc unit tests to fail, so we prevent
     // any calls to that library from going through.
     // Reference: https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1137#issuecomment-193315047
-    return global.GCLOUD_SANDBOX_ENV;
+    return global['GCLOUD_SANDBOX_ENV'];
   }
 
   Service.call(this, config, options);
@@ -235,8 +235,8 @@ nodeutil.inherits(GrpcService, Service);
  * @param {function=} callback - The callback function.
  */
 GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
-  if (global.GCLOUD_SANDBOX_ENV) {
-    return global.GCLOUD_SANDBOX_ENV;
+  if (global['GCLOUD_SANDBOX_ENV']) {
+    return global['GCLOUD_SANDBOX_ENV'];
   }
 
   var self = this;
@@ -258,10 +258,10 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
 
   var service = this.getService_(protoOpts);
   var metadata = this.grpcMetadata;
-  var grpcOpts = {};
+  var grpcOpts: any = {};
 
   if (is.number(protoOpts.timeout)) {
-    grpcOpts.deadline = GrpcService.createDeadline_(protoOpts.timeout);
+    grpcOpts.deadline = (GrpcService as any).createDeadline_(protoOpts.timeout);
   }
 
   try {
@@ -279,7 +279,7 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
     {
       retries: this.maxRetries,
       currentRetryAttempt: 0,
-      shouldRetryFn: GrpcService.shouldRetryRequest_,
+      shouldRetryFn: (GrpcService as any).shouldRetryRequest_,
 
       // retry-request determines if it should retry from the incoming HTTP
       // response status. gRPC always returns an error proto message. We pass that
@@ -293,7 +293,7 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
           resp
         ) {
           if (err) {
-            respError = GrpcService.decorateError_(err);
+            respError = (GrpcService as any).decorateError_(err);
 
             if (respError) {
               onResponse(null, respError);
@@ -332,7 +332,7 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
  * @param {object} reqOpts - The request options.
  */
 GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
-  if (global.GCLOUD_SANDBOX_ENV) {
+  if (global['GCLOUD_SANDBOX_ENV']) {
     return through.obj();
   }
 
@@ -363,10 +363,10 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
 
   var service = this.getService_(protoOpts);
   var grpcMetadata = this.grpcMetadata;
-  var grpcOpts = {};
+  var grpcOpts: any = {};
 
   if (is.number(protoOpts.timeout)) {
-    grpcOpts.deadline = GrpcService.createDeadline_(protoOpts.timeout);
+    grpcOpts.deadline = (GrpcService as any).createDeadline_(protoOpts.timeout);
   }
 
   try {
@@ -383,7 +383,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
       retries: this.maxRetries,
       currentRetryAttempt: 0,
       objectMode: objectMode,
-      shouldRetryFn: GrpcService.shouldRetryRequest_,
+      shouldRetryFn: (GrpcService as any).shouldRetryRequest_,
 
       request: function() {
         return service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts).on(
@@ -395,7 +395,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
             // it here with code `0` which translates to HTTP 200.
             //
             // https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1444#discussion_r71812636
-            var grcpStatus = GrpcService.decorateStatus_({code: 0});
+            var grcpStatus = (GrpcService as any).decorateStatus_({code: 0});
 
             this.emit('response', grcpStatus);
           }
@@ -407,7 +407,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
 
   return retryRequest(null, retryOpts)
     .on('error', function(err) {
-      var grpcError = GrpcService.decorateError_(err);
+      var grpcError = (GrpcService as any).decorateError_(err);
 
       stream.destroy(grpcError || err);
     })
@@ -428,7 +428,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
 GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
   var stream = (protoOpts.stream = protoOpts.stream || duplexify.obj());
 
-  if (global.GCLOUD_SANDBOX_ENV) {
+  if (global['GCLOUD_SANDBOX_ENV']) {
     return stream;
   }
 
@@ -451,10 +451,10 @@ GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
 
   var service = this.getService_(protoOpts);
   var grpcMetadata = this.grpcMetadata;
-  var grpcOpts = {};
+  var grpcOpts: any = {};
 
   if (is.number(protoOpts.timeout)) {
-    grpcOpts.deadline = GrpcService.createDeadline_(protoOpts.timeout);
+    grpcOpts.deadline = (GrpcService as any).createDeadline_(protoOpts.timeout);
   }
 
   try {
@@ -468,11 +468,11 @@ GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
 
   var grpcStream = service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts)
     .on('status', function(status) {
-      var grcpStatus = GrpcService.decorateStatus_(status);
+      var grcpStatus = (GrpcService as any).decorateStatus_(status);
       stream.emit('response', grcpStatus || status);
     })
     .on('error', function(err) {
-      var grpcError = GrpcService.decorateError_(err);
+      var grpcError = (GrpcService as any).decorateError_(err);
       stream.destroy(grpcError || err);
     });
 
@@ -490,10 +490,10 @@ GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
  * @param {object} value - A Struct's Field message.
  * @return {*} - The decoded value.
  */
-GrpcService.decodeValue_ = function(value) {
+(GrpcService as any).decodeValue_ = function(value) {
   switch (value.kind) {
     case 'structValue': {
-      return GrpcService.structToObj_(value.structValue);
+      return (GrpcService as any).structToObj_(value.structValue);
     }
 
     case 'nullValue': {
@@ -501,7 +501,7 @@ GrpcService.decodeValue_ = function(value) {
     }
 
     case 'listValue': {
-      return value.listValue.values.map(GrpcService.decodeValue_);
+      return value.listValue.values.map((GrpcService as any).decodeValue_);
     }
 
     default: {
@@ -524,8 +524,8 @@ GrpcService.decodeValue_ = function(value) {
  * //   stringValue: 'Hello!'
  * // }
  */
-GrpcService.encodeValue_ = function(value) {
-  return new GrpcService.ObjectToStructConverter().encodeValue_(value);
+(GrpcService as any).encodeValue_ = function(value) {
+  return new (GrpcService as any).ObjectToStructConverter().encodeValue_(value);
 };
 
 /**
@@ -536,7 +536,7 @@ GrpcService.encodeValue_ = function(value) {
  * @param {number} timeout - Timeout in miliseconds.
  * @return {date} deadline - The deadline in Date object form.
  */
-GrpcService.createDeadline_ = function(timeout) {
+(GrpcService as any).createDeadline_ = function(timeout) {
   return new Date(Date.now() + timeout);
 };
 
@@ -549,10 +549,10 @@ GrpcService.createDeadline_ = function(timeout) {
  * @param {error|object} err - The grpc error.
  * @return {error|null}
  */
-GrpcService.decorateError_ = function(err) {
+(GrpcService as any).decorateError_ = function(err) {
   var errorObj = is.error(err) ? err : {};
 
-  return GrpcService.decorateGrpcResponse_(errorObj, err);
+  return (GrpcService as any).decorateGrpcResponse_(errorObj, err);
 };
 
 /**
@@ -565,7 +565,7 @@ GrpcService.decorateError_ = function(err) {
  * @param {object} response - The grpc response.
  * @return {object|null}
  */
-GrpcService.decorateGrpcResponse_ = function(obj, response) {
+(GrpcService as any).decorateGrpcResponse_ = function(obj, response) {
   if (response && GRPC_ERROR_CODE_TO_HTTP[response.code]) {
     var defaultResponseDetails = GRPC_ERROR_CODE_TO_HTTP[response.code];
     var message = defaultResponseDetails.message;
@@ -596,8 +596,8 @@ GrpcService.decorateGrpcResponse_ = function(obj, response) {
  * @param {object} status - The grpc status.
  * @return {object|null}
  */
-GrpcService.decorateStatus_ = function(status) {
-  return GrpcService.decorateGrpcResponse_({}, status);
+(GrpcService as any).decorateStatus_ = function(status) {
+  return (GrpcService as any).decorateGrpcResponse_({}, status);
 };
 
 /**
@@ -608,7 +608,7 @@ GrpcService.decorateStatus_ = function(status) {
  * @param {object} response - The request response.
  * @return {boolean} shouldRetry
  */
-GrpcService.shouldRetryRequest_ = function(response) {
+(GrpcService as any).shouldRetryRequest_ = function(response) {
   return [429, 500, 502, 503].indexOf(response.code) > -1;
 };
 
@@ -664,8 +664,8 @@ GrpcService.shouldRetryRequest_ = function(response) {
  * //   }
  * // }
  */
-GrpcService.objToStruct_ = function(obj, options) {
-  return new GrpcService.ObjectToStructConverter(options).convert(obj);
+(GrpcService as any).objToStruct_ = function(obj, options) {
+  return new (GrpcService as any).ObjectToStructConverter(options).convert(obj);
 };
 
 /**
@@ -689,13 +689,13 @@ GrpcService.objToStruct_ = function(obj, options) {
  * //   name: 'Stephen'
  * // }
  */
-GrpcService.structToObj_ = function(struct) {
+(GrpcService as any).structToObj_ = function(struct) {
   var convertedObject = {};
 
   for (var prop in struct.fields) {
     if (struct.fields.hasOwnProperty(prop)) {
       var value = struct.fields[prop];
-      convertedObject[prop] = GrpcService.decodeValue_(value);
+      convertedObject[prop] = (GrpcService as any).decodeValue_(value);
     }
   }
 
