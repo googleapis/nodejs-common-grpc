@@ -33,7 +33,6 @@
     "generate-scaffolding": "repo-tools generate all",
     "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader build/test/*.js && nyc report",
     "test-no-cover": "repo-tools test run --cmd mocha -- test/*.js --no-timeouts",
-    "lint": "repo-tools lint --cmd eslint -- test/",
     "docs": "repo-tools exec -- jsdoc -c .jsdoc.js",
     "check": "gts check",
     "clean": "gts clean",
@@ -73,6 +72,6 @@
     "prettier": "^1.9.2",
     "proxyquire": "^2.0.0",
     "sinon": "^5.0.0",
-    "typescript": "^2.8.3"
+    "typescript": "~2.8.3"
   }
 }
