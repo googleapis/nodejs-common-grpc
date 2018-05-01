@@ -39,7 +39,7 @@ workflows:
               only: /.*/
       - publish_npm:
           requires:
-            - lint
+            # - lint
             - docs
           filters:
             branches:
