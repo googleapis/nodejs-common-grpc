@@ -20,28 +20,28 @@
 
 'use strict';
 
-var dotProp = require('dot-prop');
-var duplexify = require('duplexify');
-var extend = require('extend');
-var grpc = require('grpc');
-var is = require('is');
-var nodeutil = require('util');
-var retryRequest = require('retry-request');
-var Service = require('@google-cloud/common').Service;
-var through = require('through2');
-var util = require('@google-cloud/common').util;
+const dotProp = require('dot-prop');
+const duplexify = require('duplexify');
+const extend = require('extend');
+const grpc = require('grpc');
+const is = require('is');
+import * as nodeutil from 'util';
+const retryRequest = require('retry-request');
+const Service = require('@google-cloud/common').Service;
+const through = require('through2');
+const util = require('@google-cloud/common').util;
 
 /**
  * @const {object} - A cache of proto objects.
  * @private
  */
-var protoObjectCache = {};
+const protoObjectCache = {};
 
 /**
  * @const {object} - A map of protobuf codes to HTTP status codes.
  * @private
  */
-var GRPC_ERROR_CODE_TO_HTTP = {
+const GRPC_ERROR_CODE_TO_HTTP = {
   0: {
     code: 200,
     message: 'OK',
@@ -137,7 +137,7 @@ var GRPC_ERROR_CODE_TO_HTTP = {
  *
  * @type {object}
  */
-var GRPC_SERVICE_OPTIONS = {
+const GRPC_SERVICE_OPTIONS = {
   // RE: https://github.com/GoogleCloudPlatform/google-cloud-node/issues/1991
   'grpc.max_send_message_length': -1, // unlimited
   'grpc.max_receive_message_length': -1, // unlimited
@@ -192,7 +192,7 @@ function GrpcService(config, options) {
   );
 
   if (config.grpcMetadata) {
-    for (var prop in config.grpcMetadata) {
+    for (const prop in config.grpcMetadata) {
       if (config.grpcMetadata.hasOwnProperty(prop)) {
         this.grpcMetadata.add(prop, config.grpcMetadata[prop]);
       }
@@ -205,13 +205,13 @@ function GrpcService(config, options) {
   this.activeServiceMap_ = new Map();
   this.protos = {};
 
-  var protoServices = config.protoServices;
+  const protoServices = config.protoServices;
 
-  var self = this;
+  const self = this;
 
   Object.keys(protoServices).forEach(function(name) {
-    var protoConfig = protoServices[name];
-    var service = self.loadProtoFile_(protoConfig, config);
+    const protoConfig = protoServices[name];
+    const service = self.loadProtoFile_(protoConfig, config);
 
     self.protos[name] = service;
 
@@ -239,7 +239,7 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
     return global['GCLOUD_SANDBOX_ENV'];
   }
 
-  var self = this;
+  const self = this;
 
   if (!this.grpcCredentials) {
     // We must establish an authClient to give to grpc.
@@ -256,9 +256,9 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
     return;
   }
 
-  var service = this.getService_(protoOpts);
-  var metadata = this.grpcMetadata;
-  var grpcOpts: any = {};
+  const service = this.getService_(protoOpts);
+  const metadata = this.grpcMetadata;
+  const grpcOpts: any = {};
 
   if (is.number(protoOpts.timeout)) {
     grpcOpts.deadline = (GrpcService as any).createDeadline_(protoOpts.timeout);
@@ -273,9 +273,9 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
 
   // Retains a reference to an error from the response. If the final callback is
   // executed with this as the "response", we return it to the user as an error.
-  var respError;
+  let respError;
 
-  var retryOpts = extend(
+  const retryOpts = extend(
     {
       retries: this.maxRetries,
       currentRetryAttempt: 0,
@@ -336,13 +336,13 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
     return through.obj();
   }
 
-  var self = this;
+  const self = this;
 
   if (!protoOpts.stream) {
     protoOpts.stream = through.obj();
   }
 
-  var stream = protoOpts.stream;
+  const stream = protoOpts.stream;
 
   if (!this.grpcCredentials) {
     // We must establish an authClient to give to grpc.
@@ -359,11 +359,11 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
     return stream;
   }
 
-  var objectMode = !!reqOpts.objectMode;
+  const objectMode = !!reqOpts.objectMode;
 
-  var service = this.getService_(protoOpts);
-  var grpcMetadata = this.grpcMetadata;
-  var grpcOpts: any = {};
+  const service = this.getService_(protoOpts);
+  const grpcMetadata = this.grpcMetadata;
+  const grpcOpts: any = {};
 
   if (is.number(protoOpts.timeout)) {
     grpcOpts.deadline = (GrpcService as any).createDeadline_(protoOpts.timeout);
@@ -378,7 +378,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
     return stream;
   }
 
-  var retryOpts = extend(
+  const retryOpts = extend(
     {
       retries: this.maxRetries,
       currentRetryAttempt: 0,
@@ -395,7 +395,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
             // it here with code `0` which translates to HTTP 200.
             //
             // https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1444#discussion_r71812636
-            var grcpStatus = (GrpcService as any).decorateStatus_({code: 0});
+            const grcpStatus = (GrpcService as any).decorateStatus_({code: 0});
 
             this.emit('response', grcpStatus);
           }
@@ -407,7 +407,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
 
   return retryRequest(null, retryOpts)
     .on('error', function(err) {
-      var grpcError = (GrpcService as any).decorateError_(err);
+      const grpcError = (GrpcService as any).decorateError_(err);
 
       stream.destroy(grpcError || err);
     })
@@ -426,13 +426,13 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
  * @param {object} reqOpts - The request options.
  */
 GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
-  var stream = (protoOpts.stream = protoOpts.stream || duplexify.obj());
+  const stream = (protoOpts.stream = protoOpts.stream || duplexify.obj());
 
   if (global['GCLOUD_SANDBOX_ENV']) {
     return stream;
   }
 
-  var self = this;
+  const self = this;
 
   if (!this.grpcCredentials) {
     // We must establish an authClient to give to grpc.
@@ -449,9 +449,9 @@ GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
     return stream;
   }
 
-  var service = this.getService_(protoOpts);
-  var grpcMetadata = this.grpcMetadata;
-  var grpcOpts: any = {};
+  const service = this.getService_(protoOpts);
+  const grpcMetadata = this.grpcMetadata;
+  const grpcOpts: any = {};
 
   if (is.number(protoOpts.timeout)) {
     grpcOpts.deadline = (GrpcService as any).createDeadline_(protoOpts.timeout);
@@ -466,13 +466,13 @@ GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
     return stream;
   }
 
-  var grpcStream = service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts)
+  const grpcStream = service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts)
     .on('status', function(status) {
-      var grcpStatus = (GrpcService as any).decorateStatus_(status);
+      const grcpStatus = (GrpcService as any).decorateStatus_(status);
       stream.emit('response', grcpStatus || status);
     })
     .on('error', function(err) {
-      var grpcError = (GrpcService as any).decorateError_(err);
+      const grpcError = (GrpcService as any).decorateError_(err);
       stream.destroy(grpcError || err);
     });
 
@@ -550,7 +550,7 @@ GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
  * @return {error|null}
  */
 (GrpcService as any).decorateError_ = function(err) {
-  var errorObj = is.error(err) ? err : {};
+  const errorObj = is.error(err) ? err : {};
 
   return (GrpcService as any).decorateGrpcResponse_(errorObj, err);
 };
@@ -567,8 +567,8 @@ GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
  */
 (GrpcService as any).decorateGrpcResponse_ = function(obj, response) {
   if (response && GRPC_ERROR_CODE_TO_HTTP[response.code]) {
-    var defaultResponseDetails = GRPC_ERROR_CODE_TO_HTTP[response.code];
-    var message = defaultResponseDetails.message;
+    const defaultResponseDetails = GRPC_ERROR_CODE_TO_HTTP[response.code];
+    let message = defaultResponseDetails.message;
 
     if (response.message) {
       // gRPC error messages can be either stringified JSON or strings.
@@ -690,11 +690,11 @@ GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
  * // }
  */
 (GrpcService as any).structToObj_ = function(struct) {
-  var convertedObject = {};
+  const convertedObject = {};
 
-  for (var prop in struct.fields) {
+  for (const prop in struct.fields) {
     if (struct.fields.hasOwnProperty(prop)) {
-      var value = struct.fields[prop];
+      const value = struct.fields[prop];
       convertedObject[prop] = (GrpcService as any).decodeValue_(value);
     }
   }
@@ -728,7 +728,7 @@ GrpcService.prototype.decorateRequest_ = function(reqOpts) {
  * @param {?error} callback.err - An error getting an auth client.
  */
 GrpcService.prototype.getGrpcCredentials_ = function(callback) {
-  var self = this;
+  const self = this;
 
   this.authClient.getAuthClient(function(err, authClient) {
     if (err) {
@@ -736,7 +736,7 @@ GrpcService.prototype.getGrpcCredentials_ = function(callback) {
       return;
     }
 
-    var credentials = grpc.credentials.combineChannelCredentials(
+    const credentials = grpc.credentials.combineChannelCredentials(
       grpc.credentials.createSsl(),
       grpc.credentials.createFromGoogleCredential(authClient)
     );
@@ -760,7 +760,7 @@ GrpcService.prototype.getGrpcCredentials_ = function(callback) {
  * @return {object} protoObject - The loaded proto object.
  */
 GrpcService.prototype.loadProtoFile_ = function(protoConfig, config) {
-  var grpcOpts = {
+  const grpcOpts = {
     binaryAsBase64: true,
     convertFieldsToCamelCase: true,
   };
@@ -771,14 +771,14 @@ GrpcService.prototype.loadProtoFile_ = function(protoConfig, config) {
     };
   }
 
-  var protoObjectCacheKey = [
+  const protoObjectCacheKey = [
     config.protosDir,
     protoConfig.path,
     protoConfig.service,
   ].join('$');
 
   if (!protoObjectCache[protoObjectCacheKey]) {
-    var services = grpc.load(
+    const services = grpc.load(
       {
         root: config.protosDir,
         file: protoConfig.path,
@@ -786,7 +786,7 @@ GrpcService.prototype.loadProtoFile_ = function(protoConfig, config) {
       'proto',
       grpcOpts
     );
-    var service = dotProp.get(services.google, protoConfig.service);
+    const service = dotProp.get(services.google, protoConfig.service);
     protoObjectCache[protoObjectCacheKey] = service;
   }
 
@@ -802,8 +802,8 @@ GrpcService.prototype.loadProtoFile_ = function(protoConfig, config) {
  * @return {object} service - The proto service.
  */
 GrpcService.prototype.getService_ = function(protoOpts) {
-  var proto = this.protos[protoOpts.service];
-  var service = this.activeServiceMap_.get(protoOpts.service);
+  const proto = this.protos[protoOpts.service];
+  let service = this.activeServiceMap_.get(protoOpts.service);
 
   if (!service) {
     service = new proto[protoOpts.service](
@@ -863,15 +863,15 @@ function ObjectToStructConverter(options) {
  * // }
  */
 ObjectToStructConverter.prototype.convert = function(obj) {
-  var convertedObject = {
+  const convertedObject = {
     fields: {},
   };
 
   this.seenObjects.add(obj);
 
-  for (var prop in obj) {
+  for (const prop in obj) {
     if (obj.hasOwnProperty(prop)) {
-      var value = obj[prop];
+      const value = obj[prop];
 
       if (is.undefined(value)) {
         continue;
@@ -901,7 +901,7 @@ ObjectToStructConverter.prototype.convert = function(obj) {
  * // }
  */
 ObjectToStructConverter.prototype.encodeValue_ = function(value) {
-  var convertedValue;
+  let convertedValue;
 
   if (is.null(value)) {
     convertedValue = {
