@@ -16,17 +16,17 @@
 
 'use strict';
 
-var assert = require('assert');
-var proxyquire = require('proxyquire');
-var util = require('@google-cloud/common').util;
+import * as assert from 'assert';
+const proxyquire = require('proxyquire');
+const util = require('@google-cloud/common').util;
 
-var fakeModelo: any = {
+const fakeModelo: any = {
   inherits: function() {
     this.calledWith_ = arguments;
   },
 };
 
-var decorateGrpcStatusOverride_;
+let decorateGrpcStatusOverride_;
 function FakeGrpcService() {};
 (FakeGrpcService as any).decorateGrpcStatus_ = function() {
   return (decorateGrpcStatusOverride_ || util.noop).apply(null, arguments);
@@ -40,13 +40,13 @@ function FakeOperation() {
 }
 
 describe('GrpcOperation', function() {
-  var FAKE_SERVICE = {
+  const FAKE_SERVICE = {
     Promise: Promise,
   };
-  var OPERATION_ID = '/a/b/c/d';
+  const OPERATION_ID = '/a/b/c/d';
 
-  var GrpcOperation;
-  var grpcOperation;
+  let GrpcOperation;
+  let grpcOperation;
 
   before(function() {
     GrpcOperation = proxyquire('../src/operation.js', {
@@ -65,7 +65,7 @@ describe('GrpcOperation', function() {
   });
 
   describe('instantiation', function() {
-    var EXPECTED_CONFIG = {
+    const EXPECTED_CONFIG = {
       parent: FAKE_SERVICE,
       id: OPERATION_ID,
       methods: {
@@ -93,7 +93,7 @@ describe('GrpcOperation', function() {
     };
 
     it('should extend GrpcServiceObject and Operation', function() {
-      var args = fakeModelo.calledWith_;
+      const args = fakeModelo.calledWith_;
 
       assert.strictEqual(args[0], GrpcOperation);
       assert.strictEqual(args[1], FakeGrpcServiceObject);
@@ -101,12 +101,12 @@ describe('GrpcOperation', function() {
     });
 
     it('should pass Operation the correct config', function() {
-      var config = grpcOperation.operationArguments_[0];
+      const config = grpcOperation.operationArguments_[0];
       assert.deepEqual(config, EXPECTED_CONFIG);
     });
 
     it('should pass GrpcServiceObject the correct config', function() {
-      var config = grpcOperation.grpcServiceObjectArguments_[0];
+      const config = grpcOperation.grpcServiceObjectArguments_[0];
       assert.deepEqual(config, EXPECTED_CONFIG);
     });
   });
@@ -149,7 +149,7 @@ describe('GrpcOperation', function() {
 
     describe('could not get metadata', function() {
       it('should callback with an error', function(done) {
-        var error = new Error('Error.');
+        const error = new Error('Error.');
 
         grpcOperation.getMetadata = function(callback) {
           callback(error);
@@ -162,7 +162,7 @@ describe('GrpcOperation', function() {
       });
 
       it('should callback with the operation error', function(done) {
-        var apiResponse = {
+        const apiResponse = {
           error: {},
         };
 
@@ -170,7 +170,7 @@ describe('GrpcOperation', function() {
           callback(null, apiResponse, apiResponse);
         };
 
-        var decoratedGrpcStatus = {};
+        const decoratedGrpcStatus = {};
 
         decorateGrpcStatusOverride_ = function(status) {
           assert.strictEqual(status, apiResponse.error);
@@ -184,7 +184,7 @@ describe('GrpcOperation', function() {
       });
     });
     describe('operation incomplete', function() {
-      var apiResponse = {done: false};
+      const apiResponse = {done: false};
 
       beforeEach(function() {
         grpcOperation.getMetadata = function(callback) {
@@ -202,7 +202,7 @@ describe('GrpcOperation', function() {
     });
 
     describe('operation complete', function() {
-      var apiResponse = {done: true};
+      const apiResponse = {done: true};
 
       beforeEach(function() {
         grpcOperation.getMetadata = function(callback) {

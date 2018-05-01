@@ -20,10 +20,10 @@
 
 'use strict';
 
-var extend = require('extend');
-var nodeutil = require('util');
-var ServiceObject = require('@google-cloud/common').ServiceObject;
-var util = require('@google-cloud/common').util;
+const extend = require('extend');
+import * as nodeutil from 'util';
+const ServiceObject = require('@google-cloud/common').ServiceObject;
+const util = require('@google-cloud/common').util;
 
 /**
  * GrpcServiceObject is a base class, meant to be inherited from by a service
@@ -49,8 +49,8 @@ nodeutil.inherits(GrpcServiceObject, ServiceObject);
  * @param {?error} callback.err - An error returned while making this request.
  */
 GrpcServiceObject.prototype.delete = function(callback) {
-  var protoOpts = this.methods.delete.protoOpts;
-  var reqOpts = this.methods.delete.reqOpts;
+  const protoOpts = this.methods.delete.protoOpts;
+  const reqOpts = this.methods.delete.reqOpts;
 
   this.request(protoOpts, reqOpts, callback || util.noop);
 };
@@ -63,10 +63,10 @@ GrpcServiceObject.prototype.delete = function(callback) {
  * @param {object} callback.metadata - The metadata for this object.
  */
 GrpcServiceObject.prototype.getMetadata = function(callback) {
-  var self = this;
+  const self = this;
 
-  var protoOpts = this.methods.getMetadata.protoOpts;
-  var reqOpts = this.methods.getMetadata.reqOpts;
+  const protoOpts = this.methods.getMetadata.protoOpts;
+  const reqOpts = this.methods.getMetadata.reqOpts;
 
   this.request(protoOpts, reqOpts, function(err, resp) {
     if (err) {
@@ -88,8 +88,8 @@ GrpcServiceObject.prototype.getMetadata = function(callback) {
  * @param {?error} callback.err - An error returned while making this request.
  */
 GrpcServiceObject.prototype.setMetadata = function(metadata, callback) {
-  var protoOpts = this.methods.setMetadata.protoOpts;
-  var reqOpts = extend(true, {}, this.methods.setMetadata.reqOpts, metadata);
+  const protoOpts = this.methods.setMetadata.protoOpts;
+  const reqOpts = extend(true, {}, this.methods.setMetadata.reqOpts, metadata);
 
   this.request(protoOpts, reqOpts, callback || util.noop);
 };

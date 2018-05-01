@@ -18,22 +18,20 @@
  * @module commonGrpc/operation
  */
 
-'use strict';
-
-var common = require('@google-cloud/common');
-var modelo = require('modelo');
+import * as common from '@google-cloud/common';
+const modelo = require('modelo');
 
 /**
  * @type {module:commonGrpc/serviceObject}
  * @private
  */
-var ServiceObject = require('./service-object.js');
+const ServiceObject = require('./service-object.js');
 
 /**
  * @type {module:commonGrpc/service}
  * @private
  */
-var Service = require('./service.js');
+const Service = require('./service.js');
 
 // jscs:disable maximumLineLength
 /**
@@ -50,7 +48,7 @@ var Service = require('./service.js');
  */
 // jscs:enable maximumLineLength
 function Operation(parent, name) {
-  var methods = {
+  const methods = {
     /**
      * Deletes an operation.
      */
@@ -88,7 +86,7 @@ function Operation(parent, name) {
     },
   };
 
-  var config = {
+  const config = {
     parent: parent,
     id: name,
     methods: methods,
@@ -109,12 +107,12 @@ modelo.inherits(Operation, ServiceObject, common.Operation);
  * @param {object} callback.apiResponse - The full API response.
  */
 Operation.prototype.cancel = function(callback) {
-  var protoOpts = {
+  const protoOpts = {
     service: 'Operations',
     method: 'cancelOperation',
   };
 
-  var reqOpts = {
+  const reqOpts = {
     name: this.id,
   };
 

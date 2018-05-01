@@ -16,30 +16,30 @@
 
 'use strict';
 
-var assert = require('assert');
-var duplexify = require('duplexify');
-var extend = require('extend');
-var grpc = require('grpc');
-var is = require('is');
-var proxyquire = require('proxyquire');
-var retryRequest = require('retry-request');
-var sinon = require('sinon').sandbox.create();
-var through = require('through2');
-var util = require('@google-cloud/common').util;
+import * as assert from 'assert';
+const duplexify = require('duplexify');
+const extend = require('extend');
+const grpc = require('grpc');
+const is = require('is');
+const proxyquire = require('proxyquire');
+const retryRequest = require('retry-request');
+const sinon = require('sinon').sandbox.create();
+const through = require('through2');
+const util = require('@google-cloud/common').util;
 
-var fakeUtil = extend({}, util);
+const fakeUtil = extend({}, util);
 
 function FakeService() {
   this.calledWith_ = arguments;
 }
 
-var retryRequestOverride;
+let retryRequestOverride;
 function fakeRetryRequest() {
   return (retryRequestOverride || retryRequest).apply(null, arguments);
 }
 
-var GrpcMetadataOverride;
-var grpcLoadOverride;
+let GrpcMetadataOverride;
+let grpcLoadOverride;
 const fakeGrpc = {
   Metadata: function() {
     if (GrpcMetadataOverride) {
@@ -79,17 +79,17 @@ const fakeGrpc = {
 };
 
 describe('GrpcService', function() {
-  var GrpcServiceCached;
-  var GrpcService;
-  var grpcService;
+  let GrpcServiceCached;
+  let GrpcService;
+  let grpcService;
 
-  var ObjectToStructConverter;
+  let ObjectToStructConverter;
 
-  var ROOT_DIR = '/root/dir';
-  var PROTO_FILE_PATH = 'filepath.proto';
-  var SERVICE_PATH = 'service.path';
+  const ROOT_DIR = '/root/dir';
+  const PROTO_FILE_PATH = 'filepath.proto';
+  const SERVICE_PATH = 'service.path';
 
-  var CONFIG: any = {
+  const CONFIG: any = {
     proto: {},
     protosDir: ROOT_DIR,
     protoServices: {
@@ -107,17 +107,17 @@ describe('GrpcService', function() {
     },
   };
 
-  var OPTIONS = {
+  const OPTIONS = {
     maxRetries: 3,
   };
 
-  var EXPECTED_API_CLIENT_HEADER = [
+  const EXPECTED_API_CLIENT_HEADER = [
     'gl-node/' + process.versions.node,
     'gccl/' + CONFIG.packageJson.version,
     'grpc/' + require('grpc/package.json').version,
   ].join(' ');
 
-  var MOCK_GRPC_API = {
+  const MOCK_GRPC_API = {
     google: {
       Service: {
         [SERVICE_PATH]: {},
@@ -262,19 +262,19 @@ describe('GrpcService', function() {
     it('should inherit from Service', function() {
       assert(grpcService instanceof FakeService);
 
-      var calledWith = grpcService.calledWith_;
+      const calledWith = grpcService.calledWith_;
       assert.strictEqual(calledWith[0], CONFIG);
       assert.strictEqual(calledWith[1], OPTIONS);
     });
 
     it('should set insecure credentials if using customEndpoint', function() {
-      var config = extend({}, CONFIG, {customEndpoint: true});
-      var grpcService = new GrpcService(config, OPTIONS);
+      const config = extend({}, CONFIG, {customEndpoint: true});
+      const grpcService = new GrpcService(config, OPTIONS);
       assert.strictEqual(grpcService.grpcCredentials.name, 'createInsecure');
     });
 
     it('should default grpcMetadata to empty metadata', function() {
-      var fakeGrpcMetadata = {
+      const fakeGrpcMetadata = {
         'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
       };
 
@@ -283,15 +283,15 @@ describe('GrpcService', function() {
         this[prop] = val;
       };
 
-      var config = extend({}, CONFIG);
+      const config = extend({}, CONFIG);
       delete config.grpcMetadata;
 
-      var grpcService = new GrpcService(config, OPTIONS);
+      const grpcService = new GrpcService(config, OPTIONS);
       assert.deepEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
     });
 
     it('should create and localize grpcMetadata', function() {
-      var fakeGrpcMetadata = extend(
+      const fakeGrpcMetadata = extend(
         {
           'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
         },
@@ -303,7 +303,7 @@ describe('GrpcService', function() {
         this[prop] = val;
       };
 
-      var grpcService = new GrpcService(CONFIG, OPTIONS);
+      const grpcService = new GrpcService(CONFIG, OPTIONS);
       assert.deepEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
     });
 
@@ -312,14 +312,14 @@ describe('GrpcService', function() {
     });
 
     it('should set the correct user-agent', function() {
-      var userAgent = 'user-agent/0.0.0';
+      const userAgent = 'user-agent/0.0.0';
 
       fakeUtil.getUserAgentFromPackageJson = function(packageJson) {
         assert.strictEqual(packageJson, CONFIG.packageJson);
         return userAgent;
       };
 
-      var grpcService = new GrpcService(CONFIG, OPTIONS);
+      const grpcService = new GrpcService(CONFIG, OPTIONS);
       assert.strictEqual(grpcService.userAgent, userAgent);
     });
 
@@ -346,7 +346,7 @@ describe('GrpcService', function() {
         return MOCK_GRPC_API;
       };
 
-      var grpcService = new GrpcService(CONFIG, OPTIONS);
+      const grpcService = new GrpcService(CONFIG, OPTIONS);
       assert.strictEqual(
         grpcService.protos[CONFIG.service],
         MOCK_GRPC_API.google[CONFIG.service]
@@ -361,24 +361,24 @@ describe('GrpcService', function() {
         return MOCK_GRPC_API;
       };
 
-      var config = extend(true, {}, CONFIG, {
+      const config = extend(true, {}, CONFIG, {
         protoServices: {
           Service: '../file/path.proto',
         },
       });
 
-      var grpcService = new GrpcService(config, OPTIONS);
+      const grpcService = new GrpcService(config, OPTIONS);
       assert.strictEqual(grpcService.protos.Service, MOCK_GRPC_API.google);
     });
 
     it('should store the baseUrl properly', function() {
-      var fakeBaseUrl = 'a.googleapis.com';
+      const fakeBaseUrl = 'a.googleapis.com';
 
       grpcLoadOverride = function() {
         return MOCK_GRPC_API;
       };
 
-      var config = extend(true, {}, CONFIG, {
+      const config = extend(true, {}, CONFIG, {
         protoServices: {
           CustomServiceName: {
             path: '../file/path.proto',
@@ -387,7 +387,7 @@ describe('GrpcService', function() {
         },
       });
 
-      var grpcService = new GrpcService(config, OPTIONS);
+      const grpcService = new GrpcService(config, OPTIONS);
 
       assert.strictEqual(
         grpcService.protos.CustomServiceName.baseUrl,
@@ -397,7 +397,7 @@ describe('GrpcService', function() {
 
     it('should not run in the gcloud sandbox environment', function() {
       (global as any).GCLOUD_SANDBOX_ENV = {};
-      var grpcService = new GrpcService();
+      const grpcService = new GrpcService();
       assert.strictEqual(grpcService, (global as any).GCLOUD_SANDBOX_ENV);
       delete (global as any).GCLOUD_SANDBOX_ENV;
     });
@@ -405,12 +405,12 @@ describe('GrpcService', function() {
 
   describe('decodeValue_', function() {
     it('should decode a struct value', function() {
-      var structValue = {
+      const structValue = {
         kind: 'structValue',
         structValue: {},
       };
 
-      var decodedValue = {};
+      const decodedValue = {};
 
       GrpcService.structToObj_ = function() {
         return decodedValue;
@@ -420,17 +420,17 @@ describe('GrpcService', function() {
     });
 
     it('should decode a null value', function() {
-      var nullValue = {
+      const nullValue = {
         kind: 'nullValue',
       };
 
-      var decodedValue = null;
+      const decodedValue = null;
 
       assert.strictEqual(GrpcService.decodeValue_(nullValue), decodedValue);
     });
 
     it('should decode a list value', function() {
-      var listValue = {
+      const listValue = {
         kind: 'listValue',
         listValue: {
           values: [
@@ -445,7 +445,7 @@ describe('GrpcService', function() {
     });
 
     it('should return the raw value', function() {
-      var numberValue = {
+      const numberValue = {
         kind: 'numberValue',
         numberValue: 8,
       };
@@ -456,10 +456,10 @@ describe('GrpcService', function() {
 
   describe('objToStruct_', function() {
     it('should convert the object using ObjectToStructConverter', function() {
-      var options = {};
-      var obj = {};
+      const options = {};
+      const obj = {};
 
-      var convertedObject = {};
+      const convertedObject = {};
 
       GrpcService.ObjectToStructConverter = function(options_) {
         assert.strictEqual(options_, options);
@@ -481,10 +481,10 @@ describe('GrpcService', function() {
 
   describe('structToObj_', function() {
     it('should convert a struct to an object', function() {
-      var inputValue = {};
-      var decodedValue = {};
+      const inputValue = {};
+      const decodedValue = {};
 
-      var struct = {
+      const struct = {
         fields: {
           a: inputValue,
         },
@@ -502,9 +502,9 @@ describe('GrpcService', function() {
   });
 
   describe('request', function() {
-    var PROTO_OPTS = {service: 'service', method: 'method', timeout: 3000};
-    var REQ_OPTS = {reqOpts: true};
-    var GRPC_CREDENTIALS = {};
+    const PROTO_OPTS = {service: 'service', method: 'method', timeout: 3000};
+    const REQ_OPTS = {reqOpts: true};
+    const GRPC_CREDENTIALS = {};
 
     function ProtoService() {}
     ProtoService.prototype.method = function() {};
@@ -536,13 +536,13 @@ describe('GrpcService', function() {
     });
 
     it('should use and return retry-request', function() {
-      var retryRequestInstance = {};
+      const retryRequestInstance = {};
 
       retryRequestOverride = function() {
         return retryRequestInstance;
       };
 
-      var request = grpcService.request(PROTO_OPTS, REQ_OPTS, assert.ifError);
+      const request = grpcService.request(PROTO_OPTS, REQ_OPTS, assert.ifError);
       assert.strictEqual(request, retryRequestInstance);
     });
 
@@ -552,7 +552,7 @@ describe('GrpcService', function() {
       });
 
       describe('getting credentials error', function() {
-        var error = new Error('Error.');
+        const error = new Error('Error.');
 
         beforeEach(function() {
           grpcService.getGrpcCredentials_ = function(callback) {
@@ -569,7 +569,7 @@ describe('GrpcService', function() {
       });
 
       describe('getting credentials success', function() {
-        var authClient = {};
+        const authClient = {};
 
         beforeEach(function() {
           grpcService.getGrpcCredentials_ = function(callback) {
@@ -590,9 +590,9 @@ describe('GrpcService', function() {
     });
 
     describe('retry strategy', function() {
-      var retryRequestReqOpts;
-      var retryRequestOptions;
-      var retryRequestCallback;
+      let retryRequestReqOpts;
+      let retryRequestOptions;
+      let retryRequestCallback;
 
       beforeEach(function() {
         retryRequestOverride = function(reqOpts, options, callback) {
@@ -603,8 +603,8 @@ describe('GrpcService', function() {
       });
 
       it('should use retry-request', function(done) {
-        var error = {};
-        var response = {};
+        const error = {};
+        const response = {};
 
         grpcService.request(PROTO_OPTS, REQ_OPTS, function(err, resp) {
           assert.strictEqual(err, error);
@@ -622,11 +622,11 @@ describe('GrpcService', function() {
       it('should retry on 429, 500, 502, and 503', function() {
         grpcService.request(PROTO_OPTS, REQ_OPTS, assert.ifError);
 
-        var shouldRetryFn = retryRequestOptions.shouldRetryFn;
+        const shouldRetryFn = retryRequestOptions.shouldRetryFn;
 
-        var retryErrors = [{code: 429}, {code: 500}, {code: 502}, {code: 503}];
+        const retryErrors = [{code: 429}, {code: 500}, {code: 502}, {code: 503}];
 
-        var nonRetryErrors = [
+        const nonRetryErrors = [
           {code: 200},
           {code: 401},
           {code: 404},
@@ -639,7 +639,7 @@ describe('GrpcService', function() {
       });
 
       it('should treat a retriable error as an HTTP response', function(done) {
-        var grpcError500 = {code: 2};
+        const grpcError500 = {code: 2};
 
         grpcService.getService_ = function() {
           return {
@@ -662,7 +662,7 @@ describe('GrpcService', function() {
       });
 
       it('should return grpc request', function() {
-        var grpcRequest = {};
+        const grpcRequest = {};
 
         grpcService.getService_ = function() {
           return {
@@ -674,12 +674,12 @@ describe('GrpcService', function() {
 
         grpcService.request(PROTO_OPTS, REQ_OPTS, assert.ifError);
 
-        var request = retryRequestOptions.request();
+        const request = retryRequestOptions.request();
         assert.strictEqual(request, grpcRequest);
       });
 
       it('should exec callback with response error as error', function(done) {
-        var grpcError500 = {code: 2};
+        const grpcError500 = {code: 2};
 
         grpcService.getService_ = function() {
           return {
@@ -701,7 +701,7 @@ describe('GrpcService', function() {
       });
 
       it('should exec callback with unknown error', function(done) {
-        var unknownError = {a: 'a'};
+        const unknownError = {a: 'a'};
 
         grpcService.getService_ = function() {
           return {
@@ -726,7 +726,7 @@ describe('GrpcService', function() {
     describe('request option decoration', function() {
       describe('decoration success', function() {
         it('should decorate the request', function(done) {
-          var decoratedRequest = {};
+          const decoratedRequest = {};
 
           grpcService.decorateRequest_ = function(reqOpts) {
             assert.deepEqual(reqOpts, REQ_OPTS);
@@ -747,7 +747,7 @@ describe('GrpcService', function() {
       });
 
       describe('decoration error', function() {
-        var error = new Error('Error.');
+        const error = new Error('Error.');
 
         it('should return a thrown error to the callback', function(done) {
           grpcService.decorateRequest_ = function() {
@@ -790,7 +790,7 @@ describe('GrpcService', function() {
       });
 
       it('should set a deadline if a timeout is provided', function(done) {
-        var expectedDeadlineRange = [
+        const expectedDeadlineRange = [
           Date.now() + PROTO_OPTS.timeout - 250,
           Date.now() + PROTO_OPTS.timeout + 250,
         ];
@@ -814,9 +814,9 @@ describe('GrpcService', function() {
       describe('request response error', function() {
         it('should look up the http status from the code', function() {
           /*jshint loopfunc:true */
-          for (var grpcErrorCode in GrpcService.GRPC_ERROR_CODE_TO_HTTP) {
-            var grpcError = {code: grpcErrorCode};
-            var httpError = GrpcService.GRPC_ERROR_CODE_TO_HTTP[grpcErrorCode];
+          for (const grpcErrorCode in GrpcService.GRPC_ERROR_CODE_TO_HTTP) {
+            const grpcError = {code: grpcErrorCode};
+            const httpError = GrpcService.GRPC_ERROR_CODE_TO_HTTP[grpcErrorCode];
 
             grpcService.getService_ = function() {
               return {
@@ -835,7 +835,7 @@ describe('GrpcService', function() {
       });
 
       describe('request response success', function() {
-        var RESPONSE = {};
+        const RESPONSE = {};
 
         beforeEach(function() {
           grpcService.getService_ = function() {
@@ -859,10 +859,10 @@ describe('GrpcService', function() {
   });
 
   describe('requestStream', function() {
-    var PROTO_OPTS;
-    var REQ_OPTS = {};
-    var GRPC_CREDENTIALS = {};
-    var fakeStream;
+    let PROTO_OPTS;
+    const REQ_OPTS = {};
+    const GRPC_CREDENTIALS = {};
+    let fakeStream;
 
     function ProtoService() {}
 
@@ -907,7 +907,7 @@ describe('GrpcService', function() {
       });
 
       describe('credentials error', function() {
-        var error = new Error('err');
+        const error = new Error('err');
 
         beforeEach(function() {
           grpcService.getGrpcCredentials_ = function(callback) {
@@ -926,7 +926,7 @@ describe('GrpcService', function() {
       });
 
       describe('credentials success', function() {
-        var authClient = {};
+        const authClient = {};
 
         beforeEach(function() {
           grpcService.getGrpcCredentials_ = function(callback) {
@@ -957,8 +957,8 @@ describe('GrpcService', function() {
     });
 
     it('should set the deadline', function(done) {
-      var createDeadline = GrpcService.createDeadline_;
-      var fakeDeadline = createDeadline(PROTO_OPTS.timeout);
+      const createDeadline = GrpcService.createDeadline_;
+      const fakeDeadline = createDeadline(PROTO_OPTS.timeout);
 
       GrpcService.createDeadline_ = function(timeout) {
         assert.strictEqual(timeout, PROTO_OPTS.timeout);
@@ -1008,7 +1008,7 @@ describe('GrpcService', function() {
 
       describe('requestStream() success', function() {
         it('should decorate the request', function(done) {
-          var decoratedRequest = {};
+          const decoratedRequest = {};
 
           grpcService.decorateRequest_ = function(reqOpts) {
             assert.strictEqual(reqOpts, REQ_OPTS);
@@ -1029,7 +1029,7 @@ describe('GrpcService', function() {
 
       describe('requestStream() error', function() {
         it('should end stream with a thrown error', function(done) {
-          var error = new Error('Error.');
+          const error = new Error('Error.');
 
           grpcService.decorateRequest_ = function() {
             throw error;
@@ -1046,9 +1046,9 @@ describe('GrpcService', function() {
     });
 
     describe('retry strategy', function() {
-      var retryRequestReqOpts;
-      var retryRequestOptions;
-      var retryStream;
+      let retryRequestReqOpts;
+      let retryRequestOptions;
+      let retryStream;
 
       beforeEach(function() {
         retryRequestReqOpts = retryRequestOptions = null;
@@ -1066,7 +1066,7 @@ describe('GrpcService', function() {
       });
 
       it('should use retry-request', function() {
-        var reqOpts = extend(
+        const reqOpts = extend(
           {
             objectMode: true,
           },
@@ -1086,7 +1086,7 @@ describe('GrpcService', function() {
       });
 
       it('should emit the metadata event as a response event', function(done) {
-        var fakeStream = through.obj();
+        const fakeStream = through.obj();
 
         ProtoService.prototype.method = function() {
           return fakeStream;
@@ -1106,7 +1106,7 @@ describe('GrpcService', function() {
       });
 
       it('should forward `request` events', function(done) {
-        var requestStream = grpcService.requestStream(PROTO_OPTS, REQ_OPTS);
+        const requestStream = grpcService.requestStream(PROTO_OPTS, REQ_OPTS);
 
         requestStream.on('request', function() {
           done();
@@ -1116,8 +1116,8 @@ describe('GrpcService', function() {
       });
 
       it('should emit the response error', function(done) {
-        var grpcError500 = {code: 2};
-        var requestStream = grpcService.requestStream(PROTO_OPTS, REQ_OPTS);
+        const grpcError500 = {code: 2};
+        const requestStream = grpcService.requestStream(PROTO_OPTS, REQ_OPTS);
 
         requestStream.destroy = function(err) {
           assert.deepEqual(err, GrpcService.GRPC_ERROR_CODE_TO_HTTP[2]);
@@ -1130,9 +1130,9 @@ describe('GrpcService', function() {
   });
 
   describe('requestWritableStream', function() {
-    var PROTO_OPTS;
-    var REQ_OPTS = {};
-    var GRPC_CREDENTIALS = {};
+    let PROTO_OPTS;
+    const REQ_OPTS = {};
+    const GRPC_CREDENTIALS = {};
 
     function ProtoService() {}
 
@@ -1177,8 +1177,8 @@ describe('GrpcService', function() {
     });
 
     it('should set the deadline', function(done) {
-      var createDeadline = GrpcService.createDeadline_;
-      var fakeDeadline = createDeadline(PROTO_OPTS.timeout);
+      const createDeadline = GrpcService.createDeadline_;
+      const fakeDeadline = createDeadline(PROTO_OPTS.timeout);
 
       GrpcService.createDeadline_ = function(timeout) {
         assert.strictEqual(timeout, PROTO_OPTS.timeout);
@@ -1221,7 +1221,7 @@ describe('GrpcService', function() {
       });
 
       describe('grpcCredentials error', function() {
-        var error = new Error('err');
+        const error = new Error('err');
 
         beforeEach(function() {
           grpcService.getGrpcCredentials_ = function(callback) {
@@ -1242,7 +1242,7 @@ describe('GrpcService', function() {
       });
 
       describe('grpcCredentials success', function() {
-        var authClient = {};
+        const authClient = {};
 
         beforeEach(function() {
           grpcService.getGrpcCredentials_ = function(callback) {
@@ -1251,7 +1251,7 @@ describe('GrpcService', function() {
         });
 
         it('should make the gRPC request again', function(done) {
-          var stream = duplexify.obj();
+          const stream = duplexify.obj();
           ProtoService.prototype.method = function() {
             return stream;
           };
@@ -1279,7 +1279,7 @@ describe('GrpcService', function() {
 
       describe('requestWritableStream() success', function() {
         it('should decorate the request', function(done) {
-          var decoratedRequest = {};
+          const decoratedRequest = {};
 
           grpcService.decorateRequest_ = function(reqOpts) {
             assert.strictEqual(reqOpts, REQ_OPTS);
@@ -1297,7 +1297,7 @@ describe('GrpcService', function() {
       });
 
       describe('requestWritableStream() error', function() {
-        var error = new Error('Error.');
+        const error = new Error('Error.');
 
         it('should end stream with a thrown error', function(done) {
           grpcService.decorateRequest_ = function() {
@@ -1315,7 +1315,7 @@ describe('GrpcService', function() {
     });
 
     describe('stream success', function() {
-      var authClient = {};
+      const authClient = {};
 
       beforeEach(function() {
         delete grpcService.grpcCredentials;
@@ -1326,7 +1326,7 @@ describe('GrpcService', function() {
       });
 
       it('should emit response', function(done) {
-        var stream = duplexify.obj();
+        const stream = duplexify.obj();
         ProtoService.prototype.method = function() {
           return stream;
         };
@@ -1353,7 +1353,7 @@ describe('GrpcService', function() {
     });
 
     describe('stream error', function() {
-      var authClient = {};
+      const authClient = {};
 
       beforeEach(function() {
         delete grpcService.grpcCredentials;
@@ -1363,7 +1363,7 @@ describe('GrpcService', function() {
       });
 
       it('should emit a decorated error', function(done) {
-        var grpcStream = duplexify.obj();
+        const grpcStream = duplexify.obj();
         ProtoService.prototype.method = function() {
           return grpcStream;
         };
@@ -1372,14 +1372,14 @@ describe('GrpcService', function() {
           return new ProtoService();
         };
 
-        var error = new Error('Error.');
-        var expectedDecoratedError = new Error('Decorated error.');
+        const error = new Error('Error.');
+        const expectedDecoratedError = new Error('Decorated error.');
 
         sinon.stub(GrpcService, 'decorateError_').callsFake(function() {
           return expectedDecoratedError;
         });
 
-        var stream = grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS);
+        const stream = grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS);
 
         stream.on('error', function(err) {
           assert.strictEqual(err, expectedDecoratedError);
@@ -1395,7 +1395,7 @@ describe('GrpcService', function() {
       });
 
       it('should emit the original error', function(done) {
-        var grpcStream = duplexify.obj();
+        const grpcStream = duplexify.obj();
         ProtoService.prototype.method = function() {
           return grpcStream;
         };
@@ -1404,13 +1404,13 @@ describe('GrpcService', function() {
           return new ProtoService();
         };
 
-        var error = new Error('Error.');
+        const error = new Error('Error.');
 
         sinon.stub(GrpcService, 'decorateError_').callsFake(function() {
           return null;
         });
 
-        var stream = grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS);
+        const stream = grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS);
 
         stream.on('error', function(err) {
           assert.strictEqual(err, error);
@@ -1429,9 +1429,9 @@ describe('GrpcService', function() {
 
   describe('encodeValue_', function() {
     it('should encode value using ObjectToStructConverter fn', function() {
-      var obj = {};
+      const obj = {};
 
-      var convertedObject = {};
+      const convertedObject = {};
 
       GrpcService.ObjectToStructConverter = function() {
         return {
@@ -1447,8 +1447,8 @@ describe('GrpcService', function() {
   });
 
   describe('createDeadline_', function() {
-    var nowTimestamp = Date.now();
-    var now;
+    const nowTimestamp = Date.now();
+    let now;
 
     before(function() {
       now = Date.now;
@@ -1463,15 +1463,15 @@ describe('GrpcService', function() {
     });
 
     it('should create a deadline', function() {
-      var timeout = 3000;
-      var deadline = GrpcService.createDeadline_(timeout);
+      const timeout = 3000;
+      const deadline = GrpcService.createDeadline_(timeout);
 
       assert.strictEqual(deadline.getTime(), nowTimestamp + timeout);
     });
   });
 
   describe('decorateError_', function() {
-    var expectedDecoratedError = new Error('err.');
+    const expectedDecoratedError = new Error('err.');
 
     beforeEach(function() {
       sinon.stub(GrpcService, 'decorateGrpcResponse_').callsFake(function() {
@@ -1480,11 +1480,11 @@ describe('GrpcService', function() {
     });
 
     it('should decorate an Error object', function() {
-      var grpcError = new Error('Hello');
+      const grpcError = new Error('Hello');
       (grpcError as any).code = 2;
 
-      var decoratedError = GrpcService.decorateError_(grpcError);
-      var decorateArgs = GrpcService.decorateGrpcResponse_.getCall(0).args;
+      const decoratedError = GrpcService.decorateError_(grpcError);
+      const decorateArgs = GrpcService.decorateGrpcResponse_.getCall(0).args;
 
       assert.strictEqual(decoratedError, expectedDecoratedError);
       assert.strictEqual(decorateArgs[0] instanceof Error, true);
@@ -1492,10 +1492,10 @@ describe('GrpcService', function() {
     });
 
     it('should decorate a plain object', function() {
-      var grpcMessage = {code: 2};
+      const grpcMessage = {code: 2};
 
-      var decoratedError = GrpcService.decorateError_(grpcMessage);
-      var decorateArgs = GrpcService.decorateGrpcResponse_.getCall(0).args;
+      const decoratedError = GrpcService.decorateError_(grpcMessage);
+      const decorateArgs = GrpcService.decorateGrpcResponse_.getCall(0).args;
 
       assert.strictEqual(decoratedError, expectedDecoratedError);
       assert.deepEqual(decorateArgs[0], {});
@@ -1506,12 +1506,12 @@ describe('GrpcService', function() {
 
   describe('decorateGrpcResponse_', function() {
     it('should retrieve the HTTP code from the gRPC error map', function() {
-      var errorMap = GrpcService.GRPC_ERROR_CODE_TO_HTTP;
-      var codes = Object.keys(errorMap);
+      const errorMap = GrpcService.GRPC_ERROR_CODE_TO_HTTP;
+      const codes = Object.keys(errorMap);
 
       codes.forEach(function(code) {
-        var error = new Error();
-        var extended = GrpcService.decorateGrpcResponse_(error, {code: code});
+        const error = new Error();
+        const extended = GrpcService.decorateGrpcResponse_(error, {code: code});
 
         assert.notStrictEqual(extended, errorMap[code]);
         assert.deepEqual(extended, errorMap[code]);
@@ -1520,45 +1520,45 @@ describe('GrpcService', function() {
     });
 
     it('should use the message from the error', function() {
-      var errorMessage = 'This is an error message.';
+      const errorMessage = 'This is an error message.';
 
-      var err = {
+      const err = {
         code: 1,
         message: errorMessage,
       };
 
-      var error = new Error();
-      var extended = GrpcService.decorateGrpcResponse_(error, err);
+      const error = new Error();
+      const extended = GrpcService.decorateGrpcResponse_(error, err);
 
       assert.strictEqual(extended.message, errorMessage);
     });
 
     it('should use a stringified JSON message from the error', function() {
-      var errorMessage = 'This is an error message.';
+      const errorMessage = 'This is an error message.';
 
-      var err = {
+      const err = {
         code: 1,
         message: JSON.stringify({
           description: errorMessage,
         }),
       };
 
-      var error = new Error();
-      var extended = GrpcService.decorateGrpcResponse_(error, err);
+      const error = new Error();
+      const extended = GrpcService.decorateGrpcResponse_(error, err);
 
       assert.strictEqual(extended.message, errorMessage);
     });
 
     it('should return null for unknown errors', function() {
-      var error = new Error();
-      var extended = GrpcService.decorateGrpcResponse_(error, {code: 9999});
+      const error = new Error();
+      const extended = GrpcService.decorateGrpcResponse_(error, {code: 9999});
 
       assert.strictEqual(extended, null);
     });
   });
 
   describe('decorateStatus_', function() {
-    var fakeStatus = {status: 'a'};
+    const fakeStatus = {status: 'a'};
 
     beforeEach(function() {
       sinon.stub(GrpcService, 'decorateGrpcResponse_').callsFake(function() {
@@ -1567,10 +1567,10 @@ describe('GrpcService', function() {
     });
 
     it('should call decorateGrpcResponse_ with an object', function() {
-      var grpcStatus = {code: 2};
+      const grpcStatus = {code: 2};
 
-      var status = GrpcService.decorateStatus_(grpcStatus);
-      var args = GrpcService.decorateGrpcResponse_.getCall(0).args;
+      const status = GrpcService.decorateStatus_(grpcStatus);
+      const args = GrpcService.decorateGrpcResponse_.getCall(0).args;
 
       assert.strictEqual(status, fakeStatus);
       assert.deepEqual(args[0], {});
@@ -1580,11 +1580,11 @@ describe('GrpcService', function() {
 
   describe('shouldRetryRequest_', function() {
     it('should retry on 429, 500, 502, and 503', function() {
-      var shouldRetryFn = GrpcService.shouldRetryRequest_;
+      const shouldRetryFn = GrpcService.shouldRetryRequest_;
 
-      var retryErrors = [{code: 429}, {code: 500}, {code: 502}, {code: 503}];
+      const retryErrors = [{code: 429}, {code: 500}, {code: 502}, {code: 503}];
 
-      var nonRetryErrors = [
+      const nonRetryErrors = [
         {code: 200},
         {code: 401},
         {code: 404},
@@ -1599,25 +1599,25 @@ describe('GrpcService', function() {
 
   describe('decorateRequest_', function() {
     it('should delete custom API values without modifying object', function() {
-      var reqOpts = {
+      const reqOpts = {
         autoPaginate: true,
         autoPaginateVal: true,
         objectMode: true,
       };
 
-      var originalReqOpts = extend({}, reqOpts);
+      const originalReqOpts = extend({}, reqOpts);
 
       assert.deepEqual(grpcService.decorateRequest_(reqOpts), {});
       assert.deepEqual(reqOpts, originalReqOpts);
     });
 
     it('should execute and return replaceProjectIdToken', function() {
-      var reqOpts = {
+      const reqOpts = {
         a: 'b',
         c: 'd',
       };
 
-      var replacedReqOpts = {};
+      const replacedReqOpts = {};
 
       fakeUtil.replaceProjectIdToken = function(reqOpts_, projectId) {
         assert.deepEqual(reqOpts_, reqOpts);
@@ -1644,7 +1644,7 @@ describe('GrpcService', function() {
     });
 
     describe('credential fetching error', function() {
-      var error = new Error('Error.');
+      const error = new Error('Error.');
 
       beforeEach(function() {
         grpcService.authClient = {
@@ -1663,7 +1663,7 @@ describe('GrpcService', function() {
     });
 
     describe('credential fetching success', function() {
-      var AUTH_CLIENT = {
+      const AUTH_CLIENT = {
         projectId: 'project-id',
       };
 
@@ -1682,11 +1682,11 @@ describe('GrpcService', function() {
 
           assert.strictEqual(grpcCredentials.name, 'combineChannelCredentials');
 
-          var createSslArg = grpcCredentials.args[0];
+          const createSslArg = grpcCredentials.args[0];
           assert.strictEqual(createSslArg.name, 'createSsl');
           assert.deepEqual(createSslArg.args.length, 0);
 
-          var createFromGoogleCredentialArg = grpcCredentials.args[1];
+          const createFromGoogleCredentialArg = grpcCredentials.args[1];
           assert.strictEqual(
             createFromGoogleCredentialArg.name,
             'createFromGoogleCredential'
@@ -1749,19 +1749,19 @@ describe('GrpcService', function() {
   });
 
   describe('loadProtoFile_', function() {
-    var fakeServices = {
+    const fakeServices = {
       google: {
         FakeService: {},
       },
     };
 
     it('should load a proto file', function() {
-      var fakeProtoConfig = {
+      const fakeProtoConfig = {
         path: '/root/dir/path',
         service: 'FakeService',
       };
 
-      var fakeMainConfig = {
+      const fakeMainConfig = {
         protosDir: ROOT_DIR,
       };
 
@@ -1778,41 +1778,41 @@ describe('GrpcService', function() {
         return fakeServices;
       };
 
-      var service = grpcService.loadProtoFile_(fakeProtoConfig, fakeMainConfig);
+      const service = grpcService.loadProtoFile_(fakeProtoConfig, fakeMainConfig);
       assert.strictEqual(service, fakeServices.google.FakeService);
     });
 
     it('should cache the expensive proto object creation', function() {
-      var protoConfig = {
+      const protoConfig = {
         path: '/root/dir/path',
         service: 'FakeService',
       };
 
-      var mainConfig = {
+      const mainConfig = {
         service: 'OtherFakeService',
         apiVersion: 'v2',
       };
 
-      var gprcLoadCalled = 0;
+      let gprcLoadCalled = 0;
       grpcLoadOverride = function() {
         gprcLoadCalled++;
         return fakeServices;
       };
 
-      var service1 = grpcService.loadProtoFile_(protoConfig, mainConfig);
-      var service2 = grpcService.loadProtoFile_(protoConfig, mainConfig);
+      const service1 = grpcService.loadProtoFile_(protoConfig, mainConfig);
+      const service2 = grpcService.loadProtoFile_(protoConfig, mainConfig);
       assert.strictEqual(service1, service2);
       assert.strictEqual(gprcLoadCalled, 1);
     });
 
     it('should return the services object if invalid version', function() {
-      var fakeProtoConfig = {
+      const fakeProtoConfig = {
         path: '/root/dir/path',
         service: 'FakeService',
         apiVersion: null,
       };
 
-      var fakeMainConfig = {
+      const fakeMainConfig = {
         service: 'OtherFakeService',
         apiVersion: 'v2',
       };
@@ -1821,14 +1821,14 @@ describe('GrpcService', function() {
         return fakeServices;
       };
 
-      var service = grpcService.loadProtoFile_(fakeProtoConfig, fakeMainConfig);
+      const service = grpcService.loadProtoFile_(fakeProtoConfig, fakeMainConfig);
       assert.strictEqual(service, fakeServices.google.FakeService);
     });
   });
 
   describe('getService_', function() {
     it('should get a new service instance', function() {
-      var fakeService = {};
+      const fakeService = {};
 
       grpcService.protos = {
         Service: {
@@ -1850,15 +1850,15 @@ describe('GrpcService', function() {
         },
       };
 
-      var service = grpcService.getService_({service: 'Service'});
+      const service = grpcService.getService_({service: 'Service'});
       assert.strictEqual(service, fakeService);
 
-      var cachedService = grpcService.activeServiceMap_.get('Service');
+      const cachedService = grpcService.activeServiceMap_.get('Service');
       assert.strictEqual(cachedService, fakeService);
     });
 
     it('should return the cached version of a service', function() {
-      var fakeService = {};
+      const fakeService = {};
 
       grpcService.protos = {
         Service: {
@@ -1870,16 +1870,16 @@ describe('GrpcService', function() {
 
       grpcService.activeServiceMap_.set('Service', fakeService);
 
-      var service = grpcService.getService_({service: 'Service'});
+      const service = grpcService.getService_({service: 'Service'});
       assert.strictEqual(service, fakeService);
 
-      var cachedService = grpcService.activeServiceMap_.get('Service');
+      const cachedService = grpcService.activeServiceMap_.get('Service');
       assert.strictEqual(cachedService, fakeService);
     });
 
     it('should use the baseUrl override if applicable', function() {
-      var fakeBaseUrl = 'a.googleapis.com';
-      var fakeService = {};
+      const fakeBaseUrl = 'a.googleapis.com';
+      const fakeService = {};
 
       grpcService.protos = {
         Service: {
@@ -1891,13 +1891,13 @@ describe('GrpcService', function() {
         },
       };
 
-      var service = grpcService.getService_({service: 'Service'});
+      const service = grpcService.getService_({service: 'Service'});
       assert.strictEqual(service, fakeService);
     });
   });
 
   describe('ObjectToStructConverter', function() {
-    var objectToStructConverter;
+    let objectToStructConverter;
 
     beforeEach(function() {
       objectToStructConverter = new ObjectToStructConverter(OPTIONS);
@@ -1916,7 +1916,7 @@ describe('GrpcService', function() {
       });
 
       it('should localize options', function() {
-        var objectToStructConverter = new ObjectToStructConverter({
+        const objectToStructConverter = new ObjectToStructConverter({
           removeCircular: true,
           stringify: true,
         });
@@ -1933,15 +1933,15 @@ describe('GrpcService', function() {
 
     describe('convert', function() {
       it('should encode values in an Object', function() {
-        var inputValue = {};
-        var convertedValue = {};
+        const inputValue = {};
+        const convertedValue = {};
 
         objectToStructConverter.encodeValue_ = function(value) {
           assert.strictEqual(value, inputValue);
           return convertedValue;
         };
 
-        var struct = objectToStructConverter.convert({
+        const struct = objectToStructConverter.convert({
           a: inputValue,
         });
 
@@ -1953,7 +1953,7 @@ describe('GrpcService', function() {
           done(new Error('Should not be called'));
         };
 
-        var struct = objectToStructConverter.convert({
+        const struct = objectToStructConverter.convert({
           a: undefined,
         });
 
@@ -1963,8 +1963,8 @@ describe('GrpcService', function() {
       });
 
       it('should add seen objects to set then empty set', function(done) {
-        var obj = {};
-        var objectAdded;
+        const obj = {};
+        let objectAdded;
 
         objectToStructConverter.seenObjects = {
           add: function(obj) {
@@ -1983,7 +1983,7 @@ describe('GrpcService', function() {
 
     describe('encodeValue_', function() {
       it('should convert primitive values correctly', function() {
-        var buffer = Buffer.from('Value');
+        const buffer = Buffer.from('Value');
 
         assert.deepEqual(objectToStructConverter.encodeValue_(null), {
           nullValue: 0,
@@ -2008,7 +2008,7 @@ describe('GrpcService', function() {
       });
 
       it('should convert arrays', function() {
-        var convertedValue = objectToStructConverter.encodeValue_([1, 2, 3]);
+        const convertedValue = objectToStructConverter.encodeValue_([1, 2, 3]);
 
         assert.deepEqual(convertedValue.listValue, {
           values: [
@@ -2026,12 +2026,11 @@ describe('GrpcService', function() {
       });
 
       describe('objects', function() {
-        var VALUE = {
-          circularReference: VALUE,
-        };
+        const VALUE: any = {};
+        VALUE.circularReference = VALUE;
 
         it('should convert objects', function() {
-          var convertedValue = {};
+          const convertedValue = {};
 
           objectToStructConverter.convert = function(value) {
             assert.strictEqual(value, VALUE);
@@ -2045,7 +2044,7 @@ describe('GrpcService', function() {
 
         describe('circular references', function() {
           it('should throw if circular', function() {
-            var errorMessage = [
+            const errorMessage = [
               'This object contains a circular reference. To automatically',
               'remove it, set the `removeCircular` option to true.',
             ].join(' ');
@@ -2058,7 +2057,7 @@ describe('GrpcService', function() {
           });
 
           describe('options.removeCircular', function() {
-            var objectToStructConverter;
+            let objectToStructConverter;
 
             beforeEach(function() {
               objectToStructConverter = new ObjectToStructConverter({
@@ -2079,7 +2078,7 @@ describe('GrpcService', function() {
       });
 
       describe('options.stringify', function() {
-        var objectToStructConverter;
+        let objectToStructConverter;
 
         beforeEach(function() {
           objectToStructConverter = new ObjectToStructConverter({
@@ -2088,7 +2087,7 @@ describe('GrpcService', function() {
         });
 
         it('should return a string if the value is not recognized', function() {
-          var date = new Date();
+          const date = new Date();
 
           assert.deepEqual(
             objectToStructConverter.encodeValue_(date, OPTIONS),

@@ -16,16 +16,16 @@
 
 'use strict';
 
-var assert = require('assert');
-var proxyquire = require('proxyquire');
+import * as assert from 'assert';
+const proxyquire = require('proxyquire');
 
-var fakeOperation = {};
-var fakeService = {};
-var fakeServiceObject = {};
-var fakeGrpc2 = {};
+const fakeOperation = {};
+const fakeService = {};
+const fakeServiceObject = {};
+const fakeGrpc2 = {};
 
 describe('grpc-common', function() {
-  var grpcCommon;
+  let grpcCommon;
 
   before(function() {
     grpcCommon = proxyquire('../src/index.js', {
