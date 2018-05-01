@@ -20,10 +20,9 @@
 
 'use strict';
 
-const extend = require('extend');
+import * as extend from 'extend';
 import * as nodeutil from 'util';
-const ServiceObject = require('@google-cloud/common').ServiceObject;
-const util = require('@google-cloud/common').util;
+import {ServiceObject, util} from '@google-cloud/common';
 
 /**
  * GrpcServiceObject is a base class, meant to be inherited from by a service

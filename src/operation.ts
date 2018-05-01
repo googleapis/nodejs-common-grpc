@@ -19,7 +19,7 @@
  */
 
 import * as common from '@google-cloud/common';
-const modelo = require('modelo');
+import modelo = require('modelo');
 
 /**
  * @type {module:commonGrpc/serviceObject}

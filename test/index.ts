@@ -17,7 +17,7 @@
 'use strict';
 
 import * as assert from 'assert';
-const proxyquire = require('proxyquire');
+import * as proxyquire from 'proxyquire';
 
 const fakeOperation = {};
 const fakeService = {};
