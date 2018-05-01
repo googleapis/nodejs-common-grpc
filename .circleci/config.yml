@@ -19,12 +19,12 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - lint:
-          requires:
-            - node4
-            - node6
-            - node8
-            - node9
+      # - lint:
+      #     requires:
+      #       - node4
+      #       - node6
+      #       - node8
+      #       - node9
           filters:
             tags:
               only: /.*/
@@ -39,7 +39,7 @@ workflows:
               only: /.*/
       - publish_npm:
           requires:
-            - lint
+            # - lint
             - docs
           filters:
             branches:
@@ -102,30 +102,30 @@ jobs:
       - image: 'node:9'
         user: node
     steps: *unit_tests_steps
-  lint:
-    docker:
-      - image: 'node:8'
-        user: node
-    steps:
-      - checkout
-      - run: *remove_package_lock
-      - run:
-          name: Install modules and dependencies.
-          command: |
-            mkdir -p /home/node/.npm-global
-            npm install
-            repo_tools="node_modules/@google-cloud/nodejs-repo-tools/bin/tools"
-            if ! test -x "$repo_tools"; then
-              chmod +x "$repo_tools"
-            fi
-            npm link
-          environment:
-            NPM_CONFIG_PREFIX: /home/node/.npm-global
-      - run:
-          name: Run linting.
-          command: npm run lint
-          environment:
-            NPM_CONFIG_PREFIX: /home/node/.npm-global
+  # lint:
+  #   docker:
+  #     - image: 'node:8'
+  #       user: node
+  #   steps:
+  #     - checkout
+  #     - run: *remove_package_lock
+  #     - run:
+  #         name: Install modules and dependencies.
+  #         command: |
+  #           mkdir -p /home/node/.npm-global
+  #           npm install
+  #           repo_tools="node_modules/@google-cloud/nodejs-repo-tools/bin/tools"
+  #           if ! test -x "$repo_tools"; then
+  #             chmod +x "$repo_tools"
+  #           fi
+  #           npm link
+  #         environment:
+  #           NPM_CONFIG_PREFIX: /home/node/.npm-global
+  #     - run:
+  #         name: Run linting.
+  #         command: npm run check
+  #         environment:
+  #           NPM_CONFIG_PREFIX: /home/node/.npm-global
   docs:
     docker:
       - image: 'node:8'

@@ -40,7 +40,7 @@ function fakeRetryRequest() {
 
 var GrpcMetadataOverride;
 var grpcLoadOverride;
-var fakeGrpc = {
+const fakeGrpc = {
   Metadata: function() {
     if (GrpcMetadataOverride) {
       return new GrpcMetadataOverride();
@@ -89,7 +89,7 @@ describe('GrpcService', function() {
   var PROTO_FILE_PATH = 'filepath.proto';
   var SERVICE_PATH = 'service.path';
 
-  var CONFIG = {
+  var CONFIG: any = {
     proto: {},
     protosDir: ROOT_DIR,
     protoServices: {
@@ -396,10 +396,10 @@ describe('GrpcService', function() {
     });
 
     it('should not run in the gcloud sandbox environment', function() {
-      global.GCLOUD_SANDBOX_ENV = {};
+      (global as any).GCLOUD_SANDBOX_ENV = {};
       var grpcService = new GrpcService();
-      assert.strictEqual(grpcService, global.GCLOUD_SANDBOX_ENV);
-      delete global.GCLOUD_SANDBOX_ENV;
+      assert.strictEqual(grpcService, (global as any).GCLOUD_SANDBOX_ENV);
+      delete (global as any).GCLOUD_SANDBOX_ENV;
     });
   });
 
@@ -518,9 +518,9 @@ describe('GrpcService', function() {
     });
 
     it('should not run in the gcloud sandbox environment', function() {
-      global.GCLOUD_SANDBOX_ENV = true;
-      assert.strictEqual(grpcService.request(), global.GCLOUD_SANDBOX_ENV);
-      delete global.GCLOUD_SANDBOX_ENV;
+      (global as any).GCLOUD_SANDBOX_ENV = true;
+      assert.strictEqual(grpcService.request(), (global as any).GCLOUD_SANDBOX_ENV);
+      delete (global as any).GCLOUD_SANDBOX_ENV;
     });
 
     it('should access the specified service proto object', function(done) {
@@ -896,9 +896,9 @@ describe('GrpcService', function() {
         throw new Error('Should not be called.');
       };
 
-      global.GCLOUD_SANDBOX_ENV = true;
+      (global as any).GCLOUD_SANDBOX_ENV = true;
       grpcService.requestStream();
-      delete global.GCLOUD_SANDBOX_ENV;
+      delete (global as any).GCLOUD_SANDBOX_ENV;
     });
 
     describe('getting gRPC credentials', function() {
@@ -1157,10 +1157,10 @@ describe('GrpcService', function() {
         throw new Error('Should not be called.');
       };
 
-      global.GCLOUD_SANDBOX_ENV = true;
+      (global as any).GCLOUD_SANDBOX_ENV = true;
       grpcService.requestWritableStream({});
 
-      delete global.GCLOUD_SANDBOX_ENV;
+      delete (global as any).GCLOUD_SANDBOX_ENV;
     });
 
     it('should get the proto service', function(done) {
@@ -1481,7 +1481,7 @@ describe('GrpcService', function() {
 
     it('should decorate an Error object', function() {
       var grpcError = new Error('Hello');
-      grpcError.code = 2;
+      (grpcError as any).code = 2;
 
       var decoratedError = GrpcService.decorateError_(grpcError);
       var decorateArgs = GrpcService.decorateGrpcResponse_.getCall(0).args;
