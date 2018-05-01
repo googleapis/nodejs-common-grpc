@@ -18,8 +18,6 @@
  * @module commonGrpc/operation
  */
 
-'use strict';
-
 import * as common from '@google-cloud/common';
 const modelo = require('modelo');
 
