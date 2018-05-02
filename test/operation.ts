@@ -17,8 +17,8 @@
 'use strict';
 
 import * as assert from 'assert';
-const proxyquire = require('proxyquire');
-const util = require('@google-cloud/common').util;
+import * as proxyquire from 'proxyquire';
+import {util} from '@google-cloud/common';
 
 const fakeModelo: any = {
   inherits: function() {

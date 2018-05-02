@@ -20,16 +20,15 @@
 
 'use strict';
 
-const dotProp = require('dot-prop');
-const duplexify = require('duplexify');
-const extend = require('extend');
-const grpc = require('grpc');
-const is = require('is');
+import * as dotProp from 'dot-prop';
+import * as duplexify from 'duplexify';
+import * as extend from 'extend';
+import * as grpc from 'grpc';
+import * as is from 'is';
+import * as retryRequest from 'retry-request';
+import {Service, util} from '@google-cloud/common';
+import * as through from 'through2';
 import * as nodeutil from 'util';
-const retryRequest = require('retry-request');
-const Service = require('@google-cloud/common').Service;
-const through = require('through2');
-const util = require('@google-cloud/common').util;
 
 /**
  * @const {object} - A cache of proto objects.
@@ -311,10 +310,10 @@ GrpcService.prototype.request = function(protoOpts, reqOpts, callback) {
     protoOpts.retryOpts
   );
 
-  return retryRequest(null, retryOpts, function(err, resp) {
+  return retryRequest(null!, retryOpts, function(err, resp) {
     if (!err && resp === respError) {
       err = respError;
-      resp = null;
+      resp = null!;
     }
 
     callback(err, resp);
@@ -405,10 +404,9 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
     protoOpts.retryOpts
   );
 
-  return retryRequest(null, retryOpts)
+  return (retryRequest(null!, retryOpts) as any)
     .on('error', function(err) {
       const grpcError = (GrpcService as any).decorateError_(err);
-
       stream.destroy(grpcError || err);
     })
     .on('request', stream.emit.bind(stream, 'request'))
@@ -426,7 +424,7 @@ GrpcService.prototype.requestStream = function(protoOpts, reqOpts) {
  * @param {object} reqOpts - The request options.
  */
 GrpcService.prototype.requestWritableStream = function(protoOpts, reqOpts) {
-  const stream = (protoOpts.stream = protoOpts.stream || duplexify.obj());
+  const stream = (protoOpts.stream = protoOpts.stream || (duplexify as any).obj());
 
   if (global['GCLOUD_SANDBOX_ENV']) {
     return stream;

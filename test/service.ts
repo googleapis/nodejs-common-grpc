@@ -17,15 +17,17 @@
 'use strict';
 
 import * as assert from 'assert';
-const duplexify = require('duplexify');
-const extend = require('extend');
-const grpc = require('grpc');
-const is = require('is');
-const proxyquire = require('proxyquire');
-const retryRequest = require('retry-request');
-const sinon = require('sinon').sandbox.create();
-const through = require('through2');
-const util = require('@google-cloud/common').util;
+import * as duplexify from 'duplexify';
+import * as extend from 'extend';
+import * as grpc from 'grpc';
+import * as is from 'is';
+import * as proxyquire from 'proxyquire';
+import * as retryRequest from 'retry-request';
+import * as sn from 'sinon';
+import * as through from 'through2';
+import {util} from '@google-cloud/common';
+
+const sinon = sn.sandbox.create();
 
 const fakeUtil = extend({}, util);
 
@@ -1165,7 +1167,7 @@ describe('GrpcService', function() {
 
     it('should get the proto service', function(done) {
       ProtoService.prototype.method = function() {
-        return duplexify.obj();
+        return (duplexify as any).obj();
       };
       grpcService.getService_ = function(protoOpts) {
         assert.strictEqual(protoOpts, PROTO_OPTS);
@@ -1251,7 +1253,7 @@ describe('GrpcService', function() {
         });
 
         it('should make the gRPC request again', function(done) {
-          const stream = duplexify.obj();
+          const stream = (duplexify as any).obj();
           ProtoService.prototype.method = function() {
             return stream;
           };
@@ -1326,7 +1328,7 @@ describe('GrpcService', function() {
       });
 
       it('should emit response', function(done) {
-        const stream = duplexify.obj();
+        const stream = (duplexify as any).obj();
         ProtoService.prototype.method = function() {
           return stream;
         };
@@ -1363,7 +1365,7 @@ describe('GrpcService', function() {
       });
 
       it('should emit a decorated error', function(done) {
-        const grpcStream = duplexify.obj();
+        const grpcStream = (duplexify as any).obj();
         ProtoService.prototype.method = function() {
           return grpcStream;
         };
@@ -1395,7 +1397,7 @@ describe('GrpcService', function() {
       });
 
       it('should emit the original error', function(done) {
-        const grpcStream = duplexify.obj();
+        const grpcStream = (duplexify as any).obj();
         ProtoService.prototype.method = function() {
           return grpcStream;
         };
