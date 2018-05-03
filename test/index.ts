@@ -19,29 +19,29 @@
 import * as assert from 'assert';
 import * as proxyquire from 'proxyquire';
 
-const fakeOperation = {};
-const fakeService = {};
+const fakeOperation = {}
 const fakeServiceObject = {};
-const fakeGrpc2 = {};
+const fakeGrpc = {};
 
 describe('grpc-common', function() {
   let grpcCommon;
 
   before(function() {
-    grpcCommon = proxyquire('../src/index.js', {
-      './operation.js': fakeOperation,
-      './service.js': fakeService,
-      './service-object.js': fakeServiceObject,
-      grpc: fakeGrpc2,
+    grpcCommon = proxyquire('../src', {
+      './operation': fakeOperation,
+      './service-object': fakeServiceObject,
+      grpc: fakeGrpc,
     });
   });
 
   it('should correctly export the common modules', function() {
+    assert(grpcCommon.Service);
+    assert(grpcCommon.Service.ObjectToStructConverter);
     assert.deepEqual(grpcCommon, {
       Operation: fakeOperation,
-      Service: fakeService,
+      Service: grpcCommon.Service,
       ServiceObject: fakeServiceObject,
-      grpc: fakeGrpc2,
+      grpc: fakeGrpc,
     });
   });
 });
