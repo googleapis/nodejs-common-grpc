@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {GrpcService} from './service';
+const Service = GrpcService;
+
 /*!
  * @module commonGrpc
  */
@@ -33,7 +36,7 @@ exports.ServiceObject = require('./service-object.js');
 /**
  * @type {module:commonGrpc/service}
  */
-exports.Service = require('./service.js');
+export {Service};
 
 /**
  * @type {module:commonGrpc/grpc}
