@@ -19,7 +19,7 @@
 import * as assert from 'assert';
 import * as duplexify from 'duplexify';
 import * as extend from 'extend';
-import * as grpc from 'grpc';
+const grpc = require('grpc');
 import * as is from 'is';
 import * as proxyquire from 'proxyquire';
 import * as retryRequest from 'retry-request';
@@ -135,7 +135,7 @@ describe('GrpcService', function() {
       },
       grpc: fakeGrpc,
       'retry-request': fakeRetryRequest,
-    });
+    }).GrpcService;
     GrpcServiceCached = extend(true, {}, GrpcService);
     ObjectToStructConverter = GrpcService.ObjectToStructConverter;
   });
