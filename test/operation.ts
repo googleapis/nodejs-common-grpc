@@ -21,13 +21,13 @@ import * as proxyquire from 'proxyquire';
 import {util} from '@google-cloud/common';
 
 const fakeModelo: any = {
-  inherits: function() {
+  inherits() {
     this.calledWith_ = arguments;
   },
 };
 
 let decorateGrpcStatusOverride_;
-function FakeGrpcService() {};
+function FakeGrpcService() {}
 (FakeGrpcService as any).decorateGrpcStatus_ = function() {
   return (decorateGrpcStatusOverride_ || util.noop).apply(null, arguments);
 };
@@ -35,13 +35,14 @@ function FakeGrpcService() {};
 function FakeGrpcServiceObject() {
   this.grpcServiceObjectArguments_ = arguments;
 }
+
 function FakeOperation() {
   this.operationArguments_ = arguments;
 }
 
 describe('GrpcOperation', function() {
   const FAKE_SERVICE = {
-    Promise: Promise,
+    Promise,
   };
   const OPERATION_ID = '/a/b/c/d';
 
@@ -49,13 +50,15 @@ describe('GrpcOperation', function() {
   let grpcOperation;
 
   before(function() {
-    GrpcOperation = proxyquire('../src/operation.js', {
+    GrpcOperation = proxyquire('../src/operation', {
       '@google-cloud/common': {
         Operation: FakeOperation,
       },
       modelo: fakeModelo,
-      './service-object.js': FakeGrpcServiceObject,
-      './service.js': FakeGrpcService,
+      './service-object': {
+        GrpcServiceObject: FakeGrpcServiceObject
+      },
+      './service': FakeGrpcService,
     });
   });
 

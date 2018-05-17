@@ -22,103 +22,101 @@
 
 import * as extend from 'extend';
 import * as nodeutil from 'util';
-import {ServiceObject, util} from '@google-cloud/common';
+import * as request from 'request';
+import { ServiceObject, util, ServiceObjectConfig } from '@google-cloud/common';
+import { GetMetadataCallback } from '@google-cloud/common/build/src/service-object';
 
-/**
- * GrpcServiceObject is a base class, meant to be inherited from by a service
- * object that uses the gRPC protobuf API.
- *
- * @constructor
- * @alias module:common/grpc-service-object
- *
- * @private
- *
- * @param {object} config - Configuration object.
- */
-function GrpcServiceObject(config) {
-  ServiceObject.call(this, config);
+export class GrpcServiceObject extends ServiceObject {
+
+  /**
+   * GrpcServiceObject is a base class, meant to be inherited from by a service
+   * object that uses the gRPC protobuf API.
+   *
+   * @constructor
+   * @alias module:common/grpc-service-object
+   *
+   * @private
+   *
+   * @param {object} config - Configuration object.
+   */
+  constructor(config: ServiceObjectConfig) {
+    super(config);
+  }
+
+  /**
+   * Delete the object.
+   *
+   * @param {function=} callback - The callback function.
+   * @param {?error} callback.err - An error returned while making this request.
+   */
+  delete(callback?: request.RequestCallback) {
+    const protoOpts = (this.methods.delete as any).protoOpts;
+    const reqOpts = this.methods.delete.reqOpts;
+    this.request(protoOpts, reqOpts, callback || util.noop);
+  }
+
+  /**
+   * Get the metadata of this object.
+   *
+   * @param {function} callback - The callback function.
+   * @param {?error} callback.err - An error returned while making this request.
+   * @param {object} callback.metadata - The metadata for this object.
+   */
+  getMetadata(callback: GetMetadataCallback) {
+    const protoOpts = (this.methods.getMetadata as any).protoOpts;
+    const reqOpts = this.methods.getMetadata.reqOpts;
+
+    this.request(protoOpts, reqOpts, (err, resp) => {
+      if (err) {
+        callback(err, null, resp);
+        return;
+      }
+      this.metadata = resp;
+      callback(null, this.metadata, resp);
+    });
+  }
+
+  /**
+   * Set the metadata for this object.
+   *
+   * @param {object} metadata - The metadata to set on this object.
+   * @param {function=} callback - The callback function.
+   * @param {?error} callback.err - An error returned while making this request.
+   */
+  setMetadata(metadata, callback) {
+    const protoOpts = (this.methods.setMetadata as any).protoOpts;
+    const reqOpts = extend(true, {}, this.methods.setMetadata.reqOpts, metadata);
+    this.request(protoOpts, reqOpts, callback || util.noop);
+  }
+
+  /**
+   * Patch a request to the GrpcService object.
+   *
+   * @private
+   */
+  request(...args: Array<{}>) {
+    return this.parent.request.apply(this.parent, args);
+  }
+
+  /**
+   * Patch a streaming request to the GrpcService object.
+   *
+   * @private
+   */
+  requestStream(...args: Array<{}>) {
+    return this.parent.requestStream.apply(this.parent, args);
+  }
+
+  /**
+   * Patch a writable streaming request to the GrpcService object.
+   *
+   * @private
+   */
+  requestWritableStream(...args: Array<{}>) {
+    return (this.parent as any).requestWritableStream.apply(this.parent, args);
+  }
+
 }
-
-nodeutil.inherits(GrpcServiceObject, ServiceObject);
-
-/**
- * Delete the object.
- *
- * @param {function=} callback - The callback function.
- * @param {?error} callback.err - An error returned while making this request.
- */
-GrpcServiceObject.prototype.delete = function(callback) {
-  const protoOpts = this.methods.delete.protoOpts;
-  const reqOpts = this.methods.delete.reqOpts;
-
-  this.request(protoOpts, reqOpts, callback || util.noop);
-};
-
-/**
- * Get the metadata of this object.
- *
- * @param {function} callback - The callback function.
- * @param {?error} callback.err - An error returned while making this request.
- * @param {object} callback.metadata - The metadata for this object.
- */
-GrpcServiceObject.prototype.getMetadata = function(callback) {
-  const self = this;
-
-  const protoOpts = this.methods.getMetadata.protoOpts;
-  const reqOpts = this.methods.getMetadata.reqOpts;
-
-  this.request(protoOpts, reqOpts, function(err, resp) {
-    if (err) {
-      callback(err, null, resp);
-      return;
-    }
-
-    self.metadata = resp;
-
-    callback(null, self.metadata, resp);
-  });
-};
-
-/**
- * Set the metadata for this object.
- *
- * @param {object} metadata - The metadata to set on this object.
- * @param {function=} callback - The callback function.
- * @param {?error} callback.err - An error returned while making this request.
- */
-GrpcServiceObject.prototype.setMetadata = function(metadata, callback) {
-  const protoOpts = this.methods.setMetadata.protoOpts;
-  const reqOpts = extend(true, {}, this.methods.setMetadata.reqOpts, metadata);
-
-  this.request(protoOpts, reqOpts, callback || util.noop);
-};
-
-/**
- * Patch a request to the GrpcService object.
- *
- * @private
- */
-GrpcServiceObject.prototype.request = function() {
-  return this.parent.request.apply(this.parent, arguments);
-};
-
-/**
- * Patch a streaming request to the GrpcService object.
- *
- * @private
- */
-GrpcServiceObject.prototype.requestStream = function() {
-  return this.parent.requestStream.apply(this.parent, arguments);
-};
-
-/**
- * Patch a writable streaming request to the GrpcService object.
- *
- * @private
- */
-GrpcServiceObject.prototype.requestWritableStream = function() {
-  return this.parent.requestWritableStream.apply(this.parent, arguments);
-};
 
 /*! Developer Documentation
  *
@@ -126,5 +124,3 @@ GrpcServiceObject.prototype.requestWritableStream = function() {
  * that a callback is omitted.
  */
 util.promisifyAll(GrpcServiceObject);
-
-module.exports = GrpcServiceObject;

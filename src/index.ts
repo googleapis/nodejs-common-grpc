@@ -15,7 +15,10 @@
  */
 
 import {GrpcService} from './service';
+import {GrpcServiceObject} from './service-object';
+
 const Service = GrpcService;
+const ServiceObject = GrpcServiceObject;
 
 /*!
  * @module commonGrpc
@@ -31,7 +34,7 @@ exports.Operation = require('./operation.js');
 /**
  * @type {module:commonGrpc/serviceObject}
  */
-exports.ServiceObject = require('./service-object.js');
+export {ServiceObject};
 
 /**
  * @type {module:commonGrpc/service}

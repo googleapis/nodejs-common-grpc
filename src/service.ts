@@ -216,7 +216,7 @@ export class ObjectToStructConverter {
     this.seenObjects.delete(obj);
 
     return convertedObject;
-  };
+  }
 
   /**
    * Convert a raw value to a type-denoted protobuf message-friendly object.
@@ -443,7 +443,7 @@ export class GrpcService extends Service {
         // response status. gRPC always returns an error proto message. We pass that
         // "error" into retry-request to act as the HTTP response, so it can use the
         // status code to determine if it should retry.
-        request: function (_, onResponse) {
+        request (_, onResponse) {
           respError = null;
 
           return service[protoOpts.method](reqOpts, metadata, grpcOpts, function (
@@ -477,7 +477,7 @@ export class GrpcService extends Service {
 
       callback(err, resp);
     });
-  };
+  }
 
   /**
    * Make an authenticated streaming request with gRPC.
@@ -541,10 +541,10 @@ export class GrpcService extends Service {
       {
         retries: this.maxRetries,
         currentRetryAttempt: 0,
-        objectMode: objectMode,
+        objectMode,
         shouldRetryFn: GrpcService.shouldRetryRequest_,
 
-        request: function () {
+        request () {
           return service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts).on(
             'metadata',
             function () {
@@ -571,7 +571,7 @@ export class GrpcService extends Service {
       })
       .on('request', stream.emit.bind(stream, 'request'))
       .pipe(stream);
-  };
+  }
 
   /**
    * Make an authenticated writable streaming request with gRPC.
@@ -638,7 +638,7 @@ export class GrpcService extends Service {
     stream.setWritable(grpcStream);
 
     return stream;
-  };
+  }
 
   /**
    * Decode a protobuf Struct's value.
@@ -666,7 +666,7 @@ export class GrpcService extends Service {
         return value[value.kind];
       }
     }
-  };
+  }
 
   /**
    * Convert a raw value to a type-denoted protobuf message-friendly object.
@@ -684,7 +684,7 @@ export class GrpcService extends Service {
    */
   private static encodeValue_(value) {
     return new GrpcService.ObjectToStructConverter().encodeValue_(value);
-  };
+  }
 
   /**
    * Creates a deadline.
@@ -696,7 +696,7 @@ export class GrpcService extends Service {
    */
   private static createDeadline_(timeout) {
     return new Date(Date.now() + timeout);
-  };
+  }
 
   /**
    * Checks for a grpc status code and extends the error object with additional
@@ -710,7 +710,7 @@ export class GrpcService extends Service {
   private static decorateError_(err) {
     const errorObj = is.error(err) ? err : {};
     return GrpcService.decorateGrpcResponse_(errorObj, err);
-  };
+  }
 
   /**
    * Checks for a grpc status code and extends the supplied object with additional
@@ -738,12 +738,12 @@ export class GrpcService extends Service {
 
       return extend(true, obj, response, {
         code: defaultResponseDetails.code,
-        message: message,
+        message,
       });
     }
 
     return null;
-  };
+  }
 
   /**
    * Checks for grpc status code and extends the status object with additional
@@ -755,7 +755,7 @@ export class GrpcService extends Service {
    */
   private static decorateStatus_(status) {
     return GrpcService.decorateGrpcResponse_({}, status);
-  };
+  }
 
   /**
    * Function to decide whether or not a request retry could occur.
@@ -767,7 +767,7 @@ export class GrpcService extends Service {
    */
   private static shouldRetryRequest_(response) {
     return [429, 500, 502, 503].indexOf(response.code) > -1;
-  };
+  }
 
   /**
    * Convert an object to a struct.
@@ -823,7 +823,7 @@ export class GrpcService extends Service {
    */
   private static objToStruct_(obj, options) {
     return new GrpcService.ObjectToStructConverter(options).convert(obj);
-  };
+  }
 
   /**
    * Condense a protobuf Struct into an object of only its values.
@@ -857,7 +857,7 @@ export class GrpcService extends Service {
     }
 
     return convertedObject;
-  };
+  }
 
   /**
    * Assign a projectId if one is specified to all request options.
@@ -873,7 +873,7 @@ export class GrpcService extends Service {
     delete reqOpts.objectMode;
 
     return util.replaceProjectIdToken(reqOpts, this.projectId);
-  };
+  }
 
   /**
    * To authorize requests through gRPC, we must get the raw google-auth-library
@@ -904,7 +904,7 @@ export class GrpcService extends Service {
 
       callback(null, credentials);
     });
-  };
+  }
 
   /**
    * Loads a proto file, useful when handling multiple proto files/services
@@ -948,7 +948,7 @@ export class GrpcService extends Service {
     }
 
     return protoObjectCache[protoObjectCacheKey];
-  };
+  }
 
   /**
    * Retrieves the service object used to make the grpc requests.
@@ -978,5 +978,5 @@ export class GrpcService extends Service {
     }
 
     return service;
-  };
+  }
 }

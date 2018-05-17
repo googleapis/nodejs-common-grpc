@@ -23,7 +23,7 @@ import {util} from '@google-cloud/common';
 
 let promisified = false;
 const fakeUtil = extend({}, util, {
-  promisifyAll: function(Class) {
+  promisifyAll(Class) {
     if (Class.name === 'GrpcServiceObject') {
       promisified = true;
     }
@@ -43,12 +43,12 @@ describe('GrpcServiceObject', function() {
   const REQ_OPTS = {};
 
   before(function() {
-    GrpcServiceObject = proxyquire('../src/service-object.js', {
+    GrpcServiceObject = proxyquire('../src/service-object', {
       '@google-cloud/common': {
         ServiceObject: FakeServiceObject,
         util: fakeUtil,
       },
-    });
+    }).GrpcServiceObject;
   });
 
   beforeEach(function() {
@@ -200,7 +200,7 @@ describe('GrpcServiceObject', function() {
       const expectedReturnValue = {};
 
       grpcServiceObject.parent = {
-        request: function() {
+        request() {
           assert.strictEqual(this, grpcServiceObject.parent);
           assert.deepEqual([].slice.call(arguments), args);
           return expectedReturnValue;
@@ -218,7 +218,7 @@ describe('GrpcServiceObject', function() {
       const expectedReturnValue = {};
 
       grpcServiceObject.parent = {
-        requestStream: function() {
+        requestStream() {
           assert.strictEqual(this, grpcServiceObject.parent);
           assert.deepEqual([].slice.call(arguments), args);
           return expectedReturnValue;
@@ -236,7 +236,7 @@ describe('GrpcServiceObject', function() {
       const expectedReturnValue = {};
 
       grpcServiceObject.parent = {
-        requestWritableStream: function() {
+        requestWritableStream() {
           assert.strictEqual(this, grpcServiceObject.parent);
           assert.deepEqual([].slice.call(arguments), args);
           return expectedReturnValue;
