@@ -27,7 +27,7 @@ import * as sn from 'sinon';
 import * as through from 'through2';
 import {util} from '@google-cloud/common';
 
-const sinon = sn.sandbox.create();
+const sinon = sn.createSandbox();
 
 const fakeUtil = extend({}, util);
 
@@ -2024,7 +2024,7 @@ describe('GrpcService', function() {
       it('should throw if a type is not recognized', function() {
         assert.throws(function() {
           objectToStructConverter.encodeValue_();
-        }, 'Value of type undefined not recognized.');
+        }, /Value of type undefined not recognized./);
       });
 
       describe('objects', function() {
