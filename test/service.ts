@@ -43,35 +43,35 @@ function fakeRetryRequest() {
 let GrpcMetadataOverride;
 let grpcLoadOverride;
 const fakeGrpc = {
-  Metadata: function() {
+  Metadata() {
     if (GrpcMetadataOverride) {
       return new GrpcMetadataOverride();
     }
     return new grpc.Metadata();
   },
-  load: function() {
+  load() {
     return (grpcLoadOverride || grpc.load).apply(null, arguments);
   },
   credentials: {
-    combineChannelCredentials: function() {
+    combineChannelCredentials() {
       return {
         name: 'combineChannelCredentials',
         args: arguments,
       };
     },
-    createSsl: function() {
+    createSsl() {
       return {
         name: 'createSsl',
         args: arguments,
       };
     },
-    createFromGoogleCredential: function() {
+    createFromGoogleCredential() {
       return {
         name: 'createFromGoogleCredential',
         args: arguments,
       };
     },
-    createInsecure: function() {
+    createInsecure() {
       return {
         name: 'createInsecure',
         args: arguments,
@@ -467,7 +467,7 @@ describe('GrpcService', function() {
         assert.strictEqual(options_, options);
 
         return {
-          convert: function(obj_) {
+          convert(obj_) {
             assert.strictEqual(obj_, obj);
             return convertedObject;
           },
@@ -645,7 +645,7 @@ describe('GrpcService', function() {
 
         grpcService.getService_ = function() {
           return {
-            method: function(reqOpts, metadata, grpcOpts, callback) {
+            method(reqOpts, metadata, grpcOpts, callback) {
               callback(grpcError500);
             },
           };
@@ -668,7 +668,7 @@ describe('GrpcService', function() {
 
         grpcService.getService_ = function() {
           return {
-            method: function() {
+            method() {
               return grpcRequest;
             },
           };
@@ -685,7 +685,7 @@ describe('GrpcService', function() {
 
         grpcService.getService_ = function() {
           return {
-            method: function(reqOpts, metadata, grpcOpts, callback) {
+            method(reqOpts, metadata, grpcOpts, callback) {
               callback(grpcError500);
             },
           };
@@ -707,7 +707,7 @@ describe('GrpcService', function() {
 
         grpcService.getService_ = function() {
           return {
-            method: function(reqOpts, metadata, grpcOpts, callback) {
+            method(reqOpts, metadata, grpcOpts, callback) {
               callback(unknownError, null);
             },
           };
@@ -737,7 +737,7 @@ describe('GrpcService', function() {
 
           grpcService.getService_ = function() {
             return {
-              method: function(reqOpts) {
+              method(reqOpts) {
                 assert.strictEqual(reqOpts, decoratedRequest);
                 done();
               },
@@ -768,7 +768,7 @@ describe('GrpcService', function() {
       it('should make the correct request on the service', function(done) {
         grpcService.getService_ = function() {
           return {
-            method: function(reqOpts) {
+            method(reqOpts) {
               assert.deepEqual(reqOpts, REQ_OPTS);
               done();
             },
@@ -781,7 +781,7 @@ describe('GrpcService', function() {
       it('should pass the grpc metadata with the request', function(done) {
         grpcService.getService_ = function() {
           return {
-            method: function(reqOpts, metadata) {
+            method(reqOpts, metadata) {
               assert.strictEqual(metadata, grpcService.grpcMetadata);
               done();
             },
@@ -799,7 +799,7 @@ describe('GrpcService', function() {
 
         grpcService.getService_ = function() {
           return {
-            method: function(reqOpts, metadata, grpcOpts) {
+            method(reqOpts, metadata, grpcOpts) {
               assert(is.date(grpcOpts.deadline));
 
               assert(grpcOpts.deadline.getTime() > expectedDeadlineRange[0]);
@@ -822,7 +822,7 @@ describe('GrpcService', function() {
 
             grpcService.getService_ = function() {
               return {
-                method: function(reqOpts, metadata, grpcOpts, callback) {
+                method(reqOpts, metadata, grpcOpts, callback) {
                   callback(grpcError);
                 },
               };
@@ -842,7 +842,7 @@ describe('GrpcService', function() {
         beforeEach(function() {
           grpcService.getService_ = function() {
             return {
-              method: function(reqOpts, metadata, grpcOpts, callback) {
+              method(reqOpts, metadata, grpcOpts, callback) {
                 callback(null, RESPONSE);
               },
             };
@@ -1437,7 +1437,7 @@ describe('GrpcService', function() {
 
       GrpcService.ObjectToStructConverter = function() {
         return {
-          encodeValue_: function(obj_) {
+          encodeValue_(obj_) {
             assert.strictEqual(obj_, obj);
             return convertedObject;
           },
@@ -1513,7 +1513,7 @@ describe('GrpcService', function() {
 
       codes.forEach(function(code) {
         const error = new Error();
-        const extended = GrpcService.decorateGrpcResponse_(error, {code: code});
+        const extended = GrpcService.decorateGrpcResponse_(error, {code});
 
         assert.notStrictEqual(extended, errorMap[code]);
         assert.deepEqual(extended, errorMap[code]);
@@ -1637,7 +1637,7 @@ describe('GrpcService', function() {
   describe('getGrpcCredentials_', function() {
     it('should get credentials from the auth client', function(done) {
       grpcService.authClient = {
-        getAuthClient: function() {
+        getAuthClient() {
           done();
         },
       };
@@ -1650,7 +1650,7 @@ describe('GrpcService', function() {
 
       beforeEach(function() {
         grpcService.authClient = {
-          getAuthClient: function(callback) {
+          getAuthClient(callback) {
             callback(error);
           },
         };
@@ -1671,7 +1671,7 @@ describe('GrpcService', function() {
 
       beforeEach(function() {
         grpcService.authClient = {
-          getAuthClient: function(callback) {
+          getAuthClient(callback) {
             grpcService.authClient = AUTH_CLIENT;
             callback(null, AUTH_CLIENT);
           },
@@ -1734,7 +1734,7 @@ describe('GrpcService', function() {
         grpcService.projectId = 'project-id';
 
         grpcService.authClient = {
-          getAuthClient: function(callback) {
+          getAuthClient(callback) {
             callback(null, {
               projectId: undefined,
             });
@@ -1834,7 +1834,7 @@ describe('GrpcService', function() {
 
       grpcService.protos = {
         Service: {
-          Service: function(baseUrl, grpcCredentials, userAgent) {
+          Service(baseUrl, grpcCredentials, userAgent) {
             assert.strictEqual(baseUrl, grpcService.baseUrl);
             assert.strictEqual(grpcCredentials, grpcService.grpcCredentials);
             assert.deepEqual(
@@ -1864,7 +1864,7 @@ describe('GrpcService', function() {
 
       grpcService.protos = {
         Service: {
-          Service: function() {
+          Service() {
             throw new Error('should not be called');
           },
         },
@@ -1886,7 +1886,7 @@ describe('GrpcService', function() {
       grpcService.protos = {
         Service: {
           baseUrl: fakeBaseUrl,
-          Service: function(baseUrl) {
+          Service(baseUrl) {
             assert.strictEqual(baseUrl, fakeBaseUrl);
             return fakeService;
           },
@@ -1969,10 +1969,10 @@ describe('GrpcService', function() {
         let objectAdded;
 
         objectToStructConverter.seenObjects = {
-          add: function(obj) {
+          add(obj) {
             objectAdded = obj;
           },
-          delete: function(obj_) {
+          delete(obj_) {
             assert.strictEqual(obj_, obj);
             assert.strictEqual(objectAdded, obj);
             done();

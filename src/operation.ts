@@ -25,7 +25,7 @@ import modelo = require('modelo');
  * @type {module:commonGrpc/serviceObject}
  * @private
  */
-const ServiceObject = require('./service-object.js');
+import {GrpcServiceObject} from './service-object';
 
 /**
  * @type {module:commonGrpc/service}
@@ -58,7 +58,7 @@ function Operation(parent, name) {
         method: 'deleteOperation',
       },
       reqOpts: {
-        name: name,
+        name,
       },
     },
 
@@ -81,22 +81,22 @@ function Operation(parent, name) {
         method: 'getOperation',
       },
       reqOpts: {
-        name: name,
+        name,
       },
     },
   };
 
   const config = {
-    parent: parent,
+    parent,
     id: name,
-    methods: methods,
+    methods,
   };
 
   common.Operation.call(this, config);
-  ServiceObject.call(this, config);
+  GrpcServiceObject.call(this, config);
 }
 
-modelo.inherits(Operation, ServiceObject, common.Operation);
+modelo.inherits(Operation, GrpcServiceObject, common.Operation);
 
 /**
  * Cancel the operation.
