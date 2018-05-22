@@ -1637,7 +1637,7 @@ describe('GrpcService', function() {
   describe('getGrpcCredentials_', function() {
     it('should get credentials from the auth client', function(done) {
       grpcService.authClient = {
-        getAuthClient() {
+        async getDefaultProjectId() {
           done();
         },
       };
@@ -1650,8 +1650,8 @@ describe('GrpcService', function() {
 
       beforeEach(function() {
         grpcService.authClient = {
-          getAuthClient(callback) {
-            callback(error);
+          async getDefaultProjectId() {
+            throw error;
           },
         };
       });
@@ -1671,10 +1671,9 @@ describe('GrpcService', function() {
 
       beforeEach(function() {
         grpcService.authClient = {
-          getAuthClient(callback) {
-            grpcService.authClient = AUTH_CLIENT;
-            callback(null, AUTH_CLIENT);
-          },
+          async getDefaultProjectId() {
+            return AUTH_CLIENT.projectId;
+          }
         };
       });
 
@@ -1693,11 +1692,7 @@ describe('GrpcService', function() {
             createFromGoogleCredentialArg.name,
             'createFromGoogleCredential'
           );
-          assert.strictEqual(
-            createFromGoogleCredentialArg.args[0],
-            AUTH_CLIENT
-          );
-
+          assert.strictEqual(createFromGoogleCredentialArg.args[0], grpcService.authClient);
           done();
         });
       });
