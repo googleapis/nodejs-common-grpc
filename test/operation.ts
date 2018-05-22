@@ -26,11 +26,12 @@ const fakeModelo: any = {
   },
 };
 
-let decorateGrpcStatusOverride_;
-function FakeGrpcService() {}
-(FakeGrpcService as any).decorateGrpcStatus_ = function() {
-  return (decorateGrpcStatusOverride_ || util.noop).apply(null, arguments);
-};
+let decorateErrorOverride_;
+class FakeGrpcService {
+  static decorateError_() {
+    return (decorateErrorOverride_ || util.noop).apply(null, arguments);
+  }
+}
 
 function FakeGrpcServiceObject() {
   this.grpcServiceObjectArguments_ = arguments;
@@ -58,12 +59,14 @@ describe('GrpcOperation', () => {
       './service-object': {
         GrpcServiceObject: FakeGrpcServiceObject
       },
-      './service': FakeGrpcService,
+      './service': {
+        GrpcService: FakeGrpcService
+      }
     });
   });
 
   beforeEach(() => {
-    decorateGrpcStatusOverride_ = null;
+    decorateErrorOverride_ = null;
     grpcOperation = new GrpcOperation(FAKE_SERVICE, OPERATION_ID);
   });
 
@@ -97,7 +100,6 @@ describe('GrpcOperation', () => {
 
     it('should extend GrpcServiceObject and Operation', () => {
       const args = fakeModelo.calledWith_;
-
       assert.strictEqual(args[0], GrpcOperation);
       assert.strictEqual(args[1], FakeGrpcServiceObject);
       assert.strictEqual(args[2], FakeOperation);
@@ -153,11 +155,9 @@ describe('GrpcOperation', () => {
     describe('could not get metadata', () => {
       it('should callback with an error', done => {
         const error = new Error('Error.');
-
         grpcOperation.getMetadata = callback => {
           callback(error);
         };
-
         grpcOperation.poll_(err => {
           assert.strictEqual(err, error);
           done();
@@ -168,14 +168,12 @@ describe('GrpcOperation', () => {
         const apiResponse = {
           error: {},
         };
-
         grpcOperation.getMetadata = callback => {
           callback(null, apiResponse, apiResponse);
         };
-
         const decoratedGrpcStatus = {};
 
-        decorateGrpcStatusOverride_ = status => {
+        decorateErrorOverride_ = status => {
           assert.strictEqual(status, apiResponse.error);
           return decoratedGrpcStatus;
         };

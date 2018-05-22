@@ -28,9 +28,7 @@ import * as retryRequest from 'retry-request';
 import { Service, util } from '@google-cloud/common';
 import * as through from 'through2';
 import * as r from 'request';
-import * as nodeutil from 'util';
-
-const grpc = require('grpc');
+import * as grpc from 'grpc';
 
 /**
  * @const {object} - A cache of proto objects.
@@ -707,7 +705,7 @@ export class GrpcService extends Service {
    * @param {error|object} err - The grpc error.
    * @return {error|null}
    */
-  private static decorateError_(err) {
+  static decorateError_(err) {
     const errorObj = is.error(err) ? err : {};
     return GrpcService.decorateGrpcResponse_(errorObj, err);
   }
@@ -885,19 +883,16 @@ export class GrpcService extends Service {
    * @param {?error} callback.err - An error getting an auth client.
    */
   private getGrpcCredentials_(callback) {
-    const credentials = grpc.credentials.combineChannelCredentials(
-      grpc.credentials.createSsl(),
-      grpc.credentials.createFromGoogleCredential(this.authClient)
-    );
-    if (!this.projectId || this.projectId === '{{projectId}}') {
-      this.authClient.getDefaultProjectId().then(projectId => {
-        this.projectId = projectId;
-        callback(null, credentials);
-        return;
-      }, callback);
-    } else {
+    this.authClient.getClient().then(client => {
+      const credentials = grpc.credentials.combineChannelCredentials(
+        grpc.credentials.createSsl(),
+        grpc.credentials.createFromGoogleCredential(client)
+      );
+      if (!this.projectId || this.projectId === '{{projectId}}') {
+        this.projectId = client.projectId!;
+      }
       callback(null, credentials);
-    }
+    }, callback);
   }
 
   /**

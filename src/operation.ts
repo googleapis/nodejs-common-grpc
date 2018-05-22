@@ -31,7 +31,7 @@ import {GrpcServiceObject} from './service-object';
  * @type {module:commonGrpc/service}
  * @private
  */
-const Service = require('./service.js');
+import {GrpcService} from './service';
 
 // jscs:disable maximumLineLength
 /**
@@ -133,7 +133,7 @@ Operation.prototype.cancel = function(callback) {
 Operation.prototype.poll_ = function(callback) {
   this.getMetadata(function(err, resp) {
     if (err || resp.error) {
-      callback(err || Service.decorateGrpcStatus_(resp.error));
+      callback(err || GrpcService.decorateError_(resp.error));
       return;
     }
 
