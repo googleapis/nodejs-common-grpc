@@ -885,25 +885,19 @@ export class GrpcService extends Service {
    * @param {?error} callback.err - An error getting an auth client.
    */
   private getGrpcCredentials_(callback) {
-    const self = this;
-
-    this.authClient.getAuthClient(function (err, authClient) {
-      if (err) {
-        callback(err);
+    const credentials = grpc.credentials.combineChannelCredentials(
+      grpc.credentials.createSsl(),
+      grpc.credentials.createFromGoogleCredential(this.authClient)
+    );
+    if (!this.projectId || this.projectId === '{{projectId}}') {
+      this.authClient.getDefaultProjectId().then(projectId => {
+        this.projectId = projectId;
+        callback(null, credentials);
         return;
-      }
-
-      const credentials = grpc.credentials.combineChannelCredentials(
-        grpc.credentials.createSsl(),
-        grpc.credentials.createFromGoogleCredential(authClient)
-      );
-
-      if (!self.projectId || self.projectId === '{{projectId}}') {
-        self.projectId = self.authClient.projectId;
-      }
-
+      }, callback);
+    } else {
       callback(null, credentials);
-    });
+    }
   }
 
   /**
