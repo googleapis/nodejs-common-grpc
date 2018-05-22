@@ -34,7 +34,7 @@ function FakeServiceObject() {
   this.calledWith_ = arguments;
 }
 
-describe('GrpcServiceObject', function() {
+describe('GrpcServiceObject', () => {
   let GrpcServiceObject;
   let grpcServiceObject;
 
@@ -42,7 +42,7 @@ describe('GrpcServiceObject', function() {
   const PROTO_OPTS = {};
   const REQ_OPTS = {};
 
-  before(function() {
+  before(() => {
     GrpcServiceObject = proxyquire('../src/service-object', {
       '@google-cloud/common': {
         ServiceObject: FakeServiceObject,
@@ -51,7 +51,7 @@ describe('GrpcServiceObject', function() {
     }).GrpcServiceObject;
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     grpcServiceObject = new GrpcServiceObject(CONFIG);
 
     grpcServiceObject.methods = {
@@ -70,22 +70,22 @@ describe('GrpcServiceObject', function() {
     };
   });
 
-  describe('instantiation', function() {
-    it('should inherit from ServiceObject', function() {
+  describe('instantiation', () => {
+    it('should inherit from ServiceObject', () => {
       assert(grpcServiceObject instanceof FakeServiceObject);
 
       const calledWith = grpcServiceObject.calledWith_;
       assert.strictEqual(calledWith[0], CONFIG);
     });
 
-    it('should promisify all the things', function() {
+    it('should promisify all the things', () => {
       assert(promisified);
     });
   });
 
-  describe('delete', function() {
-    it('should make the correct request', function(done) {
-      grpcServiceObject.request = function(protoOpts, reqOpts, callback) {
+  describe('delete', () => {
+    it('should make the correct request', done => {
+      grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
         const deleteMethod = grpcServiceObject.methods.delete;
         assert.strictEqual(protoOpts, deleteMethod.protoOpts);
         assert.strictEqual(reqOpts, deleteMethod.reqOpts);
@@ -95,8 +95,8 @@ describe('GrpcServiceObject', function() {
       grpcServiceObject.delete(done);
     });
 
-    it('should not require a callback', function(done) {
-      grpcServiceObject.request = function(protoOpts, reqOpts, callback) {
+    it('should not require a callback', done => {
+      grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
         assert.doesNotThrow(callback);
         done();
       };
@@ -105,9 +105,9 @@ describe('GrpcServiceObject', function() {
     });
   });
 
-  describe('getMetadata', function() {
-    it('should make the correct request', function(done) {
-      grpcServiceObject.request = function(protoOpts, reqOpts, callback) {
+  describe('getMetadata', () => {
+    it('should make the correct request', done => {
+      grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
         const getMetadataMethod = grpcServiceObject.methods.getMetadata;
         assert.strictEqual(protoOpts, getMetadataMethod.protoOpts);
         assert.strictEqual(reqOpts, getMetadataMethod.reqOpts);
@@ -117,18 +117,18 @@ describe('GrpcServiceObject', function() {
       grpcServiceObject.getMetadata(done);
     });
 
-    describe('error', function() {
+    describe('error', () => {
       const error = new Error('Error.');
       const apiResponse = {};
 
-      beforeEach(function() {
-        grpcServiceObject.request = function(protoOpts, reqOpts, callback) {
+      beforeEach(() => {
+        grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
           callback(error, apiResponse);
         };
       });
 
-      it('should execute callback with error & API response', function(done) {
-        grpcServiceObject.getMetadata(function(err, metadata, apiResponse_) {
+      it('should execute callback with error & API response', done => {
+        grpcServiceObject.getMetadata((err, metadata, apiResponse_) => {
           assert.strictEqual(err, error);
           assert.strictEqual(metadata, null);
           assert.strictEqual(apiResponse_, apiResponse);
@@ -137,17 +137,17 @@ describe('GrpcServiceObject', function() {
       });
     });
 
-    describe('success', function() {
+    describe('success', () => {
       const apiResponse = {};
 
-      beforeEach(function() {
-        grpcServiceObject.request = function(protoOpts, reqOpts, callback) {
+      beforeEach(() => {
+        grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
           callback(null, apiResponse);
         };
       });
 
-      it('should exec callback with metadata & API response', function(done) {
-        grpcServiceObject.getMetadata(function(err, metadata, apiResponse_) {
+      it('should exec callback with metadata & API response', done => {
+        grpcServiceObject.getMetadata((err, metadata, apiResponse_) => {
           assert.ifError(err);
           assert.strictEqual(metadata, apiResponse);
           assert.strictEqual(apiResponse_, apiResponse);
@@ -155,8 +155,8 @@ describe('GrpcServiceObject', function() {
         });
       });
 
-      it('should update the metadata on the instance', function(done) {
-        grpcServiceObject.getMetadata(function(err) {
+      it('should update the metadata on the instance', done => {
+        grpcServiceObject.getMetadata(err => {
           assert.ifError(err);
           assert.strictEqual(grpcServiceObject.metadata, apiResponse);
           done();
@@ -165,17 +165,17 @@ describe('GrpcServiceObject', function() {
     });
   });
 
-  describe('setMetadata', function() {
+  describe('setMetadata', () => {
     const DEFAULT_REQ_OPTS = {a: 'b'};
     const METADATA = {a: 'c'};
 
-    it('should make the correct request', function(done) {
+    it('should make the correct request', done => {
       const setMetadataMethod = grpcServiceObject.methods.setMetadata;
       const expectedReqOpts = extend(true, {}, DEFAULT_REQ_OPTS, METADATA);
 
       grpcServiceObject.methods.setMetadata.reqOpts = DEFAULT_REQ_OPTS;
 
-      grpcServiceObject.request = function(protoOpts, reqOpts, callback) {
+      grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
         assert.strictEqual(protoOpts, setMetadataMethod.protoOpts);
         assert.deepEqual(reqOpts, expectedReqOpts);
         callback(); // done()
@@ -184,8 +184,8 @@ describe('GrpcServiceObject', function() {
       grpcServiceObject.setMetadata(METADATA, done);
     });
 
-    it('should not require a callback', function(done) {
-      grpcServiceObject.request = function(protoOpts, reqOpts, callback) {
+    it('should not require a callback', done => {
+      grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
         assert.doesNotThrow(callback);
         done();
       };
@@ -194,8 +194,8 @@ describe('GrpcServiceObject', function() {
     });
   });
 
-  describe('request', function() {
-    it('should call the parent instance request method', function() {
+  describe('request', () => {
+    it('should call the parent instance request method', () => {
       const args = [1, 2, 3];
       const expectedReturnValue = {};
 
@@ -212,8 +212,8 @@ describe('GrpcServiceObject', function() {
     });
   });
 
-  describe('requestStream', function() {
-    it('should call the parent instance requestStream method', function() {
+  describe('requestStream', () => {
+    it('should call the parent instance requestStream method', () => {
       const args = [1, 2, 3];
       const expectedReturnValue = {};
 
@@ -230,8 +230,8 @@ describe('GrpcServiceObject', function() {
     });
   });
 
-  describe('requestWritableStream', function() {
-    it('should call the parent requestWritableStream method', function() {
+  describe('requestWritableStream', () => {
+    it('should call the parent requestWritableStream method', () => {
       const args = [1, 2, 3];
       const expectedReturnValue = {};
 
