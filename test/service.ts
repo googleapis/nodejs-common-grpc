@@ -19,7 +19,7 @@
 import * as assert from 'assert';
 import * as duplexify from 'duplexify';
 import * as extend from 'extend';
-const grpc = require('grpc');
+import * as grpc from 'grpc';
 import * as is from 'is';
 import * as proxyquire from 'proxyquire';
 import * as retryRequest from 'retry-request';
@@ -1636,7 +1636,7 @@ describe('GrpcService', () => {
   describe('getGrpcCredentials_', () => {
     it('should get credentials from the auth client', done => {
       grpcService.authClient = {
-        async getDefaultProjectId() {
+        async getClient() {
           done();
         },
       };
@@ -1649,7 +1649,7 @@ describe('GrpcService', () => {
 
       beforeEach(() => {
         grpcService.authClient = {
-          async getDefaultProjectId() {
+          async getClient() {
             throw error;
           },
         };
@@ -1670,8 +1670,8 @@ describe('GrpcService', () => {
 
       beforeEach(() => {
         grpcService.authClient = {
-          async getDefaultProjectId() {
-            return AUTH_CLIENT.projectId;
+          async getClient() {
+            return AUTH_CLIENT;
           }
         };
       });
@@ -1691,7 +1691,7 @@ describe('GrpcService', () => {
             createFromGoogleCredentialArg.name,
             'createFromGoogleCredential'
           );
-          assert.strictEqual(createFromGoogleCredentialArg.args[0], grpcService.authClient);
+          assert.strictEqual(createFromGoogleCredentialArg.args[0], AUTH_CLIENT);
           done();
         });
       });
@@ -1728,10 +1728,10 @@ describe('GrpcService', () => {
         grpcService.projectId = 'project-id';
 
         grpcService.authClient = {
-          getAuthClient(callback) {
-            callback(null, {
+          async getClient() {
+            return {
               projectId: undefined,
-            });
+            };
           },
         };
 
