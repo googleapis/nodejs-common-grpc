@@ -18,13 +18,10 @@
 
 import * as assert from 'assert';
 import * as proxyquire from 'proxyquire';
-import {util} from '@google-cloud/common';
-
-const fakeModelo: any = {
-  inherits() {
-    this.calledWith_ = arguments;
-  },
-};
+import {util, ServiceObject} from '@google-cloud/common';
+import { EventEmitter } from 'events';
+import * as op from '../src/operation';
+import { GrpcServiceObject } from '../src/service-object';
 
 let decorateErrorOverride_;
 class FakeGrpcService {
@@ -33,12 +30,12 @@ class FakeGrpcService {
   }
 }
 
-function FakeGrpcServiceObject() {
-  this.grpcServiceObjectArguments_ = arguments;
-}
-
-function FakeOperation() {
-  this.operationArguments_ = arguments;
+class FakeGrpcServiceObject extends EventEmitter {
+  grpcServiceObjectArguments_: {}[];
+  constructor(...args: {}[]) {
+    super();
+    this.grpcServiceObjectArguments_ = args;
+  }
 }
 
 describe('GrpcOperation', () => {
@@ -52,17 +49,13 @@ describe('GrpcOperation', () => {
 
   before(() => {
     GrpcOperation = proxyquire('../src/operation', {
-      '@google-cloud/common': {
-        Operation: FakeOperation,
-      },
-      modelo: fakeModelo,
       './service-object': {
         GrpcServiceObject: FakeGrpcServiceObject
       },
       './service': {
         GrpcService: FakeGrpcService
       }
-    });
+    }).GrpcOperation;
   });
 
   beforeEach(() => {
@@ -98,20 +91,8 @@ describe('GrpcOperation', () => {
       },
     };
 
-    it('should extend GrpcServiceObject and Operation', () => {
-      const args = fakeModelo.calledWith_;
-      assert.strictEqual(args[0], GrpcOperation);
-      assert.strictEqual(args[1], FakeGrpcServiceObject);
-      assert.strictEqual(args[2], FakeOperation);
-    });
-
-    it('should pass Operation the correct config', () => {
-      const config = grpcOperation.operationArguments_[0];
-      assert.deepEqual(config, EXPECTED_CONFIG);
-    });
-
     it('should pass GrpcServiceObject the correct config', () => {
-      const config = grpcOperation.grpcServiceObjectArguments_[0];
+      const config = grpcOperation.grpcServiceObjectArguments_![0];
       assert.deepEqual(config, EXPECTED_CONFIG);
     });
   });
@@ -149,7 +130,7 @@ describe('GrpcOperation', () => {
         done();
       };
 
-      grpcOperation.poll_(assert.ifError);
+      grpcOperation.poll_().then(r => {}, assert.ifError);
     });
 
     describe('could not get metadata', () => {
@@ -158,7 +139,7 @@ describe('GrpcOperation', () => {
         grpcOperation.getMetadata = callback => {
           callback(error);
         };
-        grpcOperation.poll_(err => {
+        grpcOperation.poll_().then(r => {}, err => {
           assert.strictEqual(err, error);
           done();
         });
@@ -178,7 +159,7 @@ describe('GrpcOperation', () => {
           return decoratedGrpcStatus;
         };
 
-        grpcOperation.poll_(err => {
+        grpcOperation.poll_().then(r => {}, err => {
           assert.strictEqual(err, decoratedGrpcStatus);
           done();
         });
@@ -193,12 +174,10 @@ describe('GrpcOperation', () => {
         };
       });
 
-      it('should callback with no arguments', done => {
-        grpcOperation.poll_((err, resp) => {
-          assert.strictEqual(err, undefined);
+      it('should callback with no arguments', async() => {
+        return grpcOperation.poll_().then(resp => {
           assert.strictEqual(resp, undefined);
-          done();
-        });
+        }, assert.ifError);
       });
     });
 
@@ -211,13 +190,12 @@ describe('GrpcOperation', () => {
         };
       });
 
-      it('should emit complete with metadata', done => {
-        grpcOperation.poll_((err, resp) => {
-          assert.ifError(err);
+      it('should emit complete with metadata', async() => {
+        return grpcOperation.poll_().then(resp => {
           assert.strictEqual(resp, apiResponse);
-          done();
-        });
+        }, assert.ifError);
       });
+
     });
   });
 });
