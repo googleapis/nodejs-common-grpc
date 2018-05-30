@@ -1619,11 +1619,11 @@ describe('GrpcService', () => {
     it('should get credentials from the auth client', done => {
       grpcService.authClient = {
         async getClient() {
-          done();
+          return '';
         },
       };
 
-      grpcService.getGrpcCredentials_(assert.ifError);
+      grpcService.getGrpcCredentials_(done);
     });
 
     describe('credential fetching error', () => {
