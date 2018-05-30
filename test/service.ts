@@ -20,6 +20,7 @@ import * as assert from 'assert';
 import * as duplexify from 'duplexify';
 import * as extend from 'extend';
 import * as grpc from 'grpc';
+import * as grpcProtoLoader from '@grpc/proto-loader';
 import * as is from 'is';
 import * as proxyquire from 'proxyquire';
 import * as retryRequest from 'retry-request';
@@ -41,16 +42,13 @@ function fakeRetryRequest() {
 }
 
 let GrpcMetadataOverride;
-let grpcLoadOverride;
+let grpcProtoLoadOverride: (typeof grpcProtoLoader.loadSync)|null = null;
 const fakeGrpc = {
   Metadata() {
     if (GrpcMetadataOverride) {
       return new GrpcMetadataOverride();
     }
     return new grpc.Metadata();
-  },
-  load() {
-    return (grpcLoadOverride || grpc.load).apply(null, arguments);
   },
   credentials: {
     combineChannelCredentials() {
@@ -80,6 +78,12 @@ const fakeGrpc = {
   },
 };
 
+const fakeGrpcProtoLoader = {
+  loadSync() {
+    return (grpcProtoLoadOverride || grpcProtoLoader.loadSync).apply(null, arguments);
+  }
+};
+
 describe('GrpcService', () => {
   let GrpcServiceCached;
   let GrpcService;
@@ -91,7 +95,7 @@ describe('GrpcService', () => {
   const PROTO_FILE_PATH = 'filepath.proto';
   const SERVICE_PATH = 'service.path';
 
-  const CONFIG: any = {
+  const CONFIG = {
     proto: {},
     protosDir: ROOT_DIR,
     protoServices: {
@@ -119,12 +123,8 @@ describe('GrpcService', () => {
     'grpc/' + require('grpc/package.json').version,
   ].join(' ');
 
-  const MOCK_GRPC_API = {
-    google: {
-      Service: {
-        [SERVICE_PATH]: {},
-      },
-    },
+  const MOCK_GRPC_API: grpcProtoLoader.PackageDefinition = {
+    [`google.${SERVICE_PATH}.Service`]: {},
   };
 
   before(() => {
@@ -134,6 +134,7 @@ describe('GrpcService', () => {
         util: fakeUtil,
       },
       grpc: fakeGrpc,
+      '@grpc/proto-loader': fakeGrpcProtoLoader,
       'retry-request': fakeRetryRequest,
     }).GrpcService;
     GrpcServiceCached = extend(true, {}, GrpcService);
@@ -144,7 +145,7 @@ describe('GrpcService', () => {
     GrpcMetadataOverride = null;
     retryRequestOverride = null;
 
-    grpcLoadOverride = () => {
+    grpcProtoLoadOverride = () => {
       return MOCK_GRPC_API;
     };
 
@@ -155,7 +156,7 @@ describe('GrpcService', () => {
   });
 
   afterEach(() => {
-    grpcLoadOverride = null;
+    grpcProtoLoadOverride = null;
     sinon.restore();
   });
 
@@ -326,7 +327,7 @@ describe('GrpcService', () => {
     });
 
     it('should localize the service', () => {
-      assert.strictEqual(grpcService.service, CONFIG.service);
+      assert.deepStrictEqual(Object.keys(grpcService.protos), Object.keys(CONFIG.protoServices));
     });
 
     it('should localize an empty Map of services', () => {
@@ -335,56 +336,37 @@ describe('GrpcService', () => {
     });
 
     it('should call grpc.load correctly', () => {
-      grpcLoadOverride = (opts, format, grpcOpts) => {
-        assert.strictEqual(opts.root, ROOT_DIR);
-        assert.strictEqual(opts.file, PROTO_FILE_PATH);
+      grpcProtoLoadOverride = (file, options) => {
+        assert.deepStrictEqual(options.includeDirs, [ROOT_DIR]);
+        assert.strictEqual(file, PROTO_FILE_PATH);
 
-        assert.strictEqual(format, 'proto');
-        assert.deepEqual(grpcOpts, {
-          binaryAsBase64: true,
-          convertFieldsToCamelCase: true,
-        });
+        assert.strictEqual(options.bytes, String);
+        assert.strictEqual(options.keepCase, false);
 
         return MOCK_GRPC_API;
       };
 
       const grpcService = new GrpcService(CONFIG, OPTIONS);
-      assert.strictEqual(
-        grpcService.protos[CONFIG.service],
-        MOCK_GRPC_API.google[CONFIG.service]
-      );
-    });
 
-    it('should allow proto file paths to be given', () => {
-      grpcLoadOverride = opts => {
-        assert.strictEqual(opts.root, ROOT_DIR);
-        assert.strictEqual(opts.file, '../file/path.proto');
-
-        return MOCK_GRPC_API;
-      };
-
-      const config = extend(true, {}, CONFIG, {
-        protoServices: {
-          Service: '../file/path.proto',
-        },
-      });
-
-      const grpcService = new GrpcService(config, OPTIONS);
-      assert.strictEqual(grpcService.protos.Service, MOCK_GRPC_API.google);
+      for (const serviceName of Object.keys(CONFIG.protoServices)) {
+        assert.strictEqual(
+          grpcService.protos[serviceName],
+          MOCK_GRPC_API[`google.${SERVICE_PATH}.${serviceName}`]
+        );
+      }
     });
 
     it('should store the baseUrl properly', () => {
       const fakeBaseUrl = 'a.googleapis.com';
 
-      grpcLoadOverride = () => {
+      grpcProtoLoadOverride = () => {
         return MOCK_GRPC_API;
       };
 
       const config = extend(true, {}, CONFIG, {
         protoServices: {
-          CustomServiceName: {
-            path: '../file/path.proto',
-            baseUrl: fakeBaseUrl,
+          Service: {
+            baseUrl: fakeBaseUrl
           },
         },
       });
@@ -392,7 +374,7 @@ describe('GrpcService', () => {
       const grpcService = new GrpcService(config, OPTIONS);
 
       assert.strictEqual(
-        grpcService.protos.CustomServiceName.baseUrl,
+        grpcService.protos.Service.baseUrl,
         fakeBaseUrl
       );
     });
@@ -1744,45 +1726,34 @@ describe('GrpcService', () => {
     });
   });
 
-  describe('loadProtoFile_', () => {
-    const fakeServices = {
-      google: {
-        FakeService: {},
-      },
+  describe('loadProtoFile', () => {
+    const fakeServices: grpcProtoLoader.PackageDefinition = {
+      'google.FakeService': {},
     };
 
     it('should load a proto file', () => {
-      const fakeProtoConfig = {
-        path: '/root/dir/path',
-        service: 'FakeService',
-      };
+      const fakeProtoPath = '/root/dir/path';
 
       const fakeMainConfig = {
         protosDir: ROOT_DIR,
       };
 
-      grpcLoadOverride = (pathOpts, type, grpOpts) => {
-        assert.strictEqual(pathOpts.root, fakeMainConfig.protosDir);
-        assert.strictEqual(pathOpts.file, fakeProtoConfig.path);
-        assert.strictEqual(type, 'proto');
+      grpcProtoLoadOverride = (file, options) => {
+        assert.deepStrictEqual(options.includeDirs, [fakeMainConfig.protosDir]);
+        assert.strictEqual(file, fakeProtoPath);
 
-        assert.deepEqual(grpOpts, {
-          binaryAsBase64: true,
-          convertFieldsToCamelCase: true,
-        });
+        assert.strictEqual(options.bytes, String);
+        assert.strictEqual(options.keepCase, false);
 
         return fakeServices;
       };
 
-      const service = grpcService.loadProtoFile_(fakeProtoConfig, fakeMainConfig);
-      assert.strictEqual(service, fakeServices.google.FakeService);
+      const services = grpcService.loadProtoFile(fakeProtoPath, fakeMainConfig);
+      assert.deepStrictEqual(services, fakeServices);
     });
 
     it('should cache the expensive proto object creation', () => {
-      const protoConfig = {
-        path: '/root/dir/path',
-        service: 'FakeService',
-      };
+      const protoPath = '/root/dir/path';
 
       const mainConfig = {
         service: 'OtherFakeService',
@@ -1790,35 +1761,31 @@ describe('GrpcService', () => {
       };
 
       let gprcLoadCalled = 0;
-      grpcLoadOverride = () => {
+      grpcProtoLoadOverride = () => {
         gprcLoadCalled++;
         return fakeServices;
       };
 
-      const service1 = grpcService.loadProtoFile_(protoConfig, mainConfig);
-      const service2 = grpcService.loadProtoFile_(protoConfig, mainConfig);
-      assert.strictEqual(service1, service2);
+      const services1 = grpcService.loadProtoFile(protoPath, mainConfig);
+      const services2 = grpcService.loadProtoFile(protoPath, mainConfig);
+      assert.strictEqual(services1, services2);
       assert.strictEqual(gprcLoadCalled, 1);
     });
 
     it('should return the services object if invalid version', () => {
-      const fakeProtoConfig = {
-        path: '/root/dir/path',
-        service: 'FakeService',
-        apiVersion: null,
-      };
+      const fakeProtoPath = '/root/dir/path';
 
       const fakeMainConfig = {
         service: 'OtherFakeService',
         apiVersion: 'v2',
       };
 
-      grpcLoadOverride = () => {
+      grpcProtoLoadOverride = () => {
         return fakeServices;
       };
 
-      const service = grpcService.loadProtoFile_(fakeProtoConfig, fakeMainConfig);
-      assert.strictEqual(service, fakeServices.google.FakeService);
+      const services = grpcService.loadProtoFile(fakeProtoPath, fakeMainConfig);
+      assert.deepStrictEqual(services, fakeServices);
     });
   });
 
