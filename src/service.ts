@@ -54,12 +54,6 @@ export interface GrpcServiceConfig extends ServiceConfig {
 }
 
 /**
- * @const - A cache of proto objects.
- * @private
- */
-const protoObjectCache: { [name: string]: PackageDefinition } = {};
-
-/**
  * @const {object} - A map of protobuf codes to HTTP status codes.
  * @private
  */
@@ -324,9 +318,12 @@ export class GrpcService extends Service {
   activeServiceMap_ = new Map();
   protos = {};
 
-  static GRPC_SERVICE_OPTIONS = GRPC_SERVICE_OPTIONS;
-  static GRPC_ERROR_CODE_TO_HTTP = GRPC_ERROR_CODE_TO_HTTP;
-  static ObjectToStructConverter = ObjectToStructConverter;
+  /** A cache for proto objects. */
+  private static protoObjectCache: { [name: string]: PackageDefinition } = {};
+
+  static readonly GRPC_SERVICE_OPTIONS = GRPC_SERVICE_OPTIONS;
+  static readonly GRPC_ERROR_CODE_TO_HTTP = GRPC_ERROR_CODE_TO_HTTP;
+  static readonly ObjectToStructConverter = ObjectToStructConverter;
 
   /**
    * Service is a base class, meant to be inherited from by a "service," like
@@ -936,7 +933,7 @@ export class GrpcService extends Service {
       protoPath
     ].join('$');
 
-    if (!protoObjectCache[protoObjectCacheKey]) {
+    if (!GrpcService.protoObjectCache[protoObjectCacheKey]) {
       const services = loadSync(protoPath, {
         keepCase: false,
         defaults: true,
@@ -946,10 +943,10 @@ export class GrpcService extends Service {
         oneofs: true,
         includeDirs: [config.protosDir]
       });
-      protoObjectCache[protoObjectCacheKey] = services;
+      GrpcService.protoObjectCache[protoObjectCacheKey] = services;
     }
 
-    return protoObjectCache[protoObjectCacheKey];
+    return GrpcService.protoObjectCache[protoObjectCacheKey];
   }
 
   /**

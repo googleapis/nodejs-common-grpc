@@ -157,6 +157,9 @@ describe('GrpcService', () => {
 
   afterEach(() => {
     grpcProtoLoadOverride = null;
+    // Clear the proto object cache, to ensure that state isn't being carried
+    // across tests.
+    GrpcService['protoObjectCache'] = {};
     sinon.restore();
   });
 
