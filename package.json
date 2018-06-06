@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@google-cloud/common": "^0.18.9",
+    "@grpc/proto-loader": "^0.1.0",
     "dot-prop": "^4.2.0",
     "duplexify": "^3.6.0",
     "extend": "^3.0.1",

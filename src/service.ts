@@ -25,16 +25,33 @@ import * as duplexify from 'duplexify';
 import * as extend from 'extend';
 import * as is from 'is';
 import * as retryRequest from 'retry-request';
-import { Service, util } from '@google-cloud/common';
+import { Service, util, ServiceConfig } from '@google-cloud/common';
 import * as through from 'through2';
 import * as r from 'request';
 import * as grpc from 'grpc';
+import { loadSync, PackageDefinition, ServiceDefinition } from '@grpc/proto-loader';
 
 /**
- * @const {object} - A cache of proto objects.
- * @private
+ * Configuration object for GrpcService.
  */
-const protoObjectCache = {};
+export interface GrpcServiceConfig extends ServiceConfig {
+  /** Metadata to send with every request. */
+  grpcMetadata: grpc.Metadata;
+  /** The root directory where proto files live. */
+  protosDir: string;
+  /**
+   * Directly provide the required proto files. This is useful when a single
+   * class requires multiple services.
+   */
+  protoServices: {
+    [serviceName: string]: {
+      path: string;
+      service: string;
+      baseUrl: string;
+    };
+  };
+  customEndpoint: boolean;
+}
 
 /**
  * @const {object} - A map of protobuf codes to HTTP status codes.
@@ -301,9 +318,12 @@ export class GrpcService extends Service {
   activeServiceMap_ = new Map();
   protos = {};
 
-  static GRPC_SERVICE_OPTIONS = GRPC_SERVICE_OPTIONS;
-  static GRPC_ERROR_CODE_TO_HTTP = GRPC_ERROR_CODE_TO_HTTP;
-  static ObjectToStructConverter = ObjectToStructConverter;
+  /** A cache for proto objects. */
+  private static protoObjectCache: { [name: string]: PackageDefinition } = {};
+
+  static readonly GRPC_SERVICE_OPTIONS = GRPC_SERVICE_OPTIONS;
+  static readonly GRPC_ERROR_CODE_TO_HTTP = GRPC_ERROR_CODE_TO_HTTP;
+  static readonly ObjectToStructConverter = ObjectToStructConverter;
 
   /**
    * Service is a base class, meant to be inherited from by a "service," like
@@ -314,16 +334,10 @@ export class GrpcService extends Service {
    * @constructor
    * @alias module:common/grpc-service
    *
-   * @param {object} config - Configuration object.
-   * @param {string} config.baseUrl - The base URL to make API requests to.
-   * @param {object} config.grpcMetadata - Metadata to send with every request.
-   * @param {string[]} config.scopes - The scopes required for the request.
-   * @param {string} config.protosDir - The root directory where proto files live.
-   * @param {object} config.protoServices - Directly provide the required proto
-   *     files. This is useful when a single class requires multiple services.
+   * @param config - Configuration object.
    * @param {object} options - [Configuration object](#/docs/?method=gcloud).
    */
-  constructor(config, options) {
+  constructor(config: GrpcServiceConfig, options) {
     super(config, options);
 
     if (global['GCLOUD_SANDBOX_ENV']) {
@@ -368,7 +382,15 @@ export class GrpcService extends Service {
 
     Object.keys(protoServices).forEach(name => {
       const protoConfig = protoServices[name];
-      const service = this.loadProtoFile_(protoConfig, config);
+      const services = this.loadProtoFile(protoConfig.path, config);
+      const serviceKey = [
+        'google',
+        protoConfig.service,
+        name
+      ].filter(x => x).join('.');
+      const service = services[serviceKey] as ServiceDefinition & {
+        baseUrl?: string;
+      };
 
       this.protos[name] = service;
 
@@ -901,42 +923,30 @@ export class GrpcService extends Service {
    *
    * @private
    *
-   * @param {object} protoConfig - The proto specific configs for this file.
-   * @param {object} config - The base config for the GrpcService.
-   * @return {object} protoObject - The loaded proto object.
+   * @param protoConfig - The proto specific configs for this file.
+   * @param config - The base config for the GrpcService.
+   * @return protoObject - The loaded proto object.
    */
-  private loadProtoFile_(protoConfig, config) {
-    const grpcOpts = {
-      binaryAsBase64: true,
-      convertFieldsToCamelCase: true,
-    };
-
-    if (is.string(protoConfig)) {
-      protoConfig = {
-        path: protoConfig,
-      };
-    }
-
+  private loadProtoFile(protoPath: string, config: GrpcServiceConfig): PackageDefinition {
     const protoObjectCacheKey = [
       config.protosDir,
-      protoConfig.path,
-      protoConfig.service,
+      protoPath
     ].join('$');
 
-    if (!protoObjectCache[protoObjectCacheKey]) {
-      const services = grpc.load(
-        {
-          root: config.protosDir,
-          file: protoConfig.path,
-        },
-        'proto',
-        grpcOpts
-      );
-      const service = dotProp.get(services.google, protoConfig.service);
-      protoObjectCache[protoObjectCacheKey] = service;
+    if (!GrpcService.protoObjectCache[protoObjectCacheKey]) {
+      const services = loadSync(protoPath, {
+        keepCase: false,
+        defaults: true,
+        bytes: String,
+        longs: String,
+        enums: String,
+        oneofs: true,
+        includeDirs: [config.protosDir]
+      });
+      GrpcService.protoObjectCache[protoObjectCacheKey] = services;
     }
 
-    return protoObjectCache[protoObjectCacheKey];
+    return GrpcService.protoObjectCache[protoObjectCacheKey];
   }
 
   /**
