@@ -20,7 +20,7 @@ import * as assert from 'assert';
 import * as proxyquire from 'proxyquire';
 const grpcCommon = require('../src');
 
-describe('grpc-common', function() {
+describe('grpc-common', () => {
 
   it('should correctly export the common modules', () => {
     assert(grpcCommon.Service);

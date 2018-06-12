@@ -21,10 +21,8 @@
 'use strict';
 
 import * as extend from 'extend';
-import * as nodeutil from 'util';
 import * as request from 'request';
-import { ServiceObject, util, ServiceObjectConfig } from '@google-cloud/common';
-import { GetMetadataCallback } from '@google-cloud/common/build/src/service-object';
+import { ServiceObject, util, ServiceObjectConfig, GetMetadataCallback } from '@google-cloud/common';
 
 export class GrpcServiceObject extends ServiceObject {
 

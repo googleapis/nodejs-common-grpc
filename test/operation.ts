@@ -18,29 +18,27 @@
 
 import * as assert from 'assert';
 import * as proxyquire from 'proxyquire';
-import {util} from '@google-cloud/common';
+import {util, ServiceObject} from '@google-cloud/common';
+import { EventEmitter } from 'events';
+import * as op from '../src/operation';
+import { GrpcServiceObject } from '../src/service-object';
 
-const fakeModelo: any = {
-  inherits() {
-    this.calledWith_ = arguments;
-  },
-};
-
-let decorateGrpcStatusOverride_;
-function FakeGrpcService() {}
-(FakeGrpcService as any).decorateGrpcStatus_ = function() {
-  return (decorateGrpcStatusOverride_ || util.noop).apply(null, arguments);
-};
-
-function FakeGrpcServiceObject() {
-  this.grpcServiceObjectArguments_ = arguments;
+let decorateErrorOverride_;
+class FakeGrpcService {
+  static decorateError_() {
+    return (decorateErrorOverride_ || util.noop).apply(null, arguments);
+  }
 }
 
-function FakeOperation() {
-  this.operationArguments_ = arguments;
+class FakeGrpcServiceObject extends EventEmitter {
+  grpcServiceObjectArguments_: {}[];
+  constructor(...args: {}[]) {
+    super();
+    this.grpcServiceObjectArguments_ = args;
+  }
 }
 
-describe('GrpcOperation', function() {
+describe('GrpcOperation', () => {
   const FAKE_SERVICE = {
     Promise,
   };
@@ -49,25 +47,23 @@ describe('GrpcOperation', function() {
   let GrpcOperation;
   let grpcOperation;
 
-  before(function() {
+  before(() => {
     GrpcOperation = proxyquire('../src/operation', {
-      '@google-cloud/common': {
-        Operation: FakeOperation,
-      },
-      modelo: fakeModelo,
       './service-object': {
         GrpcServiceObject: FakeGrpcServiceObject
       },
-      './service': FakeGrpcService,
-    });
+      './service': {
+        GrpcService: FakeGrpcService
+      }
+    }).GrpcOperation;
   });
 
-  beforeEach(function() {
-    decorateGrpcStatusOverride_ = null;
+  beforeEach(() => {
+    decorateErrorOverride_ = null;
     grpcOperation = new GrpcOperation(FAKE_SERVICE, OPERATION_ID);
   });
 
-  describe('instantiation', function() {
+  describe('instantiation', () => {
     const EXPECTED_CONFIG = {
       parent: FAKE_SERVICE,
       id: OPERATION_ID,
@@ -95,30 +91,17 @@ describe('GrpcOperation', function() {
       },
     };
 
-    it('should extend GrpcServiceObject and Operation', function() {
-      const args = fakeModelo.calledWith_;
-
-      assert.strictEqual(args[0], GrpcOperation);
-      assert.strictEqual(args[1], FakeGrpcServiceObject);
-      assert.strictEqual(args[2], FakeOperation);
-    });
-
-    it('should pass Operation the correct config', function() {
-      const config = grpcOperation.operationArguments_[0];
-      assert.deepEqual(config, EXPECTED_CONFIG);
-    });
-
-    it('should pass GrpcServiceObject the correct config', function() {
-      const config = grpcOperation.grpcServiceObjectArguments_[0];
+    it('should pass GrpcServiceObject the correct config', () => {
+      const config = grpcOperation.grpcServiceObjectArguments_![0];
       assert.deepEqual(config, EXPECTED_CONFIG);
     });
   });
 
-  describe('cancel', function() {
-    it('should provide the proper request options', function(done) {
+  describe('cancel', () => {
+    it('should provide the proper request options', done => {
       grpcOperation.id = OPERATION_ID;
 
-      grpcOperation.request = function(protoOpts, reqOpts, callback) {
+      grpcOperation.request = (protoOpts, reqOpts, callback) => {
         assert.deepEqual(protoOpts, {
           service: 'Operations',
           method: 'cancelOperation',
@@ -131,8 +114,8 @@ describe('GrpcOperation', function() {
       grpcOperation.cancel(done);
     });
 
-    it('should use util.noop if callback is omitted', function(done) {
-      grpcOperation.request = function(protoOpts, reqOpts, callback) {
+    it('should use util.noop if callback is omitted', done => {
+      grpcOperation.request = (protoOpts, reqOpts, callback) => {
         assert.strictEqual(callback, util.noop);
         done();
       };
@@ -141,85 +124,78 @@ describe('GrpcOperation', function() {
     });
   });
 
-  describe('poll_', function() {
-    it('should call getMetdata', function(done) {
-      grpcOperation.getMetadata = function() {
+  describe('poll_', () => {
+    it('should call getMetdata', done => {
+      grpcOperation.getMetadata = () => {
         done();
       };
 
-      grpcOperation.poll_(assert.ifError);
+      grpcOperation.poll_().then(r => {}, assert.ifError);
     });
 
-    describe('could not get metadata', function() {
-      it('should callback with an error', function(done) {
+    describe('could not get metadata', () => {
+      it('should callback with an error', done => {
         const error = new Error('Error.');
-
-        grpcOperation.getMetadata = function(callback) {
+        grpcOperation.getMetadata = callback => {
           callback(error);
         };
-
-        grpcOperation.poll_(function(err) {
+        grpcOperation.poll_().then(r => {}, err => {
           assert.strictEqual(err, error);
           done();
         });
       });
 
-      it('should callback with the operation error', function(done) {
+      it('should callback with the operation error', done => {
         const apiResponse = {
           error: {},
         };
-
-        grpcOperation.getMetadata = function(callback) {
+        grpcOperation.getMetadata = callback => {
           callback(null, apiResponse, apiResponse);
         };
-
         const decoratedGrpcStatus = {};
 
-        decorateGrpcStatusOverride_ = function(status) {
+        decorateErrorOverride_ = status => {
           assert.strictEqual(status, apiResponse.error);
           return decoratedGrpcStatus;
         };
 
-        grpcOperation.poll_(function(err) {
+        grpcOperation.poll_().then(r => {}, err => {
           assert.strictEqual(err, decoratedGrpcStatus);
           done();
         });
       });
     });
-    describe('operation incomplete', function() {
+    describe('operation incomplete', () => {
       const apiResponse = {done: false};
 
-      beforeEach(function() {
-        grpcOperation.getMetadata = function(callback) {
+      beforeEach(() => {
+        grpcOperation.getMetadata = callback => {
           callback(null, apiResponse);
         };
       });
 
-      it('should callback with no arguments', function(done) {
-        grpcOperation.poll_(function(err, resp) {
-          assert.strictEqual(err, undefined);
+      it('should callback with no arguments', async() => {
+        return grpcOperation.poll_().then(resp => {
           assert.strictEqual(resp, undefined);
-          done();
-        });
+        }, assert.ifError);
       });
     });
 
-    describe('operation complete', function() {
+    describe('operation complete', () => {
       const apiResponse = {done: true};
 
-      beforeEach(function() {
-        grpcOperation.getMetadata = function(callback) {
+      beforeEach(() => {
+        grpcOperation.getMetadata = callback => {
           callback(null, apiResponse);
         };
       });
 
-      it('should emit complete with metadata', function(done) {
-        grpcOperation.poll_(function(err, resp) {
-          assert.ifError(err);
+      it('should emit complete with metadata', async() => {
+        return grpcOperation.poll_().then(resp => {
           assert.strictEqual(resp, apiResponse);
-          done();
-        });
+        }, assert.ifError);
       });
+
     });
   });
 });
