@@ -120,7 +120,7 @@ export class GrpcOperation extends GrpcServiceObject {
     };
 
     this.request(protoOpts, reqOpts, callback || util.noop);
-  };
+  }
 
   /**
    * Poll for a status update. Execute the callback:
@@ -146,8 +146,8 @@ export class GrpcOperation extends GrpcServiceObject {
         }
         resolve(resp);
       });
-    })
-  };
+    });
+  }
 
   /**
    * Begin listening for events on the operation. This method keeps track of how

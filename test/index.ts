@@ -16,8 +16,7 @@
 
 'use strict';
 
-import * as assert from 'assert';
-import * as proxyquire from 'proxyquire';
+import assert from 'assert';
 const grpcCommon = require('../src');
 
 describe('grpc-common', () => {

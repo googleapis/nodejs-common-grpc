@@ -1,32 +1,14 @@
 {
+  "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "build",
-    "noImplicitAny": false,
-    "noImplicitThis": false,
-    "allowSyntheticDefaultImports": false,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": ["es2015"],
-    "noFallthroughCasesInSwitch": true,
-    "noEmitOnError": true,
-    "noImplicitReturns": true,
-    "pretty": true,
-    "strict": true,
-    "module": "commonjs",
     "target": "es5",
-    "sourceMap": true
+    "noImplicitAny": false,
+    "noImplicitThis": false
   },
-  "exclude": [
-    "node_modules",
-    "build"
-  ],
   "include": [
     "src/*.ts",
-    "src/**/*.ts",
     "test/*.ts",
-    "test/**/*.ts"
   ]
 }

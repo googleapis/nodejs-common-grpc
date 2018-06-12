@@ -20,14 +20,12 @@
 
 'use strict';
 
-import * as dotProp from 'dot-prop';
 import * as duplexify from 'duplexify';
-import * as extend from 'extend';
+import extend from 'extend';
 import * as is from 'is';
-import * as retryRequest from 'retry-request';
+import retryRequest from 'retry-request';
 import { Service, util, ServiceConfig } from '@google-cloud/common';
 import * as through from 'through2';
-import * as r from 'request';
 import * as grpc from 'grpc';
 import { loadSync, PackageDefinition, ServiceDefinition } from '@grpc/proto-loader';
 

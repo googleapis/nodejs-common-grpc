@@ -16,14 +16,14 @@
 
 'use strict';
 
-import * as assert from 'assert';
+import assert from 'assert';
 import * as duplexify from 'duplexify';
-import * as extend from 'extend';
+import extend from 'extend';
 import * as grpc from 'grpc';
 import * as grpcProtoLoader from '@grpc/proto-loader';
 import * as is from 'is';
-import * as proxyquire from 'proxyquire';
-import * as retryRequest from 'retry-request';
+import proxyquire from 'proxyquire';
+import retryRequest from 'retry-request';
 import * as sn from 'sinon';
 import * as through from 'through2';
 import {util} from '@google-cloud/common';
