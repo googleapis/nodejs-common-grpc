@@ -42,7 +42,7 @@
     "pretest": "npm run compile"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.19.2",
+    "@google-cloud/common": "^0.20.0",
     "@grpc/proto-loader": "^0.1.0",
     "dot-prop": "^4.2.0",
     "duplexify": "^3.6.0",
