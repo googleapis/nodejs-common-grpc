@@ -16,12 +16,10 @@
 
 'use strict';
 
-import * as assert from 'assert';
-import * as proxyquire from 'proxyquire';
-import {util, ServiceObject} from '@google-cloud/common';
+import assert from 'assert';
+import proxyquire from 'proxyquire';
+import {util} from '@google-cloud/common';
 import { EventEmitter } from 'events';
-import * as op from '../src/operation';
-import { GrpcServiceObject } from '../src/service-object';
 
 let decorateErrorOverride_;
 class FakeGrpcService {
@@ -31,8 +29,8 @@ class FakeGrpcService {
 }
 
 class FakeGrpcServiceObject extends EventEmitter {
-  grpcServiceObjectArguments_: {}[];
-  constructor(...args: {}[]) {
+  grpcServiceObjectArguments_: Array<{}>;
+  constructor(...args: Array<{}>) {
     super();
     this.grpcServiceObjectArguments_ = args;
   }

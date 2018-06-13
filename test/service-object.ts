@@ -16,9 +16,9 @@
 
 'use strict';
 
-import * as assert from 'assert';
-import * as extend from 'extend';
-import * as proxyquire from 'proxyquire';
+import assert from 'assert';
+import extend from 'extend';
+import proxyquire from 'proxyquire';
 import {util} from '@google-cloud/common';
 
 let promisified = false;
