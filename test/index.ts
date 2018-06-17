@@ -17,7 +17,7 @@
 'use strict';
 
 import assert from 'assert';
-const grpcCommon = require('../src');
+import * as grpcCommon from '../src';
 
 describe('grpc-common', () => {
 
@@ -27,5 +27,7 @@ describe('grpc-common', () => {
     assert(grpcCommon.ServiceObject);
     assert(grpcCommon.Operation);
     assert(grpcCommon.grpc);
+    assert(grpcCommon.util);
+    assert(grpcCommon.paginator);
   });
 });
