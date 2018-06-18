@@ -48,3 +48,15 @@ export {Service};
  * @type {module:commonGrpc/grpc}
  */
 export {grpc};
+
+/**
+ * @type {module:common/util}
+ * @private
+ */
+export {util} from '@google-cloud/common';
+
+/**
+ * @type {module:common/paginator}
+ * @private
+ */
+export {paginator, Paginator, ParsedArguments} from '@google-cloud/common';
