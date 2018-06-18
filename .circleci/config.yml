@@ -110,6 +110,7 @@ jobs:
         user: node
     steps:
       - checkout
+      - run: npm install
       - run:
           name: Set NPM authentication.
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
