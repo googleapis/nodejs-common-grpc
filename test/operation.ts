@@ -16,8 +16,8 @@
 
 'use strict';
 
-import assert from 'assert';
-import proxyquire from 'proxyquire';
+import * as assert from 'assert';
+import * as proxyquire from 'proxyquire';
 import {util} from '@google-cloud/common';
 import { EventEmitter } from 'events';
 

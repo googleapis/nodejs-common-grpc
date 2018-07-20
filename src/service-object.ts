@@ -20,7 +20,7 @@
 
 'use strict';
 
-import extend from 'extend';
+import * as extend from 'extend';
 import * as request from 'request';
 import { ServiceObject, util, ServiceObjectConfig, GetMetadataCallback } from '@google-cloud/common';
 
