@@ -21,9 +21,9 @@
 'use strict';
 
 import * as duplexify from 'duplexify';
-import extend from 'extend';
+import * as extend from 'extend';
 import * as is from 'is';
-import retryRequest from 'retry-request';
+import * as retryRequest from 'retry-request';
 import { Service, util, ServiceConfig } from '@google-cloud/common';
 import * as through from 'through2';
 import * as grpc from 'grpc';

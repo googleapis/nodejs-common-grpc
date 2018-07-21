@@ -16,7 +16,7 @@
 
 'use strict';
 
-import assert from 'assert';
+import * as assert from 'assert';
 import * as grpcCommon from '../src';
 
 describe('grpc-common', () => {
