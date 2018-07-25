@@ -340,11 +340,11 @@ describe('GrpcService', () => {
 
     it('should call grpc.load correctly', () => {
       grpcProtoLoadOverride = (file, options) => {
-        assert.deepStrictEqual(options.includeDirs, [ROOT_DIR]);
+        assert.deepStrictEqual(options!.includeDirs, [ROOT_DIR]);
         assert.strictEqual(file, PROTO_FILE_PATH);
 
-        assert.strictEqual(options.bytes, String);
-        assert.strictEqual(options.keepCase, false);
+        assert.strictEqual(options!.bytes, String);
+        assert.strictEqual(options!.keepCase, false);
 
         return MOCK_GRPC_API;
       };
@@ -1742,11 +1742,11 @@ describe('GrpcService', () => {
       };
 
       grpcProtoLoadOverride = (file, options) => {
-        assert.deepStrictEqual(options.includeDirs, [fakeMainConfig.protosDir]);
+        assert.deepStrictEqual(options!.includeDirs, [fakeMainConfig.protosDir]);
         assert.strictEqual(file, fakeProtoPath);
 
-        assert.strictEqual(options.bytes, String);
-        assert.strictEqual(options.keepCase, false);
+        assert.strictEqual(options!.bytes, String);
+        assert.strictEqual(options!.keepCase, false);
 
         return fakeServices;
       };
