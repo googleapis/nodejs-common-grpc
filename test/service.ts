@@ -165,7 +165,7 @@ describe('GrpcService', () => {
 
   describe('grpc error to http error map', () => {
     it('should export grpc error map', () => {
-      assert.deepEqual(GrpcService.GRPC_ERROR_CODE_TO_HTTP, {
+      assert.deepStrictEqual(GrpcService.GRPC_ERROR_CODE_TO_HTTP, {
         0: {
           code: 200,
           message: 'OK',
@@ -256,7 +256,7 @@ describe('GrpcService', () => {
 
   describe('grpc service options', () => {
     it('should define the correct default options', () => {
-      assert.deepEqual(GrpcService.GRPC_SERVICE_OPTIONS, {
+      assert.deepStrictEqual(GrpcService.GRPC_SERVICE_OPTIONS, {
         'grpc.max_send_message_length': -1,
         'grpc.max_receive_message_length': -1,
         'grpc.initial_reconnect_backoff_ms': 5000,
@@ -280,37 +280,41 @@ describe('GrpcService', () => {
     });
 
     it('should default grpcMetadata to empty metadata', () => {
-      const fakeGrpcMetadata = {
-        'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
-      };
-
       GrpcMetadataOverride = () => {};
       GrpcMetadataOverride.prototype.add = function(prop, val) {
         this[prop] = val;
       };
+
+      const fakeGrpcMetadata = Object.assign(
+        new GrpcMetadataOverride(),
+        {
+          'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
+        },
+      );
 
       const config = extend({}, CONFIG);
       delete config.grpcMetadata;
 
       const grpcService = new GrpcService(config, OPTIONS);
-      assert.deepEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
+      assert.deepStrictEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
     });
 
     it('should create and localize grpcMetadata', () => {
-      const fakeGrpcMetadata = extend(
-        {
-          'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
-        },
-        CONFIG.grpcMetadata
-      );
-
       GrpcMetadataOverride = () => {};
       GrpcMetadataOverride.prototype.add = function(prop, val) {
         this[prop] = val;
       };
 
+      const fakeGrpcMetadata = Object.assign(
+        new GrpcMetadataOverride(),
+        {
+          'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
+        },
+        CONFIG.grpcMetadata,
+      );
+
       const grpcService = new GrpcService(CONFIG, OPTIONS);
-      assert.deepEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
+      assert.deepStrictEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
     });
 
     it('should localize maxRetries', () => {
@@ -428,7 +432,7 @@ describe('GrpcService', () => {
         },
       };
 
-      assert.deepEqual(GrpcService.decodeValue_(listValue), [null]);
+      assert.deepStrictEqual(GrpcService.decodeValue_(listValue), [null]);
     });
 
     it('should return the raw value', () => {
@@ -482,7 +486,7 @@ describe('GrpcService', () => {
         return decodedValue;
       };
 
-      assert.deepEqual(GrpcService.structToObj_(struct), {
+      assert.deepStrictEqual(GrpcService.structToObj_(struct), {
         a: decodedValue,
       });
     });
@@ -640,7 +644,7 @@ describe('GrpcService', () => {
 
         const onResponse = (err, resp) => {
           assert.strictEqual(err, null);
-          assert.deepEqual(resp, GrpcService.GRPC_ERROR_CODE_TO_HTTP[2]);
+          assert.deepStrictEqual(resp, GrpcService.GRPC_ERROR_CODE_TO_HTTP[2]);
           done();
         };
 
@@ -676,7 +680,7 @@ describe('GrpcService', () => {
         };
 
         grpcService.request(PROTO_OPTS, REQ_OPTS, (err, resp) => {
-          assert.deepEqual(err, GrpcService.GRPC_ERROR_CODE_TO_HTTP[2]);
+          assert.deepStrictEqual(err, GrpcService.GRPC_ERROR_CODE_TO_HTTP[2]);
           assert.strictEqual(resp, null);
           done();
         });
@@ -715,7 +719,7 @@ describe('GrpcService', () => {
           const decoratedRequest = {};
 
           grpcService.decorateRequest_ = reqOpts => {
-            assert.deepEqual(reqOpts, REQ_OPTS);
+            assert.deepStrictEqual(reqOpts, REQ_OPTS);
             return decoratedRequest;
           };
 
@@ -753,7 +757,7 @@ describe('GrpcService', () => {
         grpcService.getService_ = () => {
           return {
             method(reqOpts) {
-              assert.deepEqual(reqOpts, REQ_OPTS);
+              assert.deepStrictEqual(reqOpts, REQ_OPTS);
               done();
             },
           };
@@ -1083,7 +1087,7 @@ describe('GrpcService', () => {
         };
 
         fakeStream.on('error', done).on('response', resp => {
-          assert.deepEqual(resp, GrpcService.GRPC_ERROR_CODE_TO_HTTP[0]);
+          assert.deepStrictEqual(resp, GrpcService.GRPC_ERROR_CODE_TO_HTTP[0]);
           done();
         });
 
@@ -1106,7 +1110,7 @@ describe('GrpcService', () => {
         const requestStream = grpcService.requestStream(PROTO_OPTS, REQ_OPTS);
 
         requestStream.destroy = err => {
-          assert.deepEqual(err, GrpcService.GRPC_ERROR_CODE_TO_HTTP[2]);
+          assert.deepStrictEqual(err, GrpcService.GRPC_ERROR_CODE_TO_HTTP[2]);
           done();
         };
 
@@ -1484,7 +1488,7 @@ describe('GrpcService', () => {
       const decorateArgs = GrpcService.decorateGrpcResponse_.getCall(0).args;
 
       assert.strictEqual(decoratedError, expectedDecoratedError);
-      assert.deepEqual(decorateArgs[0], {});
+      assert.deepStrictEqual(decorateArgs[0], {});
       assert.strictEqual(decorateArgs[0] instanceof Error, false);
       assert.strictEqual(decorateArgs[1], grpcMessage);
     });
@@ -1500,7 +1504,8 @@ describe('GrpcService', () => {
         const extended = GrpcService.decorateGrpcResponse_(error, {code});
 
         assert.notStrictEqual(extended, errorMap[code]);
-        assert.deepEqual(extended, errorMap[code]);
+        assert.strictEqual(extended.code, errorMap[code].code);
+        assert.strictEqual(extended.message, errorMap[code].message);
         assert.strictEqual(error, extended);
       });
     });
@@ -1559,7 +1564,7 @@ describe('GrpcService', () => {
       const args = GrpcService.decorateGrpcResponse_.getCall(0).args;
 
       assert.strictEqual(status, fakeStatus);
-      assert.deepEqual(args[0], {});
+      assert.deepStrictEqual(args[0], {});
       assert.strictEqual(args[1], grpcStatus);
     });
   });
@@ -1593,8 +1598,8 @@ describe('GrpcService', () => {
 
       const originalReqOpts = extend({}, reqOpts);
 
-      assert.deepEqual(grpcService.decorateRequest_(reqOpts), {});
-      assert.deepEqual(reqOpts, originalReqOpts);
+      assert.deepStrictEqual(grpcService.decorateRequest_(reqOpts), {});
+      assert.deepStrictEqual(reqOpts, originalReqOpts);
     });
 
     it('should execute and return replaceProjectIdToken', () => {
@@ -1606,7 +1611,7 @@ describe('GrpcService', () => {
       const replacedReqOpts = {};
 
       fakeUtil.replaceProjectIdToken = (reqOpts_, projectId) => {
-        assert.deepEqual(reqOpts_, reqOpts);
+        assert.deepStrictEqual(reqOpts_, reqOpts);
         assert.strictEqual(projectId, grpcService.projectId);
         return replacedReqOpts;
       };
@@ -1669,7 +1674,7 @@ describe('GrpcService', () => {
 
           const createSslArg = grpcCredentials.args[0];
           assert.strictEqual(createSslArg.name, 'createSsl');
-          assert.deepEqual(createSslArg.args.length, 0);
+          assert.deepStrictEqual(createSslArg.args.length, 0);
 
           const createFromGoogleCredentialArg = grpcCredentials.args[1];
           assert.strictEqual(
@@ -1801,7 +1806,7 @@ describe('GrpcService', () => {
           Service(baseUrl, grpcCredentials, userAgent) {
             assert.strictEqual(baseUrl, grpcService.baseUrl);
             assert.strictEqual(grpcCredentials, grpcService.grpcCredentials);
-            assert.deepEqual(
+            assert.deepStrictEqual(
               userAgent,
               extend(
                 {
@@ -1923,7 +1928,7 @@ describe('GrpcService', () => {
           a: undefined,
         });
 
-        assert.deepEqual(struct.fields, {});
+        assert.deepStrictEqual(struct.fields, {});
 
         done();
       });
@@ -1951,19 +1956,19 @@ describe('GrpcService', () => {
       it('should convert primitive values correctly', () => {
         const buffer = Buffer.from('Value');
 
-        assert.deepEqual(objectToStructConverter.encodeValue_(null), {
+        assert.deepStrictEqual(objectToStructConverter.encodeValue_(null), {
           nullValue: 0,
         });
 
-        assert.deepEqual(objectToStructConverter.encodeValue_(1), {
+        assert.deepStrictEqual(objectToStructConverter.encodeValue_(1), {
           numberValue: 1,
         });
 
-        assert.deepEqual(objectToStructConverter.encodeValue_('Hi'), {
+        assert.deepStrictEqual(objectToStructConverter.encodeValue_('Hi'), {
           stringValue: 'Hi',
         });
 
-        assert.deepEqual(objectToStructConverter.encodeValue_(true), {
+        assert.deepStrictEqual(objectToStructConverter.encodeValue_(true), {
           boolValue: true,
         });
 
@@ -1976,7 +1981,7 @@ describe('GrpcService', () => {
       it('should convert arrays', () => {
         const convertedValue = objectToStructConverter.encodeValue_([1, 2, 3]);
 
-        assert.deepEqual(convertedValue.listValue, {
+        assert.deepStrictEqual(convertedValue.listValue, {
           values: [
             objectToStructConverter.encodeValue_(1),
             objectToStructConverter.encodeValue_(2),
@@ -2055,7 +2060,7 @@ describe('GrpcService', () => {
         it('should return a string if the value is not recognized', () => {
           const date = new Date();
 
-          assert.deepEqual(
+          assert.deepStrictEqual(
             objectToStructConverter.encodeValue_(date, OPTIONS),
             {stringValue: String(date)}
           );
