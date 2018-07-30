@@ -31,7 +31,7 @@
   "scripts": {
     "test": "npm run cover",
     "generate-scaffolding": "repo-tools generate all",
-    "cover": "nyc --reporter=lcov mocha --require source-map-support/register build/test && nyc report",
+    "cover": "nyc --reporter=lcov mocha build/test && nyc report",
     "test-no-cover": "mocha build/test",
     "docs": "jsdoc -c .jsdoc.js",
     "check": "gts check",
