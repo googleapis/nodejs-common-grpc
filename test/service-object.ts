@@ -177,7 +177,7 @@ describe('GrpcServiceObject', () => {
 
       grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
         assert.strictEqual(protoOpts, setMetadataMethod.protoOpts);
-        assert.deepEqual(reqOpts, expectedReqOpts);
+        assert.deepStrictEqual(reqOpts, expectedReqOpts);
         callback(); // done()
       };
 
@@ -202,7 +202,7 @@ describe('GrpcServiceObject', () => {
       grpcServiceObject.parent = {
         request() {
           assert.strictEqual(this, grpcServiceObject.parent);
-          assert.deepEqual([].slice.call(arguments), args);
+          assert.deepStrictEqual([].slice.call(arguments), args);
           return expectedReturnValue;
         },
       };
@@ -220,7 +220,7 @@ describe('GrpcServiceObject', () => {
       grpcServiceObject.parent = {
         requestStream() {
           assert.strictEqual(this, grpcServiceObject.parent);
-          assert.deepEqual([].slice.call(arguments), args);
+          assert.deepStrictEqual([].slice.call(arguments), args);
           return expectedReturnValue;
         },
       };
@@ -238,7 +238,7 @@ describe('GrpcServiceObject', () => {
       grpcServiceObject.parent = {
         requestWritableStream() {
           assert.strictEqual(this, grpcServiceObject.parent);
-          assert.deepEqual([].slice.call(arguments), args);
+          assert.deepStrictEqual([].slice.call(arguments), args);
           return expectedReturnValue;
         },
       };
