@@ -280,14 +280,17 @@ describe('GrpcService', () => {
     });
 
     it('should default grpcMetadata to empty metadata', () => {
-      const fakeGrpcMetadata = {
-        'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
-      };
-
       GrpcMetadataOverride = () => {};
       GrpcMetadataOverride.prototype.add = function(prop, val) {
         this[prop] = val;
       };
+
+      const fakeGrpcMetadata = Object.assign(
+        new GrpcMetadataOverride(),
+        {
+          'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
+        },
+      );
 
       const config = extend({}, CONFIG);
       delete config.grpcMetadata;
@@ -297,17 +300,18 @@ describe('GrpcService', () => {
     });
 
     it('should create and localize grpcMetadata', () => {
-      const fakeGrpcMetadata = extend(
-        {
-          'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
-        },
-        CONFIG.grpcMetadata
-      );
-
       GrpcMetadataOverride = () => {};
       GrpcMetadataOverride.prototype.add = function(prop, val) {
         this[prop] = val;
       };
+
+      const fakeGrpcMetadata = Object.assign(
+        new GrpcMetadataOverride(),
+        {
+          'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
+        },
+        CONFIG.grpcMetadata,
+      );
 
       const grpcService = new GrpcService(CONFIG, OPTIONS);
       assert.deepStrictEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
@@ -1500,7 +1504,8 @@ describe('GrpcService', () => {
         const extended = GrpcService.decorateGrpcResponse_(error, {code});
 
         assert.notStrictEqual(extended, errorMap[code]);
-        assert.deepStrictEqual(extended, errorMap[code]);
+        assert.strictEqual(extended.code, errorMap[code].code);
+        assert.strictEqual(extended.message, errorMap[code].message);
         assert.strictEqual(error, extended);
       });
     });
