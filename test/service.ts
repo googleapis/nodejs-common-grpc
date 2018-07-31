@@ -1919,6 +1919,16 @@ describe('GrpcService', () => {
         assert.strictEqual(struct.fields.a, convertedValue);
       });
 
+      it('should support host objects', () => {
+        const hostObject = { hasOwnProperty: null };
+
+        objectToStructConverter.encodeValue_ = util.noop;
+
+        assert.doesNotThrow(() => {
+          objectToStructConverter.convert(hostObject);
+        });
+      });
+
       it('should not include undefined values', done => {
         objectToStructConverter.encodeValue_ = () => {
           done(new Error('Should not be called'));
