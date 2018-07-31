@@ -215,7 +215,7 @@ export class ObjectToStructConverter {
     this.seenObjects.add(obj);
 
     for (const prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
+      if (Object.prototype.hasOwnProperty.call(obj, prop)) {
         const value = obj[prop];
 
         if (is.undefined(value)) {
