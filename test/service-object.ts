@@ -20,9 +20,10 @@ import * as assert from 'assert';
 import * as extend from 'extend';
 import * as proxyquire from 'proxyquire';
 import {util} from '@google-cloud/common';
+import * as pfy from '@google-cloud/promisify';
 
 let promisified = false;
-const fakeUtil = extend({}, util, {
+const fakePfy = extend({}, pfy, {
   promisifyAll(Class) {
     if (Class.name === 'GrpcServiceObject') {
       promisified = true;
@@ -46,8 +47,8 @@ describe('GrpcServiceObject', () => {
     GrpcServiceObject = proxyquire('../src/service-object', {
       '@google-cloud/common': {
         ServiceObject: FakeServiceObject,
-        util: fakeUtil,
       },
+      '@google-cloud/promisify': fakePfy
     }).GrpcServiceObject;
   });
 
