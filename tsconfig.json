@@ -3,7 +3,6 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "build",
-    "target": "es5",
     "noImplicitAny": false,
     "noImplicitThis": false
   },

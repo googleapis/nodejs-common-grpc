@@ -28,6 +28,5 @@ describe('grpc-common', () => {
     assert(grpcCommon.Operation);
     assert(grpcCommon.grpc);
     assert(grpcCommon.util);
-    assert(grpcCommon.paginator);
   });
 });

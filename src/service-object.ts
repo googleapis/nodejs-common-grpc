@@ -23,6 +23,7 @@
 import * as extend from 'extend';
 import * as request from 'request';
 import { ServiceObject, util, ServiceObjectConfig, GetMetadataCallback } from '@google-cloud/common';
+import {promisifyAll} from '@google-cloud/promisify';
 
 export class GrpcServiceObject extends ServiceObject {
 
@@ -121,4 +122,4 @@ export class GrpcServiceObject extends ServiceObject {
  * All async methods (except for streams) will return a Promise in the event
  * that a callback is omitted.
  */
-util.promisifyAll(GrpcServiceObject);
+promisifyAll(GrpcServiceObject);
