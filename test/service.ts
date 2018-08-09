@@ -128,7 +128,7 @@ describe('GrpcService', () => {
   };
 
   before(() => {
-    GrpcService = proxyquire('../src/service.js', {
+    GrpcService = proxyquire('../src/service', {
       '@google-cloud/common': {
         Service: FakeService,
         util: fakeUtil,
