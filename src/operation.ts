@@ -32,6 +32,8 @@ import { GrpcServiceObject } from './service-object';
  */
 import { GrpcService } from './service';
 
+import * as r from 'request';
+
 export class GrpcOperation extends GrpcServiceObject {
 
   completeListeners: number;
@@ -108,7 +110,7 @@ export class GrpcOperation extends GrpcServiceObject {
    *     request.
    * @param {object} callback.apiResponse - The full API response.
    */
-  cancel(callback) {
+  cancel(callback: (err: Error|null, apiResponse?: r.Response) => void) {
     const protoOpts = {
       service: 'Operations',
       method: 'cancelOperation',

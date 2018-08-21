@@ -21,7 +21,7 @@
 'use strict';
 
 import * as extend from 'extend';
-import * as request from 'request';
+import * as r from 'request';
 import { ServiceObject, util, ServiceObjectConfig, GetMetadataCallback } from '@google-cloud/common';
 import {promisifyAll} from '@google-cloud/promisify';
 
@@ -48,9 +48,9 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {function=} callback - The callback function.
    * @param {?error} callback.err - An error returned while making this request.
    */
-  delete(callback?: request.RequestCallback) {
+  delete(callback?: r.RequestCallback) {
     const protoOpts = (this.methods.delete as any).protoOpts;
-    const reqOpts = this.methods.delete.reqOpts;
+    const reqOpts = this.getOpts(this.methods.delete);
     this.request(protoOpts, reqOpts, callback || util.noop);
   }
 
@@ -63,9 +63,8 @@ export class GrpcServiceObject extends ServiceObject {
    */
   getMetadata(callback: GetMetadataCallback) {
     const protoOpts = (this.methods.getMetadata as any).protoOpts;
-    const reqOpts = this.methods.getMetadata.reqOpts;
-
-    this.request(protoOpts, reqOpts, (err, resp) => {
+    const reqOpts = this.getOpts(this.methods.getMetadata);
+    this.request(protoOpts, reqOpts, (err: Error, resp: r.Response) => {
       if (err) {
         callback(err, null, resp);
         return;
@@ -82,9 +81,9 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {function=} callback - The callback function.
    * @param {?error} callback.err - An error returned while making this request.
    */
-  setMetadata(metadata, callback) {
+  setMetadata(metadata: {}, callback?: (err: Error | null, resp?: r.Response) => void) {
     const protoOpts = (this.methods.setMetadata as any).protoOpts;
-    const reqOpts = extend(true, {}, this.methods.setMetadata.reqOpts, metadata);
+    const reqOpts = extend(true, {}, this.getOpts(this.methods.setMetadata), metadata);
     this.request(protoOpts, reqOpts, callback || util.noop);
   }
 
@@ -113,6 +112,10 @@ export class GrpcServiceObject extends ServiceObject {
    */
   requestWritableStream(...args: Array<{}>) {
     return (this.parent as any).requestWritableStream.apply(this.parent, args);
+  }
+
+  private getOpts(metadata: boolean|{ reqOpts?: r.OptionsWithUri }) {
+    return typeof metadata === 'boolean' ? {} : metadata.reqOpts || {};
   }
 
 }
