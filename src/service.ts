@@ -162,6 +162,10 @@ const GRPC_SERVICE_OPTIONS = {
   'grpc.initial_reconnect_backoff_ms': 5000,
 };
 
+export interface ObjectToStructConverterConfig {
+  removeCircular?: boolean;
+  stringify?: boolean;
+}
 
 export class ObjectToStructConverter {
 
@@ -180,9 +184,8 @@ export class ObjectToStructConverter {
    * @param {boolean} options.stringify - Stringify un-recognized types. (Default:
    *     `false`)
    */
-  constructor(options?) {
+  constructor(options?: ObjectToStructConverterConfig) {
     options = options || {};
-
     this.seenObjects = new Set();
     this.removeCircular = options.removeCircular === true;
     this.stringify = options.stringify === true;
@@ -207,7 +210,7 @@ export class ObjectToStructConverter {
    * //   }
    * // }
    */
-  convert(obj) {
+  convert(obj: any) {
     const convertedObject = {
       fields: {},
     };
@@ -245,7 +248,7 @@ export class ObjectToStructConverter {
    * //   stringValue: 'Hello!'
    * // }
    */
-  encodeValue_(value) {
+  encodeValue_(value: any) {
     let convertedValue;
 
     if (is.null(value)) {
@@ -297,12 +300,10 @@ export class ObjectToStructConverter {
       if (!this.stringify) {
         throw new Error('Value of type ' + typeof value + ' not recognized.');
       }
-
       convertedValue = {
         stringValue: String(value),
       };
     }
-
     return convertedValue;
   }
 }
