@@ -27,6 +27,7 @@ import * as retryRequest from 'retry-request';
 import * as sn from 'sinon';
 import * as through from 'through2';
 import {util} from '@google-cloud/common';
+import {replaceProjectIdToken} from '@google-cloud/projectify';
 
 const sinon = sn.createSandbox();
 
@@ -34,6 +35,11 @@ const fakeUtil = extend({}, util);
 
 function FakeService() {
   this.calledWith_ = arguments;
+}
+
+let replaceProjectIdTokenOverride;
+function fakeReplaceProjectIdTokenOverride() {
+  return (replaceProjectIdTokenOverride || replaceProjectIdToken).apply(null, arguments);
 }
 
 let retryRequestOverride;
@@ -134,6 +140,9 @@ describe('GrpcService', () => {
         util: fakeUtil,
       },
       grpc: fakeGrpc,
+      '@google-cloud/projectify': {
+        replaceProjectIdToken: fakeReplaceProjectIdTokenOverride
+      },
       '@grpc/proto-loader': fakeGrpcProtoLoader,
       'retry-request': fakeRetryRequest,
     }).GrpcService;
@@ -1610,7 +1619,7 @@ describe('GrpcService', () => {
 
       const replacedReqOpts = {};
 
-      fakeUtil.replaceProjectIdToken = (reqOpts_, projectId) => {
+      replaceProjectIdTokenOverride = (reqOpts_, projectId) => {
         assert.deepStrictEqual(reqOpts_, reqOpts);
         assert.strictEqual(projectId, grpcService.projectId);
         return replacedReqOpts;

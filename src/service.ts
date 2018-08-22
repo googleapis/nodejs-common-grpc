@@ -25,6 +25,7 @@ import * as extend from 'extend';
 import * as is from 'is';
 import * as retryRequest from 'retry-request';
 import { Service, util, ServiceConfig } from '@google-cloud/common';
+import {replaceProjectIdToken} from '@google-cloud/projectify';
 import * as through from 'through2';
 import * as grpc from 'grpc';
 import { loadSync, PackageDefinition, ServiceDefinition } from '@grpc/proto-loader';
@@ -891,7 +892,7 @@ export class GrpcService extends Service {
     delete reqOpts.autoPaginateVal;
     delete reqOpts.objectMode;
 
-    return util.replaceProjectIdToken(reqOpts, this.projectId);
+    return replaceProjectIdToken(reqOpts, this.projectId);
   }
 
   /**
