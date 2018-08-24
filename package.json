@@ -42,7 +42,8 @@
     "pretest": "npm run compile"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.21.0",
+    "@google-cloud/common": "^0.23.0",
+    "@google-cloud/projectify": "^0.3.0",
     "@google-cloud/promisify": "^0.3.0",
     "@grpc/proto-loader": "^0.3.0",
     "dot-prop": "^4.2.0",
