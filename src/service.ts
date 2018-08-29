@@ -21,10 +21,11 @@
 'use strict';
 
 import * as duplexify from 'duplexify';
-import extend from 'extend';
+import * as extend from 'extend';
 import * as is from 'is';
-import retryRequest from 'retry-request';
+import * as retryRequest from 'retry-request';
 import { Service, util, ServiceConfig } from '@google-cloud/common';
+import {replaceProjectIdToken} from '@google-cloud/projectify';
 import * as through from 'through2';
 import * as grpc from 'grpc';
 import { loadSync, PackageDefinition, ServiceDefinition } from '@grpc/proto-loader';
@@ -162,6 +163,10 @@ const GRPC_SERVICE_OPTIONS = {
   'grpc.initial_reconnect_backoff_ms': 5000,
 };
 
+export interface ObjectToStructConverterConfig {
+  removeCircular?: boolean;
+  stringify?: boolean;
+}
 
 export class ObjectToStructConverter {
 
@@ -180,9 +185,8 @@ export class ObjectToStructConverter {
    * @param {boolean} options.stringify - Stringify un-recognized types. (Default:
    *     `false`)
    */
-  constructor(options?) {
+  constructor(options?: ObjectToStructConverterConfig) {
     options = options || {};
-
     this.seenObjects = new Set();
     this.removeCircular = options.removeCircular === true;
     this.stringify = options.stringify === true;
@@ -207,7 +211,7 @@ export class ObjectToStructConverter {
    * //   }
    * // }
    */
-  convert(obj) {
+  convert(obj: any) {
     const convertedObject = {
       fields: {},
     };
@@ -215,7 +219,7 @@ export class ObjectToStructConverter {
     this.seenObjects.add(obj);
 
     for (const prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
+      if (Object.prototype.hasOwnProperty.call(obj, prop)) {
         const value = obj[prop];
 
         if (is.undefined(value)) {
@@ -245,7 +249,7 @@ export class ObjectToStructConverter {
    * //   stringValue: 'Hello!'
    * // }
    */
-  encodeValue_(value) {
+  encodeValue_(value: any) {
     let convertedValue;
 
     if (is.null(value)) {
@@ -297,12 +301,10 @@ export class ObjectToStructConverter {
       if (!this.stringify) {
         throw new Error('Value of type ' + typeof value + ' not recognized.');
       }
-
       convertedValue = {
         stringValue: String(value),
       };
     }
-
     return convertedValue;
   }
 }
@@ -890,7 +892,7 @@ export class GrpcService extends Service {
     delete reqOpts.autoPaginateVal;
     delete reqOpts.objectMode;
 
-    return util.replaceProjectIdToken(reqOpts, this.projectId);
+    return replaceProjectIdToken(reqOpts, this.projectId);
   }
 
   /**

@@ -16,8 +16,8 @@
 
 'use strict';
 
-import assert from 'assert';
-import proxyquire from 'proxyquire';
+import * as assert from 'assert';
+import * as proxyquire from 'proxyquire';
 import {util} from '@google-cloud/common';
 import { EventEmitter } from 'events';
 
@@ -91,7 +91,7 @@ describe('GrpcOperation', () => {
 
     it('should pass GrpcServiceObject the correct config', () => {
       const config = grpcOperation.grpcServiceObjectArguments_![0];
-      assert.deepEqual(config, EXPECTED_CONFIG);
+      assert.deepStrictEqual(config, EXPECTED_CONFIG);
     });
   });
 
@@ -100,7 +100,7 @@ describe('GrpcOperation', () => {
       grpcOperation.id = OPERATION_ID;
 
       grpcOperation.request = (protoOpts, reqOpts, callback) => {
-        assert.deepEqual(protoOpts, {
+        assert.deepStrictEqual(protoOpts, {
           service: 'Operations',
           method: 'cancelOperation',
         });

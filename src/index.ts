@@ -48,3 +48,9 @@ export {Service};
  * @type {module:commonGrpc/grpc}
  */
 export {grpc};
+
+/**
+ * @type {module:common/util}
+ * @private
+ */
+export {util} from '@google-cloud/common';

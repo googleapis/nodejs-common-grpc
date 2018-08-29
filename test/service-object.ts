@@ -16,13 +16,14 @@
 
 'use strict';
 
-import assert from 'assert';
-import extend from 'extend';
-import proxyquire from 'proxyquire';
+import * as assert from 'assert';
+import * as extend from 'extend';
+import * as proxyquire from 'proxyquire';
 import {util} from '@google-cloud/common';
+import * as pfy from '@google-cloud/promisify';
 
 let promisified = false;
-const fakeUtil = extend({}, util, {
+const fakePfy = extend({}, pfy, {
   promisifyAll(Class) {
     if (Class.name === 'GrpcServiceObject') {
       promisified = true;
@@ -46,8 +47,8 @@ describe('GrpcServiceObject', () => {
     GrpcServiceObject = proxyquire('../src/service-object', {
       '@google-cloud/common': {
         ServiceObject: FakeServiceObject,
-        util: fakeUtil,
       },
+      '@google-cloud/promisify': fakePfy
     }).GrpcServiceObject;
   });
 
@@ -177,7 +178,7 @@ describe('GrpcServiceObject', () => {
 
       grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
         assert.strictEqual(protoOpts, setMetadataMethod.protoOpts);
-        assert.deepEqual(reqOpts, expectedReqOpts);
+        assert.deepStrictEqual(reqOpts, expectedReqOpts);
         callback(); // done()
       };
 
@@ -202,7 +203,7 @@ describe('GrpcServiceObject', () => {
       grpcServiceObject.parent = {
         request() {
           assert.strictEqual(this, grpcServiceObject.parent);
-          assert.deepEqual([].slice.call(arguments), args);
+          assert.deepStrictEqual([].slice.call(arguments), args);
           return expectedReturnValue;
         },
       };
@@ -220,7 +221,7 @@ describe('GrpcServiceObject', () => {
       grpcServiceObject.parent = {
         requestStream() {
           assert.strictEqual(this, grpcServiceObject.parent);
-          assert.deepEqual([].slice.call(arguments), args);
+          assert.deepStrictEqual([].slice.call(arguments), args);
           return expectedReturnValue;
         },
       };
@@ -238,7 +239,7 @@ describe('GrpcServiceObject', () => {
       grpcServiceObject.parent = {
         requestWritableStream() {
           assert.strictEqual(this, grpcServiceObject.parent);
-          assert.deepEqual([].slice.call(arguments), args);
+          assert.deepStrictEqual([].slice.call(arguments), args);
           return expectedReturnValue;
         },
       };
