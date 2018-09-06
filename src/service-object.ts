@@ -114,7 +114,7 @@ export class GrpcServiceObject extends ServiceObject {
     return (this.parent as any).requestWritableStream.apply(this.parent, args);
   }
 
-  private getOpts(metadata: boolean|{ reqOpts?: r.OptionsWithUri }) {
+  private getOpts(metadata: boolean|{ reqOpts?: r.CoreOptions }) {
     return typeof metadata === 'boolean' ? {} : metadata.reqOpts || {};
   }
 
