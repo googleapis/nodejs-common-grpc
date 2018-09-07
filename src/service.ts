@@ -585,8 +585,8 @@ export class GrpcService extends Service {
    * @param {object} reqOpts - The request options.
    */
   requestWritableStream(protoOpts, reqOpts) {
-    // tslint:disable-next-line:no-any
     const stream =
+        // tslint:disable-next-line:no-any
         (protoOpts.stream = protoOpts.stream || (duplexify as any).obj());
 
     if (global['GCLOUD_SANDBOX_ENV']) {
