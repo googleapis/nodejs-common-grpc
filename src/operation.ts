@@ -18,24 +18,21 @@
  * @module commonGrpc/operation
  */
 
-import { util, Metadata, ServiceObjectConfig } from '@google-cloud/common';
-
-/**
- * @type {module:commonGrpc/serviceObject}
- * @private
- */
-import { GrpcServiceObject } from './service-object';
+import {Metadata, ServiceObjectConfig, util} from '@google-cloud/common';
+import * as r from 'request';
 
 /**
  * @type {module:commonGrpc/service}
  * @private
  */
-import { GrpcService } from './service';
-
-import * as r from 'request';
+import {GrpcService} from './service';
+/**
+ * @type {module:commonGrpc/serviceObject}
+ * @private
+ */
+import {GrpcServiceObject} from './service-object';
 
 export class GrpcOperation extends GrpcServiceObject {
-
   completeListeners: number;
   hasActiveListeners: boolean;
 
@@ -47,11 +44,11 @@ export class GrpcOperation extends GrpcServiceObject {
    * @alias module:common/grpcOperation
    *
    * @param {module:commonGrpc/service|module:commonGrpc/serviceObject} parent - The
-   *     parent object. This should be configured to use the longrunning.operation
-   *     service.
+   *     parent object. This should be configured to use the
+   * longrunning.operation service.
    * @param {string} name - The operation name.
    */
-  constructor(parent: GrpcService | GrpcServiceObject, name: string) {
+  constructor(parent: GrpcService|GrpcServiceObject, name: string) {
     const methods = {
       /**
        * Deletes an operation.
@@ -118,7 +115,7 @@ export class GrpcOperation extends GrpcServiceObject {
 
     const reqOpts = {
       // TODO: remove this when upgrading to the latest @google-cloud/common
-      name: (this as any).id,
+      name: this.id,
     };
 
     this.request(protoOpts, reqOpts, callback || util.noop);

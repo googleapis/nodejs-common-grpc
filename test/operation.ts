@@ -19,7 +19,7 @@
 import * as assert from 'assert';
 import * as proxyquire from 'proxyquire';
 import {util} from '@google-cloud/common';
-import { EventEmitter } from 'events';
+import {EventEmitter} from 'events';
 
 let decorateErrorOverride_;
 class FakeGrpcService {
@@ -42,18 +42,16 @@ describe('GrpcOperation', () => {
   };
   const OPERATION_ID = '/a/b/c/d';
 
+  // tslint:disable-next-line:variable-name
   let GrpcOperation;
   let grpcOperation;
 
   before(() => {
-    GrpcOperation = proxyquire('../src/operation', {
-      './service-object': {
-        GrpcServiceObject: FakeGrpcServiceObject
-      },
-      './service': {
-        GrpcService: FakeGrpcService
-      }
-    }).GrpcOperation;
+    GrpcOperation =
+        proxyquire('../src/operation', {
+          './service-object': {GrpcServiceObject: FakeGrpcServiceObject},
+          './service': {GrpcService: FakeGrpcService}
+        }).GrpcOperation;
   });
 
   beforeEach(() => {
@@ -106,7 +104,7 @@ describe('GrpcOperation', () => {
         });
 
         assert.strictEqual(reqOpts.name, OPERATION_ID);
-        callback(); // done()
+        callback();  // done()
       };
 
       grpcOperation.cancel(done);
@@ -172,7 +170,7 @@ describe('GrpcOperation', () => {
         };
       });
 
-      it('should callback with no arguments', async() => {
+      it('should callback with no arguments', async () => {
         return grpcOperation.poll_().then(resp => {
           assert.strictEqual(resp, undefined);
         }, assert.ifError);
@@ -188,12 +186,11 @@ describe('GrpcOperation', () => {
         };
       });
 
-      it('should emit complete with metadata', async() => {
+      it('should emit complete with metadata', async () => {
         return grpcOperation.poll_().then(resp => {
           assert.strictEqual(resp, apiResponse);
         }, assert.ifError);
       });
-
     });
   });
 });

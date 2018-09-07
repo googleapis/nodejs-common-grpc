@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
+'use strict';
+
 import {GrpcService} from './service';
 import {GrpcServiceObject} from './service-object';
 import {GrpcOperation} from './operation';
 import * as grpc from 'grpc';
 
+// tslint:disable-next-line:variable-name
 const Service = GrpcService;
+
+// tslint:disable-next-line:variable-name
 const ServiceObject = GrpcServiceObject;
+
+// tslint:disable-next-line:variable-name
 const Operation = GrpcOperation;
 
 /*!
  * @module commonGrpc
  */
-
-'use strict';
 
 /**
  * @type {module:commonGrpc/operation}

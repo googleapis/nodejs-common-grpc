@@ -20,7 +20,6 @@ import * as assert from 'assert';
 import * as grpcCommon from '../src';
 
 describe('grpc-common', () => {
-
   it('should correctly export the common modules', () => {
     assert(grpcCommon.Service);
     assert(grpcCommon.Service.ObjectToStructConverter);
