@@ -22,11 +22,10 @@
 
 import * as extend from 'extend';
 import * as r from 'request';
-import { ServiceObject, util, ServiceObjectConfig, GetMetadataCallback } from '@google-cloud/common';
+import {ServiceObject, util, ServiceObjectConfig, GetMetadataCallback} from '@google-cloud/common';
 import {promisifyAll} from '@google-cloud/promisify';
 
 export class GrpcServiceObject extends ServiceObject {
-
   /**
    * GrpcServiceObject is a base class, meant to be inherited from by a service
    * object that uses the gRPC protobuf API.
@@ -49,6 +48,7 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {?error} callback.err - An error returned while making this request.
    */
   delete(callback?: r.RequestCallback) {
+    // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.delete as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.delete);
     this.request(protoOpts, reqOpts, callback || util.noop);
@@ -62,6 +62,7 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {object} callback.metadata - The metadata for this object.
    */
   getMetadata(callback: GetMetadataCallback) {
+    // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.getMetadata as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.getMetadata);
     this.request(protoOpts, reqOpts, (err: Error, resp: r.Response) => {
@@ -81,9 +82,12 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {function=} callback - The callback function.
    * @param {?error} callback.err - An error returned while making this request.
    */
-  setMetadata(metadata: {}, callback?: (err: Error | null, resp?: r.Response) => void) {
+  setMetadata(
+      metadata: {}, callback?: (err: Error|null, resp?: r.Response) => void) {
+    // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.setMetadata as any).protoOpts;
-    const reqOpts = extend(true, {}, this.getOpts(this.methods.setMetadata), metadata);
+    const reqOpts =
+        extend(true, {}, this.getOpts(this.methods.setMetadata), metadata);
     this.request(protoOpts, reqOpts, callback || util.noop);
   }
 
@@ -111,13 +115,13 @@ export class GrpcServiceObject extends ServiceObject {
    * @private
    */
   requestWritableStream(...args: Array<{}>) {
+    // tslint:disable-next-line:no-any
     return (this.parent as any).requestWritableStream.apply(this.parent, args);
   }
 
-  private getOpts(metadata: boolean|{ reqOpts?: r.CoreOptions }) {
+  private getOpts(metadata: boolean|{reqOpts?: r.CoreOptions}) {
     return typeof metadata === 'boolean' ? {} : metadata.reqOpts || {};
   }
-
 }
 
 /*! Developer Documentation
