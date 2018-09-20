@@ -22,7 +22,7 @@
 
 import * as extend from 'extend';
 import * as r from 'request';
-import {ServiceObject, util, ServiceObjectConfig, GetMetadataCallback} from '@google-cloud/common';
+import {ServiceObject, util, ServiceObjectConfig, GetMetadataCallback, Metadata, SetMetadataResponse, ResponseCallback} from '@google-cloud/common';
 import {promisifyAll} from '@google-cloud/promisify';
 
 export class GrpcServiceObject extends ServiceObject {
@@ -47,7 +47,9 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {function=} callback - The callback function.
    * @param {?error} callback.err - An error returned while making this request.
    */
-  delete(callback?: r.RequestCallback) {
+  delete(): Promise<[r.Response]>;
+  delete(callback: r.RequestCallback): void;
+  delete(callback?: r.RequestCallback): void|Promise<[r.Response]> {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.delete as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.delete);
@@ -61,17 +63,19 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {?error} callback.err - An error returned while making this request.
    * @param {object} callback.metadata - The metadata for this object.
    */
-  getMetadata(callback: GetMetadataCallback) {
+  getMetadata(): Promise<Metadata>;
+  getMetadata(callback: GetMetadataCallback): void;
+  getMetadata(callback?: GetMetadataCallback): void|Promise<Metadata> {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.getMetadata as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.getMetadata);
     this.request(protoOpts, reqOpts, (err: Error, resp: r.Response) => {
       if (err) {
-        callback(err, null, resp);
+        callback!(err, null, resp);
         return;
       }
       this.metadata = resp;
-      callback(null, this.metadata, resp);
+      callback!(null, this.metadata, resp);
     });
   }
 
@@ -82,8 +86,10 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {function=} callback - The callback function.
    * @param {?error} callback.err - An error returned while making this request.
    */
-  setMetadata(
-      metadata: {}, callback?: (err: Error|null, resp?: r.Response) => void) {
+  setMetadata(metadata: Metadata): Promise<SetMetadataResponse>;
+  setMetadata(metadata: Metadata, callback: ResponseCallback): void;
+  setMetadata(metadata: Metadata, callback?: ResponseCallback):
+      void|Promise<SetMetadataResponse> {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.setMetadata as any).protoOpts;
     const reqOpts =

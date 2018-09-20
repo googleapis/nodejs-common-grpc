@@ -44,14 +44,14 @@
     "samples-test": "cd samples/ && npm link ../ && npm test && cd ../"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.24.0",
+    "@google-cloud/common": "^0.25.1",
     "@google-cloud/projectify": "^0.3.0",
     "@google-cloud/promisify": "^0.3.0",
     "@grpc/proto-loader": "^0.3.0",
     "dot-prop": "^4.2.0",
     "duplexify": "^3.6.0",
     "extend": "^3.0.2",
-    "grpc": "^1.13.1",
+    "grpc": "~1.15.1",
     "is": "^3.2.1",
     "retry-request": "^4.0.0",
     "through2": "^2.0.3"
