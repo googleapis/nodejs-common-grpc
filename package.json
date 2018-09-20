@@ -51,7 +51,7 @@
     "dot-prop": "^4.2.0",
     "duplexify": "^3.6.0",
     "extend": "^3.0.2",
-    "grpc": "~1.15.1",
+    "grpc": "^1.15.1",
     "is": "^3.2.1",
     "retry-request": "^4.0.0",
     "through2": "^2.0.3"
