@@ -4,6 +4,20 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+## v0.9.0
+
+### Implementation Changes
+- fix(deps): upgrade to the latest @google-cloud/common and grpc ([#115](https://github.com/googleapis/nodejs-common-grpc/pull/115))
+- fix(deps): update dependency @google-cloud/common to ^0.24.0 ([#109](https://github.com/googleapis/nodejs-common-grpc/pull/109))
+
+### Internal / Testing Changes
+- Enable prefer-const in the eslint config ([#114](https://github.com/googleapis/nodejs-common-grpc/pull/114))
+- Enable no-var in eslint ([#112](https://github.com/googleapis/nodejs-common-grpc/pull/112))
+- Update CI config ([#111](https://github.com/googleapis/nodejs-common-grpc/pull/111))
+- Enable gts lint ([#110](https://github.com/googleapis/nodejs-common-grpc/pull/110))
+- Add synth file and update CI ([#107](https://github.com/googleapis/nodejs-common-grpc/pull/107))
+- Retry npm install in CI ([#106](https://github.com/googleapis/nodejs-common-grpc/pull/106))
+
 ## v0.8.0
 
 **THIS RELEASE HAS BREAKING CHANGES**.  Some of the most notable changes include:
