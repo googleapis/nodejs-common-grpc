@@ -80,7 +80,7 @@
     "nyc": "^13.0.0",
     "power-assert": "^1.6.0",
     "proxyquire": "^2.0.1",
-    "sinon": "^6.1.4",
+    "sinon": "^7.0.0",
     "source-map-support": "^0.5.6",
     "typescript": "~3.1.0"
   }
