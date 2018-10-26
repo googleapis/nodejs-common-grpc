@@ -48,16 +48,20 @@ function fakeRetryRequest() {
   return (retryRequestOverride || retryRequest).apply(null, arguments);
 }
 
-// tslint:disable-next-line:variable-name
-let GrpcMetadataOverride;
-let grpcProtoLoadOverride: (typeof grpcProtoLoader.loadSync)|null = null;
-const fakeGrpc = {
-  Metadata() {
+class FakeMetadata {
+  constructor() {
     if (GrpcMetadataOverride) {
       return new GrpcMetadataOverride();
     }
     return new grpc.Metadata();
-  },
+  }
+}
+
+// tslint:disable-next-line:variable-name
+let GrpcMetadataOverride;
+let grpcProtoLoadOverride: (typeof grpcProtoLoader.loadSync)|null = null;
+const fakeGrpc = {
+  Metadata: FakeMetadata,
   credentials: {
     combineChannelCredentials() {
       return {
@@ -295,9 +299,10 @@ describe('GrpcService', () => {
     });
 
     it('should default grpcMetadata to empty metadata', () => {
-      GrpcMetadataOverride = () => {};
-      GrpcMetadataOverride.prototype.add = function(prop, val) {
-        this[prop] = val;
+      GrpcMetadataOverride = class {
+        add(prop, val) {
+          this[prop] = val;
+        }
       };
 
       const fakeGrpcMetadata = Object.assign(
@@ -315,10 +320,11 @@ describe('GrpcService', () => {
     });
 
     it('should create and localize grpcMetadata', () => {
-      GrpcMetadataOverride = () => {};
-      GrpcMetadataOverride.prototype.add = function(prop, val) {
-        this[prop] = val;
-      };
+      GrpcMetadataOverride = class {
+        add(prop, val) {
+          this[prop] = val;
+        }
+      }
 
       const fakeGrpcMetadata = Object.assign(
           new GrpcMetadataOverride(),
@@ -412,11 +418,7 @@ describe('GrpcService', () => {
       };
 
       const decodedValue = {};
-
-      GrpcService.structToObj_ = () => {
-        return decodedValue;
-      };
-
+      sinon.stub(GrpcService, 'structToObj_').returns(decodedValue);
       assert.strictEqual(GrpcService.decodeValue_(structValue), decodedValue);
     });
 
@@ -459,22 +461,17 @@ describe('GrpcService', () => {
     it('should convert the object using ObjectToStructConverter', () => {
       const options = {};
       const obj = {};
-
       const convertedObject = {};
-
-      GrpcService.ObjectToStructConverter = options_ => {
+      sinon.stub(GrpcService, 'ObjectToStructConverter').callsFake(options_ => {
         assert.strictEqual(options_, options);
-
         return {
           convert(obj_) {
             assert.strictEqual(obj_, obj);
             return convertedObject;
           },
         };
-      };
-
-      assert.strictEqual(
-          GrpcService.objToStruct_(obj, options), convertedObject);
+      });
+      assert.strictEqual(GrpcService.objToStruct_(obj, options), convertedObject);
     });
   });
 
@@ -489,10 +486,10 @@ describe('GrpcService', () => {
         },
       };
 
-      GrpcService.decodeValue_ = value => {
+      sinon.stub(GrpcService, 'decodeValue_').callsFake(value => {
         assert.strictEqual(value, inputValue);
         return decodedValue;
-      };
+      });
 
       assert.deepStrictEqual(GrpcService.structToObj_(struct), {
         a: decodedValue,
@@ -1425,18 +1422,13 @@ describe('GrpcService', () => {
   describe('encodeValue_', () => {
     it('should encode value using ObjectToStructConverter fn', () => {
       const obj = {};
-
       const convertedObject = {};
-
-      GrpcService.ObjectToStructConverter = () => {
-        return {
-          encodeValue_(obj_) {
-            assert.strictEqual(obj_, obj);
-            return convertedObject;
-          },
-        };
-      };
-
+      sinon.stub(GrpcService, 'ObjectToStructConverter').returns({
+        encodeValue_(obj_) {
+          assert.strictEqual(obj_, obj);
+          return convertedObject;
+        },
+      });
       assert.strictEqual(GrpcService.encodeValue_(obj), convertedObject);
     });
   });
@@ -1804,10 +1796,10 @@ describe('GrpcService', () => {
   describe('getService_', () => {
     it('should get a new service instance', () => {
       const fakeService = {};
-
       grpcService.protos = {
         Service: {
-          Service(baseUrl, grpcCredentials, userAgent) {
+          Service: class Service {
+          constructor(baseUrl, grpcCredentials, userAgent) {
             assert.strictEqual(baseUrl, grpcService.baseUrl);
             assert.strictEqual(grpcCredentials, grpcService.grpcCredentials);
             assert.deepStrictEqual(
@@ -1819,7 +1811,8 @@ describe('GrpcService', () => {
                     GrpcService.GRPC_SERVICE_OPTIONS));
 
             return fakeService;
-          },
+          }
+        }
         },
       };
 
@@ -1857,9 +1850,11 @@ describe('GrpcService', () => {
       grpcService.protos = {
         Service: {
           baseUrl: fakeBaseUrl,
-          Service(baseUrl) {
-            assert.strictEqual(baseUrl, fakeBaseUrl);
-            return fakeService;
+          Service: class Service {
+            constructor(baseUrl) {
+              assert.strictEqual(baseUrl, fakeBaseUrl);
+              return fakeService;
+            }
           },
         },
       };

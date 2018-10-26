@@ -83,5 +83,10 @@
     "sinon": "^7.0.0",
     "source-map-support": "^0.5.6",
     "typescript": "~3.1.0"
+  },
+  "nyc": {
+    "exclude": [
+      "build/test"
+    ]
   }
 }
