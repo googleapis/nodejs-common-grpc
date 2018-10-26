@@ -324,7 +324,7 @@ describe('GrpcService', () => {
         add(prop, val) {
           this[prop] = val;
         }
-      }
+      };
 
       const fakeGrpcMetadata = Object.assign(
           new GrpcMetadataOverride(),
@@ -471,7 +471,8 @@ describe('GrpcService', () => {
           },
         };
       });
-      assert.strictEqual(GrpcService.objToStruct_(obj, options), convertedObject);
+      assert.strictEqual(
+          GrpcService.objToStruct_(obj, options), convertedObject);
     });
   });
 
@@ -1799,20 +1800,20 @@ describe('GrpcService', () => {
       grpcService.protos = {
         Service: {
           Service: class Service {
-          constructor(baseUrl, grpcCredentials, userAgent) {
-            assert.strictEqual(baseUrl, grpcService.baseUrl);
-            assert.strictEqual(grpcCredentials, grpcService.grpcCredentials);
-            assert.deepStrictEqual(
-                userAgent,
-                extend(
-                    {
-                      'grpc.primary_user_agent': grpcService.userAgent,
-                    },
-                    GrpcService.GRPC_SERVICE_OPTIONS));
+            constructor(baseUrl, grpcCredentials, userAgent) {
+              assert.strictEqual(baseUrl, grpcService.baseUrl);
+              assert.strictEqual(grpcCredentials, grpcService.grpcCredentials);
+              assert.deepStrictEqual(
+                  userAgent,
+                  extend(
+                      {
+                        'grpc.primary_user_agent': grpcService.userAgent,
+                      },
+                      GrpcService.GRPC_SERVICE_OPTIONS));
 
-            return fakeService;
+              return fakeService;
+            }
           }
-        }
         },
       };
 
@@ -1850,7 +1851,7 @@ describe('GrpcService', () => {
       grpcService.protos = {
         Service: {
           baseUrl: fakeBaseUrl,
-          Service: class Service {
+          Service: class Service{
             constructor(baseUrl) {
               assert.strictEqual(baseUrl, fakeBaseUrl);
               return fakeService;
