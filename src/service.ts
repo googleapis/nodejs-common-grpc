@@ -648,12 +648,10 @@ export class GrpcService extends Service {
   /**
    * Decode a protobuf Struct's value.
    *
-   * @private
-   *
    * @param {object} value - A Struct's Field message.
    * @return {*} - The decoded value.
    */
-  private static decodeValue_(value) {
+  static decodeValue_(value) {
     switch (value.kind) {
       case 'structValue': {
         return GrpcService.structToObj_(value.structValue);
@@ -674,7 +672,6 @@ export class GrpcService extends Service {
   /**
    * Convert a raw value to a type-denoted protobuf message-friendly object.
    *
-   * @private
    *
    * @param {*} value - The input value.
    * @return {*} - The encoded value.
@@ -685,7 +682,7 @@ export class GrpcService extends Service {
    * //   stringValue: 'Hello!'
    * // }
    */
-  private static encodeValue_(value) {
+  static encodeValue_(value) {
     return new GrpcService.ObjectToStructConverter().encodeValue_(value);
   }
 
