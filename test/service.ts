@@ -31,7 +31,15 @@ import {replaceProjectIdToken} from '@google-cloud/projectify';
 
 const sinon = sn.createSandbox();
 const glob = global as {} as {GCLOUD_SANDBOX_ENV: boolean | {}};
-const fakeUtil = extend({}, util);
+
+let getUserAgentFromPackageJsonOverride: Function|null;
+const fakeUtil = extend({}, util, {
+  getUserAgentFromPackageJson: (...args) => {
+    return (getUserAgentFromPackageJsonOverride ||
+            util.getUserAgentFromPackageJson)
+        .apply(null, args);
+  }
+});
 
 function FakeService() {
   this.calledWith_ = arguments;
@@ -163,14 +171,11 @@ describe('GrpcService', () => {
   beforeEach(() => {
     GrpcMetadataOverride = null;
     retryRequestOverride = null;
-
+    getUserAgentFromPackageJsonOverride = null;
     grpcProtoLoadOverride = () => {
       return MOCK_GRPC_API;
     };
-
-    extend(fakeUtil, util);
     extend(GrpcService, GrpcServiceCached);
-
     grpcService = new GrpcService(CONFIG, OPTIONS);
   });
 
@@ -345,7 +350,7 @@ describe('GrpcService', () => {
     it('should set the correct user-agent', () => {
       const userAgent = 'user-agent/0.0.0';
 
-      fakeUtil.getUserAgentFromPackageJson = packageJson => {
+      getUserAgentFromPackageJsonOverride = packageJson => {
         assert.strictEqual(packageJson, CONFIG.packageJson);
         return userAgent;
       };
