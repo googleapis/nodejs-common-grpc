@@ -4,6 +4,11 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+## v0.9.2
+
+### Bug fixes
+- fix: add typing for ignored request methods ([#149](https://github.com/googleapis/nodejs-common-grpc/pull/149))
+
 ## v0.9.1
 
 This patch release includes a variety of TypeScript type fixes.
