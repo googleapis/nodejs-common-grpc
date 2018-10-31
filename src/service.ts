@@ -425,7 +425,7 @@ export class GrpcService extends Service {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends
-     * ServiceObject, the signatures for `request` need to have
+     * Service, the signatures for `request` need to have
      * *something* in common.  The only signature actually used here is:
      *
      * request(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions, callback:
@@ -533,7 +533,7 @@ export class GrpcService extends Service {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends
-     * ServiceObject, the signatures for `requestStream` need to have
+     * Service, the signatures for `requestStream` need to have
      * *something* in common.  The only signature actually used here is:
      *
      * requestStream(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions):
