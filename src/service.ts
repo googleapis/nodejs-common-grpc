@@ -24,11 +24,25 @@ import * as duplexify from 'duplexify';
 import * as extend from 'extend';
 import * as is from 'is';
 import * as retryRequest from 'retry-request';
-import {Service, util, ServiceConfig} from '@google-cloud/common';
+import {Service, util, ServiceConfig, DecorateRequestOptions, Abortable, BodyResponseCallback} from '@google-cloud/common';
 import {replaceProjectIdToken} from '@google-cloud/projectify';
 import * as through from 'through2';
 import * as grpc from 'grpc';
 import {loadSync, PackageDefinition, ServiceDefinition} from '@grpc/proto-loader';
+import {Duplex} from 'stream';
+import * as r from 'request';
+
+export interface ServiceRequestCallback {
+  (err: Error|null, apiResponse?: r.Response): void;
+}
+
+export interface ProtoOpts {
+  service: string;
+  method: string;
+  timeout?: number;
+  retryOpts?: retryRequest.Options;
+  stream?: Duplex;
+}
 
 interface GrpcOptions {
   deadline?: Date;
@@ -364,13 +378,9 @@ export class GrpcService extends Service {
 
     this.maxRetries = options.maxRetries;
     this.userAgent = util.getUserAgentFromPackageJson(config.packageJson);
-
     this.activeServiceMap_ = new Map();
     this.protos = {};
-
     const protoServices = config.protoServices;
-
-    const self = this;
 
     Object.keys(protoServices).forEach(name => {
       const protoConfig = protoServices[name];
@@ -400,24 +410,46 @@ export class GrpcService extends Service {
    * @param {object} reqOpts - The request options.
    * @param {function=} callback - The callback function.
    */
-  // @ts-ignore
-  request(protoOpts, reqOpts, callback) {
+  request(reqOpts: DecorateRequestOptions): Promise<r.Response>;
+  request(reqOpts: DecorateRequestOptions, callback: BodyResponseCallback):
+      void;
+  request(reqOpts: DecorateRequestOptions, callback?: BodyResponseCallback):
+      void|Promise<r.Response>;
+  request(
+      protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions,
+      callback: ServiceRequestCallback): Abortable|void;
+  request(
+      pOpts: ProtoOpts|DecorateRequestOptions,
+      rOpts?: DecorateRequestOptions|BodyResponseCallback,
+      callback?: ServiceRequestCallback): Abortable|void|Promise<r.Response> {
+    /**
+     * The function signature above is a little funky.  This is due to the way
+     * method overloading in TypeScript operates.  Since this class extends
+     * Service, the signatures for `request` need to have
+     * *something* in common.  The only signature actually used here is:
+     *
+     * request(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions, callback:
+     * ServiceRequestCallback): Abortable|void;
+     *
+     * Hence the weird casting below.
+     */
+    const protoOpts = pOpts as ProtoOpts;
+    let reqOpts = rOpts as DecorateRequestOptions;
+
     if (global['GCLOUD_SANDBOX_ENV']) {
       return global['GCLOUD_SANDBOX_ENV'];
     }
-
-    const self = this;
 
     if (!this.grpcCredentials) {
       // We must establish an authClient to give to grpc.
       this.getGrpcCredentials_((err, credentials) => {
         if (err) {
-          callback(err);
+          callback!(err);
           return;
         }
 
         this.grpcCredentials = credentials;
-        this.request(protoOpts, reqOpts, callback);
+        this.request(protoOpts, reqOpts, callback!);
       });
 
       return;
@@ -434,7 +466,7 @@ export class GrpcService extends Service {
     try {
       reqOpts = this.decorateRequest_(reqOpts);
     } catch (e) {
-      callback(e);
+      callback!(e);
       return;
     }
 
@@ -479,7 +511,7 @@ export class GrpcService extends Service {
         err = respError;
         resp = null!;
       }
-      callback(err, resp);
+      callback!(err, resp);
     });
   }
 
@@ -493,13 +525,27 @@ export class GrpcService extends Service {
    *     request cancel.
    * @param {object} reqOpts - The request options.
    */
-  // @ts-ignore
-  requestStream(protoOpts, reqOpts) {
+  requestStream(reqOpts: DecorateRequestOptions): r.Request;
+  requestStream(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions): Duplex;
+  requestStream(
+      pOpts: ProtoOpts|DecorateRequestOptions,
+      rOpts?: DecorateRequestOptions): Duplex|r.Request {
+    /**
+     * The function signature above is a little funky.  This is due to the way
+     * method overloading in TypeScript operates.  Since this class extends
+     * Service, the signatures for `requestStream` need to have
+     * *something* in common.  The only signature actually used here is:
+     *
+     * requestStream(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions):
+     * Duplex;
+     *
+     * Hence the weird casting below.
+     */
     if (global['GCLOUD_SANDBOX_ENV']) {
       return through.obj();
     }
-
-    const self = this;
+    const protoOpts = pOpts as ProtoOpts;
+    let reqOpts = rOpts as DecorateRequestOptions;
 
     if (!protoOpts.stream) {
       protoOpts.stream = through.obj();
@@ -514,14 +560,13 @@ export class GrpcService extends Service {
           stream.destroy(err);
           return;
         }
-        self.grpcCredentials = credentials;
-        self.requestStream(protoOpts, reqOpts);
+        this.grpcCredentials = credentials;
+        this.requestStream(protoOpts, reqOpts);
       });
       return stream;
     }
 
     const objectMode = !!reqOpts.objectMode;
-
     const service = this.getService_(protoOpts);
     const grpcMetadata = this.grpcMetadata;
     const grpcOpts: GrpcOptions = {};
