@@ -52,6 +52,8 @@ export interface GrpcServiceConfig extends ServiceConfig {
   customEndpoint: boolean;
 }
 
+// TODO: convert this object to an array
+
 /**
  * @const {object} - A map of protobuf codes to HTTP status codes.
  * @private
