@@ -378,13 +378,9 @@ export class GrpcService extends Service {
 
     this.maxRetries = options.maxRetries;
     this.userAgent = util.getUserAgentFromPackageJson(config.packageJson);
-
     this.activeServiceMap_ = new Map();
     this.protos = {};
-
     const protoServices = config.protoServices;
-
-    const self = this;
 
     Object.keys(protoServices).forEach(name => {
       const protoConfig = protoServices[name];
@@ -429,11 +425,11 @@ export class GrpcService extends Service {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends
-     * ServiceObject, the signatures for `requestStream` need to have
+     * ServiceObject, the signatures for `request` need to have
      * *something* in common.  The only signature actually used here is:
      *
-     * requestStream(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions):
-     * Duplex;
+     * request(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions, callback:
+     * ServiceRequestCallback): Abortable|void;
      *
      * Hence the weird casting below.
      */
