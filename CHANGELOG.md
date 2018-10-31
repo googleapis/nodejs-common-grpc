@@ -4,6 +4,37 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+## v0.9.1
+
+This patch release includes a variety of TypeScript type fixes.
+
+### Fixes
+- fix: make encodeValue_ and decodeValue_ public ([#142](https://github.com/googleapis/nodejs-common-grpc/pull/142))
+- fix: enable noImplicitAny ([#145](https://github.com/googleapis/nodejs-common-grpc/pull/145))
+
+### Dependencies
+- fix(deps): update dependency @google-cloud/common to ^0.26.0 ([#135](https://github.com/googleapis/nodejs-common-grpc/pull/135))
+
+### Internal / Testing Changes
+- chore: include build in eslintignore ([#147](https://github.com/googleapis/nodejs-common-grpc/pull/147))
+- chore(build): target es6 with TypeScript build ([#140](https://github.com/googleapis/nodejs-common-grpc/pull/140))
+- chore: update issue templates ([#139](https://github.com/googleapis/nodejs-common-grpc/pull/139))
+- chore: remove old issue template ([#137](https://github.com/googleapis/nodejs-common-grpc/pull/137))
+- build: run tests on node11 ([#136](https://github.com/googleapis/nodejs-common-grpc/pull/136))
+- chores(build): do not collect sponge.xml from windows builds ([#134](https://github.com/googleapis/nodejs-common-grpc/pull/134))
+- chores(build): run codecov on continuous builds ([#133](https://github.com/googleapis/nodejs-common-grpc/pull/133))
+- chore: update new issue template ([#132](https://github.com/googleapis/nodejs-common-grpc/pull/132))
+- chore(deps): update dependency sinon to v7 ([#128](https://github.com/googleapis/nodejs-common-grpc/pull/128))
+- build: fix codecov uploading on Kokoro ([#129](https://github.com/googleapis/nodejs-common-grpc/pull/129))
+- Update CI config ([#126](https://github.com/googleapis/nodejs-common-grpc/pull/126))
+- chore(deps): update dependency typescript to ~3.1.0 ([#124](https://github.com/googleapis/nodejs-common-grpc/pull/124))
+- Update CI config ([#123](https://github.com/googleapis/nodejs-common-grpc/pull/123))
+- Don't publish sourcemaps ([#121](https://github.com/googleapis/nodejs-common-grpc/pull/121))
+- build: prevent system/sample-test from leaking credentials
+- Update the kokoro config ([#119](https://github.com/googleapis/nodejs-common-grpc/pull/119))
+- test: remove appveyor config ([#118](https://github.com/googleapis/nodejs-common-grpc/pull/118))
+- Update CI config ([#117](https://github.com/googleapis/nodejs-common-grpc/pull/117))
+
 ## v0.9.0
 
 ### Implementation Changes
