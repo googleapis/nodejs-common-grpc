@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import * as assert from 'assert';
-import * as proxyquire from 'proxyquire';
 import {util} from '@google-cloud/common';
+import * as assert from 'assert';
 import {EventEmitter} from 'events';
+import * as proxyquire from 'proxyquire';
 
 let decorateErrorOverride_;
 class FakeGrpcService {

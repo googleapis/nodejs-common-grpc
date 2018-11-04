@@ -18,19 +18,18 @@
  * @module commonGrpc/service
  */
 
-'use strict';
-
-import * as duplexify from 'duplexify';
-import * as extend from 'extend';
-import * as is from 'is';
-import * as retryRequest from 'retry-request';
-import {Service, util, ServiceConfig, DecorateRequestOptions, Abortable, BodyResponseCallback} from '@google-cloud/common';
+import {Abortable, BodyResponseCallback, DecorateRequestOptions, Service, ServiceConfig, util} from '@google-cloud/common';
 import {replaceProjectIdToken} from '@google-cloud/projectify';
-import * as through from 'through2';
-import * as grpc from 'grpc';
 import {loadSync, PackageDefinition, ServiceDefinition} from '@grpc/proto-loader';
-import {Duplex} from 'stream';
+import * as duplexify from 'duplexify';
+import {EventEmitter} from 'events';
+import * as extend from 'extend';
+import * as grpc from 'grpc';
+import * as is from 'is';
 import * as r from 'request';
+import * as retryRequest from 'retry-request';
+import {Duplex} from 'stream';
+import * as through from 'through2';
 
 export interface ServiceRequestCallback {
   (err: Error|null, apiResponse?: r.Response): void;
@@ -592,10 +591,9 @@ export class GrpcService extends Service {
           shouldRetryFn: GrpcService.shouldRetryRequest_,
 
           request() {
-            return service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts)
-                .on('metadata',
-                    // tslint:disable-next-line:variable-name
-                    function() {
+            const ee: EventEmitter =
+                service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts)
+                    .on('metadata', () => {
                       // retry-request requires a server response before it
                       // starts emitting data. The closest mechanism grpc
                       // provides is a metadata event, but this does not provide
@@ -604,8 +602,9 @@ export class GrpcService extends Service {
                       //
                       // https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1444#discussion_r71812636
                       const grcpStatus = GrpcService.decorateStatus_({code: 0});
-                      this.emit('response', grcpStatus);
+                      ee.emit('response', grcpStatus);
                     });
+            return ee;
           },
         },
         protoOpts.retryOpts);

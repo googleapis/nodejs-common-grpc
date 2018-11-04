@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-'use strict';
-
+import {util} from '@google-cloud/common';
+import {replaceProjectIdToken} from '@google-cloud/projectify';
+import * as grpcProtoLoader from '@grpc/proto-loader';
 import * as assert from 'assert';
 import * as duplexify from 'duplexify';
 import * as extend from 'extend';
 import * as grpc from 'grpc';
-import * as grpcProtoLoader from '@grpc/proto-loader';
 import * as is from 'is';
 import * as proxyquire from 'proxyquire';
 import * as retryRequest from 'retry-request';
 import * as sn from 'sinon';
 import * as through from 'through2';
-import {util} from '@google-cloud/common';
-import {replaceProjectIdToken} from '@google-cloud/projectify';
 
 const sinon = sn.createSandbox();
 const glob = global as {} as {GCLOUD_SANDBOX_ENV: boolean | {}};
@@ -41,8 +39,11 @@ const fakeUtil = extend({}, util, {
   }
 });
 
-function FakeService() {
-  this.calledWith_ = arguments;
+class FakeService {
+  calledWith_: IArguments;
+  constructor() {
+    this.calledWith_ = arguments;
+  }
 }
 
 let replaceProjectIdTokenOverride;
