@@ -18,12 +18,10 @@
  * @module commonGrpc/serviceObject
  */
 
-'use strict';
-
+import {GetMetadataCallback, Metadata, ResponseCallback, ServiceObject, ServiceObjectConfig, SetMetadataResponse, util} from '@google-cloud/common';
+import {promisifyAll} from '@google-cloud/promisify';
 import * as extend from 'extend';
 import * as r from 'request';
-import {ServiceObject, util, ServiceObjectConfig, GetMetadataCallback, Metadata, SetMetadataResponse, ResponseCallback} from '@google-cloud/common';
-import {promisifyAll} from '@google-cloud/promisify';
 
 export class GrpcServiceObject extends ServiceObject {
   /**

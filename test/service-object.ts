@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-'use strict';
-
+import * as pfy from '@google-cloud/promisify';
 import * as assert from 'assert';
 import * as extend from 'extend';
 import * as proxyquire from 'proxyquire';
-import * as pfy from '@google-cloud/promisify';
 
 let promisified = false;
 const fakePfy = extend({}, pfy, {
-  // tslint:disable-next-line:variable-name
-  promisifyAll(Class) {
-    if (Class.name === 'GrpcServiceObject') {
+  promisifyAll(klass) {
+    if (klass.name === 'GrpcServiceObject') {
       promisified = true;
     }
   },
 });
 
-function FakeServiceObject() {
-  this.calledWith_ = arguments;
+class FakeServiceObject {
+  calledWith_: IArguments;
+  constructor() {
+    this.calledWith_ = arguments;
+  }
 }
 
 describe('GrpcServiceObject', () => {
