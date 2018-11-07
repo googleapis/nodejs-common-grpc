@@ -54,7 +54,7 @@
     "grpc": "^1.15.1",
     "is": "^3.2.1",
     "retry-request": "^4.0.0",
-    "through2": "^2.0.3"
+    "through2": "^3.0.0"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.3.2",
