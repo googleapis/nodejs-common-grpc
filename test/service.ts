@@ -31,7 +31,7 @@ const sinon = sn.createSandbox();
 const glob = global as {} as {GCLOUD_SANDBOX_ENV: boolean | {}};
 
 let getUserAgentFromPackageJsonOverride: Function|null;
-const fakeUtil = extend({}, util, {
+const fakeUtil = Object.assign({}, util, {
   getUserAgentFromPackageJson: (...args) => {
     return (getUserAgentFromPackageJsonOverride ||
             util.getUserAgentFromPackageJson)
@@ -176,7 +176,7 @@ describe('GrpcService', () => {
     grpcProtoLoadOverride = () => {
       return MOCK_GRPC_API;
     };
-    extend(GrpcService, GrpcServiceCached);
+    Object.assign(GrpcService, GrpcServiceCached);
     grpcService = new GrpcService(CONFIG, OPTIONS);
   });
 
@@ -299,7 +299,7 @@ describe('GrpcService', () => {
     });
 
     it('should set insecure credentials if using customEndpoint', () => {
-      const config = extend({}, CONFIG, {customEndpoint: true});
+      const config = Object.assign({}, CONFIG, {customEndpoint: true});
       const grpcService = new GrpcService(config, OPTIONS);
       assert.strictEqual(grpcService.grpcCredentials.name, 'createInsecure');
     });
@@ -318,7 +318,7 @@ describe('GrpcService', () => {
           },
       );
 
-      const config = extend({}, CONFIG);
+      const config = Object.assign({}, CONFIG);
       delete config.grpcMetadata;
 
       const grpcService = new GrpcService(config, OPTIONS);
@@ -1065,7 +1065,7 @@ describe('GrpcService', () => {
       });
 
       it('should use retry-request', () => {
-        const reqOpts = extend(
+        const reqOpts = Object.assign(
             {
               objectMode: true,
             },
@@ -1601,7 +1601,7 @@ describe('GrpcService', () => {
         objectMode: true,
       };
 
-      const originalReqOpts = extend({}, reqOpts);
+      const originalReqOpts = Object.assign({}, reqOpts);
 
       assert.deepStrictEqual(grpcService.decorateRequest_(reqOpts), {});
       assert.deepStrictEqual(reqOpts, originalReqOpts);
@@ -1811,7 +1811,7 @@ describe('GrpcService', () => {
               assert.strictEqual(grpcCredentials, grpcService.grpcCredentials);
               assert.deepStrictEqual(
                   userAgent,
-                  extend(
+                  Object.assign(
                       {
                         'grpc.primary_user_agent': grpcService.userAgent,
                       },
