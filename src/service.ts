@@ -474,7 +474,7 @@ export class GrpcService extends Service {
     // error.
     let respError;
 
-    const retryOpts = extend(
+    const retryOpts = Object.assign(
         {
           retries: this.maxRetries,
           currentRetryAttempt: 0,
@@ -583,7 +583,7 @@ export class GrpcService extends Service {
       return stream;
     }
 
-    const retryOpts = extend(
+    const retryOpts = Object.assign(
         {
           retries: this.maxRetries,
           currentRetryAttempt: 0,
@@ -912,7 +912,7 @@ export class GrpcService extends Service {
    * @return {object} - The decorated request object.
    */
   decorateRequest_(reqOpts) {
-    reqOpts = extend({}, reqOpts);
+    reqOpts = Object.assign({}, reqOpts);
 
     delete reqOpts.autoPaginate;
     delete reqOpts.autoPaginateVal;
@@ -987,7 +987,7 @@ export class GrpcService extends Service {
     if (!service) {
       service = new proto[protoOpts.service](
           proto.baseUrl || this.baseUrl, this.grpcCredentials,
-          extend(
+          Object.assign(
               {
                 'grpc.primary_user_agent': this.userAgent,
               },

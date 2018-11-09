@@ -20,7 +20,7 @@ import * as extend from 'extend';
 import * as proxyquire from 'proxyquire';
 
 let promisified = false;
-const fakePfy = extend({}, pfy, {
+const fakePfy = Object.assign({}, pfy, {
   promisifyAll(klass) {
     if (klass.name === 'GrpcServiceObject') {
       promisified = true;
