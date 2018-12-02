@@ -24,6 +24,8 @@ import * as extend from 'extend';
 import * as r from 'request';
 
 export class GrpcServiceObject extends ServiceObject {
+  parent!: GrpcServiceObject;
+
   /**
    * GrpcServiceObject is a base class, meant to be inherited from by a service
    * object that uses the gRPC protobuf API.
