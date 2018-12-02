@@ -100,9 +100,9 @@ const fakeGrpc = {
 };
 
 const fakeGrpcProtoLoader = {
-  loadSync() {
-    return (grpcProtoLoadOverride || grpcProtoLoader.loadSync)
-        .apply(null, arguments);
+  loadSync(filename: string, options?: grpcProtoLoader.Options) {
+    return (grpcProtoLoadOverride || grpcProtoLoader.loadSync)(
+        filename, options);
   }
 };
 
