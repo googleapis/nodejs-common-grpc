@@ -458,7 +458,7 @@ export class GrpcService extends Service {
     const metadata = this.grpcMetadata;
     const grpcOpts: GrpcOptions = {};
 
-    if (is.number(protoOpts.timeout)) {
+    if (typeof protoOpts.timeout === 'number') {
       grpcOpts.deadline = GrpcService.createDeadline_(protoOpts.timeout);
     }
 
@@ -570,7 +570,7 @@ export class GrpcService extends Service {
     const grpcMetadata = this.grpcMetadata;
     const grpcOpts: GrpcOptions = {};
 
-    if (is.number(protoOpts.timeout)) {
+    if (typeof protoOpts.timeout === 'number') {
       grpcOpts.deadline = GrpcService.createDeadline_(protoOpts.timeout);
     }
 
@@ -740,7 +740,7 @@ export class GrpcService extends Service {
    * @param {number} timeout - Timeout in miliseconds.
    * @return {date} deadline - The deadline in Date object form.
    */
-  private static createDeadline_(timeout) {
+  private static createDeadline_(timeout: number) {
     return new Date(Date.now() + timeout);
   }
 
@@ -753,7 +753,7 @@ export class GrpcService extends Service {
    * @param {error|object} err - The grpc error.
    * @return {error|null}
    */
-  static decorateError_(err) {
+  static decorateError_(err: Error): Error|null {
     const errorObj = is.error(err) ? err : {};
     return GrpcService.decorateGrpcResponse_(errorObj, err);
   }

@@ -1395,22 +1395,14 @@ describe('GrpcService', () => {
       it('should emit the original error', done => {
         // tslint:disable-next-line:no-any
         const grpcStream = (duplexify as any).obj();
-        ProtoService.prototype.method = () => {
-          return grpcStream;
-        };
+        ProtoService.prototype.method = () => grpcStream;
         grpcService.getService_ = () => {
           assert.strictEqual(grpcService.grpcCredentials, authClient);
           return new ProtoService();
         };
-
         const error = new Error('Error.');
-
-        sinon.stub(GrpcService, 'decorateError_').callsFake(() => {
-          return null;
-        });
-
+        sinon.stub(GrpcService, 'decorateError_').returns(null!);
         const stream = grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS);
-
         stream.on('error', err => {
           assert.strictEqual(err, error);
           assert.strictEqual(GrpcService.decorateError_.callCount, 1);
