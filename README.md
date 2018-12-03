@@ -3,8 +3,7 @@
 # [Google Cloud Common GRPC Module: Node.js Client](https://github.com/googleapis/nodejs-common-grpc)
 
 [![release level](https://img.shields.io/badge/release%20level-beta-yellow.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)
-[![CircleCI](https://img.shields.io/circleci/project/github/googleapis/nodejs-common-grpc.svg?style=flat)](https://circleci.com/gh/googleapis/nodejs-common-grpc)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/googleapis/nodejs-common-grpc?branch=master&svg=true)](https://ci.appveyor.com/project/googleapis/nodejs-common-grpc)
+[![npm version](https://img.shields.io/npm/v/@google-cloud/common-grpc.svg)](https://www.npmjs.org/package/@google-cloud/common-grpc)
 [![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-common-grpc/master.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-common-grpc)
 
 > Node.js idiomatic client for [common-grpc][product-docs].
@@ -86,3 +85,4 @@ See [LICENSE](https://github.com/googleapis/nodejs-common-grpc/blob/master/LICEN
 [client-docs]: https://cloud.google.com/nodejs/docs/
 [product-docs]: https://cloud.google.com/nodejs/docs/
 [shell_img]: http://gstatic.com/cloudssh/images/open-btn.png
+
