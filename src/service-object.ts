@@ -18,7 +18,7 @@
  * @module commonGrpc/serviceObject
  */
 
-import {GetMetadataCallback, Metadata, ResponseCallback, ServiceObject, ServiceObjectConfig, SetMetadataResponse, util} from '@google-cloud/common';
+import {Metadata, MetadataCallback, ResponseCallback, ServiceObject, ServiceObjectConfig, SetMetadataResponse, util} from '@google-cloud/common';
 import {promisifyAll} from '@google-cloud/promisify';
 import * as extend from 'extend';
 import * as r from 'request';
@@ -64,8 +64,8 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {object} callback.metadata - The metadata for this object.
    */
   getMetadata(): Promise<Metadata>;
-  getMetadata(callback: GetMetadataCallback): void;
-  getMetadata(callback?: GetMetadataCallback): void|Promise<Metadata> {
+  getMetadata(callback: MetadataCallback): void;
+  getMetadata(callback?: MetadataCallback): void|Promise<Metadata> {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.getMetadata as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.getMetadata);
