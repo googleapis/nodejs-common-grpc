@@ -4,6 +4,21 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+## v0.10.0
+
+01-28-2019 13:51 PST
+
+### Dependencies
+- fix(deps): update dependency @google-cloud/common to ^0.30.0 ([#195](https://github.com/googleapis/nodejs-common-grpc/pull/195))
+- fix(deps): update dependency @grpc/proto-loader to ^0.4.0 ([#193](https://github.com/googleapis/nodejs-common-grpc/pull/193))
+- fix(deps): update dependency through2 to v3 ([#155](https://github.com/googleapis/nodejs-common-grpc/pull/155))
+
+### Documentation
+- docs: update readme badges ([#173](https://github.com/googleapis/nodejs-common-grpc/pull/173))
+
+### Internal / Testing Changes
+- refactor: use Object.assign where possible ([#158](https://github.com/googleapis/nodejs-common-grpc/pull/158))
+
 ## v0.9.2
 
 ### Bug fixes
