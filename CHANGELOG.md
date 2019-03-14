@@ -4,6 +4,29 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+## v0.10.1
+
+03-13-2019 21:40 PDT
+
+### Dependencies
+- fix(deps): update dependency @google-cloud/promisify to ^0.4.0 ([#207](https://github.com/googleapis/nodejs-common-grpc/pull/207))
+- fix(deps): update dependency @google-cloud/common to ^0.31.0 ([#200](https://github.com/googleapis/nodejs-common-grpc/pull/200))
+- fix(deps): update dependency duplexify to v4 ([#198](https://github.com/googleapis/nodejs-common-grpc/pull/198))
+
+### Documentation
+- docs: update links in contrib guide ([#208](https://github.com/googleapis/nodejs-common-grpc/pull/208))
+- docs: update contributing path in README ([#203](https://github.com/googleapis/nodejs-common-grpc/pull/203))
+- docs: move CONTRIBUTING.md to root ([#202](https://github.com/googleapis/nodejs-common-grpc/pull/202))
+- docs: add lint/fix example to contributing guide ([#199](https://github.com/googleapis/nodejs-common-grpc/pull/199))
+
+### Internal / Testing Changes
+- build: Add docuploader credentials to node publish jobs ([#212](https://github.com/googleapis/nodejs-common-grpc/pull/212))
+- build: use node10 to run samples-test, system-test etc ([#211](https://github.com/googleapis/nodejs-common-grpc/pull/211))
+- chore(deps): update dependency mocha to v6
+- build: use linkinator for docs test ([#206](https://github.com/googleapis/nodejs-common-grpc/pull/206))
+- build: create docs test npm scripts ([#205](https://github.com/googleapis/nodejs-common-grpc/pull/205))
+- build: test using @grpc/grpc-js in CI ([#204](https://github.com/googleapis/nodejs-common-grpc/pull/204))
+
 ## v0.10.0
 
 01-28-2019 13:51 PST
