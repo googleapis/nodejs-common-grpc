@@ -18,8 +18,15 @@ import {util} from '@google-cloud/common';
 import * as assert from 'assert';
 import {EventEmitter} from 'events';
 import * as proxyquire from 'proxyquire';
+import * as r from 'request';
+import * as Sinon from 'sinon';
 
-let decorateErrorOverride_;
+import * as operationTypes from '../src/operation';
+import {GrpcService, ProtoOpts} from '../src/service';
+
+const sandbox = Sinon.createSandbox();
+
+let decorateErrorOverride_: Function|null;
 class FakeGrpcService {
   static decorateError_() {
     return (decorateErrorOverride_ || util.noop).apply(null, arguments);
@@ -32,6 +39,7 @@ class FakeGrpcServiceObject extends EventEmitter {
     super();
     this.grpcServiceObjectArguments_ = args;
   }
+  getMetadata = () => {};
 }
 
 describe('GrpcOperation', () => {
@@ -41,8 +49,8 @@ describe('GrpcOperation', () => {
   const OPERATION_ID = '/a/b/c/d';
 
   // tslint:disable-next-line:variable-name
-  let GrpcOperation;
-  let grpcOperation;
+  let GrpcOperation: typeof operationTypes.GrpcOperation;
+  let grpcOperation: operationTypes.GrpcOperation;
 
   before(() => {
     GrpcOperation =
@@ -54,8 +62,11 @@ describe('GrpcOperation', () => {
 
   beforeEach(() => {
     decorateErrorOverride_ = null;
-    grpcOperation = new GrpcOperation(FAKE_SERVICE, OPERATION_ID);
+    grpcOperation =
+        new GrpcOperation(FAKE_SERVICE as GrpcService, OPERATION_ID);
   });
+
+
 
   describe('instantiation', () => {
     const EXPECTED_CONFIG = {
@@ -86,7 +97,8 @@ describe('GrpcOperation', () => {
     };
 
     it('should pass GrpcServiceObject the correct config', () => {
-      const config = grpcOperation.grpcServiceObjectArguments_![0];
+      const config = (grpcOperation as {} as FakeGrpcServiceObject)
+                         .grpcServiceObjectArguments_![0];
       assert.deepStrictEqual(config, EXPECTED_CONFIG);
     });
   });
@@ -95,15 +107,17 @@ describe('GrpcOperation', () => {
     it('should provide the proper request options', done => {
       grpcOperation.id = OPERATION_ID;
 
-      grpcOperation.request = (protoOpts, reqOpts, callback) => {
-        assert.deepStrictEqual(protoOpts, {
-          service: 'Operations',
-          method: 'cancelOperation',
-        });
+      grpcOperation.request =
+          (protoOpts: ProtoOpts, reqOpts: {name: string},
+           callback: Function) => {
+            assert.deepStrictEqual(protoOpts, {
+              service: 'Operations',
+              method: 'cancelOperation',
+            });
 
-        assert.strictEqual(reqOpts.name, OPERATION_ID);
-        callback();  // done()
-      };
+            assert.strictEqual(reqOpts.name, OPERATION_ID);
+            callback();  // done()
+          };
 
       grpcOperation.cancel(done);
     });
@@ -113,63 +127,77 @@ describe('GrpcOperation', () => {
         assert.strictEqual(callback, util.noop);
         done();
       };
-
-      grpcOperation.cancel();
+      // tslint:disable-next-line no-any
+      (grpcOperation as any).cancel();
     });
   });
 
   describe('poll_', () => {
-    it('should call getMetdata', done => {
-      grpcOperation.getMetadata = () => {
-        done();
-      };
+    afterEach(() => {
+      sandbox.restore();
+    });
 
-      grpcOperation.poll_().then(r => {}, assert.ifError);
+    it('should call getMetdata', done => {
+      sandbox.stub(grpcOperation, 'getMetadata').callsFake(() => {
+        done();
+      });
+      // tslint:disable-next-line no-any
+      (grpcOperation as any)
+          .poll_()
+          .then((r: r.Response) => {}, assert.ifError);
     });
 
     describe('could not get metadata', () => {
       it('should callback with an error', done => {
         const error = new Error('Error.');
-        grpcOperation.getMetadata = callback => {
+        sandbox.stub(grpcOperation, 'getMetadata').callsFake((callback) => {
           callback(error);
-        };
-        grpcOperation.poll_().then(r => {}, err => {
-          assert.strictEqual(err, error);
-          done();
         });
+        // tslint:disable-next-line no-any
+        (grpcOperation as any)
+            .poll_()
+            .then((r: r.Response) => {}, (err: Error) => {
+              assert.strictEqual(err, error);
+              done();
+            });
       });
 
       it('should callback with the operation error', done => {
         const apiResponse = {
           error: {},
         };
-        grpcOperation.getMetadata = callback => {
-          callback(null, apiResponse, apiResponse);
-        };
+        sandbox.stub(grpcOperation, 'getMetadata').callsFake((callback) => {
+          callback(null, apiResponse, apiResponse as {} as r.Response);
+        });
+
         const decoratedGrpcStatus = {};
 
-        decorateErrorOverride_ = status => {
+        decorateErrorOverride_ = (status: Error) => {
           assert.strictEqual(status, apiResponse.error);
           return decoratedGrpcStatus;
         };
 
-        grpcOperation.poll_().then(r => {}, err => {
-          assert.strictEqual(err, decoratedGrpcStatus);
-          done();
-        });
+        // tslint:disable-next-line no-any
+        (grpcOperation as any)
+            .poll_()
+            .then((r: r.Response) => {}, (err: Error) => {
+              assert.strictEqual(err, decoratedGrpcStatus);
+              done();
+            });
       });
     });
     describe('operation incomplete', () => {
       const apiResponse = {done: false};
 
       beforeEach(() => {
-        grpcOperation.getMetadata = callback => {
+        sandbox.stub(grpcOperation, 'getMetadata').callsFake(callback => {
           callback(null, apiResponse);
-        };
+        });
       });
 
       it('should callback with no arguments', async () => {
-        return grpcOperation.poll_().then(resp => {
+        // tslint:disable-next-line no-any
+        return (grpcOperation as any).poll_().then((resp: r.Response) => {
           assert.strictEqual(resp, undefined);
         }, assert.ifError);
       });
@@ -179,13 +207,14 @@ describe('GrpcOperation', () => {
       const apiResponse = {done: true};
 
       beforeEach(() => {
-        grpcOperation.getMetadata = callback => {
+        sandbox.stub(grpcOperation, 'getMetadata').callsFake(callback => {
           callback(null, apiResponse);
-        };
+        });
       });
 
       it('should emit complete with metadata', async () => {
-        return grpcOperation.poll_().then(resp => {
+        // tslint:disable-next-line no-any
+        return (grpcOperation as any).poll_().then((resp: r.Response) => {
           assert.strictEqual(resp, apiResponse);
         }, assert.ifError);
       });
