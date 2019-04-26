@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-console.warn(`no samples available 👎`);
+'use strict'
+
+// [START common_quickstart]
+const common = require('@google-cloud/common-grpc');
+console.log(common);
+// [END common_quickstart]
