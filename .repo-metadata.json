@@ -1,0 +1,8 @@
+{
+  "name": "common-grpc",
+  "name_pretty": "Google Cloud Common gRPC",
+  "release_level": "ga",
+  "language": "nodejs",
+  "repo": "googleapis/nodejs-common-grpc",
+  "distribution_name": "@google-cloud/common-grpc"
+}
