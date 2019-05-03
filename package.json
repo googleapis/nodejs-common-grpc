@@ -55,7 +55,7 @@
     "@types/sinon": "^7.0.0",
     "@types/through2": "^2.0.33",
     "codecov": "^3.0.4",
-    "gts": "^0.9.0",
+    "gts": "^1.0.0",
     "intelli-espower-loader": "^1.0.1",
     "mocha": "^6.0.0",
     "nyc": "^14.0.0",
