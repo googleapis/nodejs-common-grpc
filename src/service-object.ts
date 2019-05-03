@@ -18,7 +18,15 @@
  * @module commonGrpc/serviceObject
  */
 
-import {Metadata, MetadataCallback, ResponseCallback, ServiceObject, ServiceObjectConfig, SetMetadataResponse, util} from '@google-cloud/common';
+import {
+  Metadata,
+  MetadataCallback,
+  ResponseCallback,
+  ServiceObject,
+  ServiceObjectConfig,
+  SetMetadataResponse,
+  util,
+} from '@google-cloud/common';
 import {promisifyAll} from '@google-cloud/promisify';
 import * as extend from 'extend';
 import * as r from 'request';
@@ -49,7 +57,7 @@ export class GrpcServiceObject extends ServiceObject {
    */
   delete(): Promise<[r.Response]>;
   delete(callback: r.RequestCallback): void;
-  delete(callback?: r.RequestCallback): void|Promise<[r.Response]> {
+  delete(callback?: r.RequestCallback): void | Promise<[r.Response]> {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.delete as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.delete);
@@ -65,7 +73,7 @@ export class GrpcServiceObject extends ServiceObject {
    */
   getMetadata(): Promise<Metadata>;
   getMetadata(callback: MetadataCallback): void;
-  getMetadata(callback?: MetadataCallback): void|Promise<Metadata> {
+  getMetadata(callback?: MetadataCallback): void | Promise<Metadata> {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.getMetadata as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.getMetadata);
@@ -88,12 +96,18 @@ export class GrpcServiceObject extends ServiceObject {
    */
   setMetadata(metadata: Metadata): Promise<SetMetadataResponse>;
   setMetadata(metadata: Metadata, callback: ResponseCallback): void;
-  setMetadata(metadata: Metadata, callback?: ResponseCallback):
-      void|Promise<SetMetadataResponse> {
+  setMetadata(
+    metadata: Metadata,
+    callback?: ResponseCallback
+  ): void | Promise<SetMetadataResponse> {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.setMetadata as any).protoOpts;
-    const reqOpts =
-        extend(true, {}, this.getOpts(this.methods.setMetadata), metadata);
+    const reqOpts = extend(
+      true,
+      {},
+      this.getOpts(this.methods.setMetadata),
+      metadata
+    );
     this.request(protoOpts, reqOpts, callback || util.noop);
   }
 
@@ -125,7 +139,7 @@ export class GrpcServiceObject extends ServiceObject {
     return (this.parent as any).requestWritableStream.apply(this.parent, args);
   }
 
-  private getOpts(metadata: boolean|{reqOpts?: r.CoreOptions}) {
+  private getOpts(metadata: boolean | {reqOpts?: r.CoreOptions}) {
     return typeof metadata === 'boolean' ? {} : metadata.reqOpts || {};
   }
 }

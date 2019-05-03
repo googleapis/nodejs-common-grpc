@@ -46,11 +46,11 @@ describe('GrpcServiceObject', () => {
 
   before(() => {
     GrpcServiceObject = proxyquire('../src/service-object', {
-                          '@google-cloud/common': {
-                            ServiceObject: FakeServiceObject,
-                          },
-                          '@google-cloud/promisify': fakePfy
-                        }).GrpcServiceObject;
+      '@google-cloud/common': {
+        ServiceObject: FakeServiceObject,
+      },
+      '@google-cloud/promisify': fakePfy,
+    }).GrpcServiceObject;
   });
 
   beforeEach(() => {
@@ -91,7 +91,7 @@ describe('GrpcServiceObject', () => {
         const deleteMethod = grpcServiceObject.methods.delete;
         assert.strictEqual(protoOpts, deleteMethod.protoOpts);
         assert.strictEqual(reqOpts, deleteMethod.reqOpts);
-        callback();  // done()
+        callback(); // done()
       };
 
       grpcServiceObject.delete(done);
@@ -113,7 +113,7 @@ describe('GrpcServiceObject', () => {
         const getMetadataMethod = grpcServiceObject.methods.getMetadata;
         assert.strictEqual(protoOpts, getMetadataMethod.protoOpts);
         assert.strictEqual(reqOpts, getMetadataMethod.reqOpts);
-        callback();  // done()
+        callback(); // done()
       };
 
       grpcServiceObject.getMetadata(done);
@@ -180,7 +180,7 @@ describe('GrpcServiceObject', () => {
       grpcServiceObject.request = (protoOpts, reqOpts, callback) => {
         assert.strictEqual(protoOpts, setMetadataMethod.protoOpts);
         assert.deepStrictEqual(reqOpts, expectedReqOpts);
-        callback();  // done()
+        callback(); // done()
       };
 
       grpcServiceObject.setMetadata(METADATA, done);
@@ -227,8 +227,10 @@ describe('GrpcServiceObject', () => {
         },
       };
 
-      const ret =
-          grpcServiceObject.requestStream.apply(grpcServiceObject, args);
+      const ret = grpcServiceObject.requestStream.apply(
+        grpcServiceObject,
+        args
+      );
       assert.strictEqual(ret, expectedReturnValue);
     });
   });
@@ -247,7 +249,9 @@ describe('GrpcServiceObject', () => {
       };
 
       const ret = grpcServiceObject.requestWritableStream.apply(
-          grpcServiceObject, args);
+        grpcServiceObject,
+        args
+      );
       assert.strictEqual(ret, expectedReturnValue);
     });
   });

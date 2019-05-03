@@ -18,9 +18,20 @@
  * @module commonGrpc/service
  */
 
-import {Abortable, BodyResponseCallback, DecorateRequestOptions, Service, ServiceConfig, util} from '@google-cloud/common';
+import {
+  Abortable,
+  BodyResponseCallback,
+  DecorateRequestOptions,
+  Service,
+  ServiceConfig,
+  util,
+} from '@google-cloud/common';
 import {replaceProjectIdToken} from '@google-cloud/projectify';
-import {loadSync, PackageDefinition, ServiceDefinition} from '@grpc/proto-loader';
+import {
+  loadSync,
+  PackageDefinition,
+  ServiceDefinition,
+} from '@grpc/proto-loader';
 import * as duplexify from 'duplexify';
 import {EventEmitter} from 'events';
 import * as extend from 'extend';
@@ -32,7 +43,7 @@ import {Duplex} from 'stream';
 import * as through from 'through2';
 
 export interface ServiceRequestCallback {
-  (err: Error|null, apiResponse?: r.Response): void;
+  (err: Error | null, apiResponse?: r.Response): void;
 }
 
 export interface ProtoOpts {
@@ -60,7 +71,7 @@ export interface GrpcServiceConfig extends ServiceConfig {
    * class requires multiple services.
    */
   protoServices: {
-    [serviceName: string]: {path: string; service: string; baseUrl: string;};
+    [serviceName: string]: {path: string; service: string; baseUrl: string};
   };
   customEndpoint: boolean;
 }
@@ -170,8 +181,8 @@ const GRPC_ERROR_CODE_TO_HTTP = {
  */
 const GRPC_SERVICE_OPTIONS = {
   // RE: https://github.com/GoogleCloudPlatform/google-cloud-node/issues/1991
-  'grpc.max_send_message_length': -1,     // unlimited
-  'grpc.max_receive_message_length': -1,  // unlimited
+  'grpc.max_send_message_length': -1, // unlimited
+  'grpc.max_receive_message_length': -1, // unlimited
 
   // RE: https://github.com/grpc/grpc/issues/8839
   // RE: https://github.com/grpc/grpc/issues/8382
@@ -285,10 +296,12 @@ export class ObjectToStructConverter {
       if (this.seenObjects.has(value)) {
         // Circular reference.
         if (!this.removeCircular) {
-          throw new Error([
-            'This object contains a circular reference. To automatically',
-            'remove it, set the `removeCircular` option to true.',
-          ].join(' '));
+          throw new Error(
+            [
+              'This object contains a circular reference. To automatically',
+              'remove it, set the `removeCircular` option to true.',
+            ].join(' ')
+          );
         }
         convertedValue = {
           stringValue: '[Circular]',
@@ -361,11 +374,14 @@ export class GrpcService extends Service {
 
     this.grpcMetadata = new grpc.Metadata();
 
-    this.grpcMetadata.add('x-goog-api-client', [
-      'gl-node/' + process.versions.node,
-      'gccl/' + config.packageJson.version,
-      'grpc/' + require('grpc/package.json').version,
-    ].join(' '));
+    this.grpcMetadata.add(
+      'x-goog-api-client',
+      [
+        'gl-node/' + process.versions.node,
+        'gccl/' + config.packageJson.version,
+        'grpc/' + require('grpc/package.json').version,
+      ].join(' ')
+    );
 
     if (config.grpcMetadata) {
       for (const prop in config.grpcMetadata) {
@@ -384,8 +400,9 @@ export class GrpcService extends Service {
     Object.keys(protoServices).forEach(name => {
       const protoConfig = protoServices[name];
       const services = this.loadProtoFile(protoConfig.path, config);
-      const serviceKey =
-          ['google', protoConfig.service, name].filter(x => x).join('.');
+      const serviceKey = ['google', protoConfig.service, name]
+        .filter(x => x)
+        .join('.');
       const service = services[serviceKey] as ServiceDefinition & {
         baseUrl?: string;
       };
@@ -410,17 +427,24 @@ export class GrpcService extends Service {
    * @param {function=} callback - The callback function.
    */
   request(reqOpts: DecorateRequestOptions): Promise<r.Response>;
-  request(reqOpts: DecorateRequestOptions, callback: BodyResponseCallback):
-      void;
-  request(reqOpts: DecorateRequestOptions, callback?: BodyResponseCallback):
-      void|Promise<r.Response>;
   request(
-      protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions,
-      callback: ServiceRequestCallback): Abortable|void;
+    reqOpts: DecorateRequestOptions,
+    callback: BodyResponseCallback
+  ): void;
   request(
-      pOpts: ProtoOpts|DecorateRequestOptions,
-      rOpts?: DecorateRequestOptions|BodyResponseCallback,
-      callback?: ServiceRequestCallback): Abortable|void|Promise<r.Response> {
+    reqOpts: DecorateRequestOptions,
+    callback?: BodyResponseCallback
+  ): void | Promise<r.Response>;
+  request(
+    protoOpts: ProtoOpts,
+    reqOpts: DecorateRequestOptions,
+    callback: ServiceRequestCallback
+  ): Abortable | void;
+  request(
+    pOpts: ProtoOpts | DecorateRequestOptions,
+    rOpts?: DecorateRequestOptions | BodyResponseCallback,
+    callback?: ServiceRequestCallback
+  ): Abortable | void | Promise<r.Response> {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends
@@ -475,35 +499,40 @@ export class GrpcService extends Service {
     let respError;
 
     const retryOpts = Object.assign(
-        {
-          retries: this.maxRetries,
-          currentRetryAttempt: 0,
-          shouldRetryFn: GrpcService.shouldRetryRequest_,
+      {
+        retries: this.maxRetries,
+        currentRetryAttempt: 0,
+        shouldRetryFn: GrpcService.shouldRetryRequest_,
 
-          // retry-request determines if it should retry from the incoming HTTP
-          // response status. gRPC always returns an error proto message. We
-          // pass that "error" into retry-request to act as the HTTP response,
-          // so it can use the status code to determine if it should retry.
-          request(_, onResponse) {
-            respError = null;
-            return service[protoOpts.method](
-                reqOpts, metadata, grpcOpts, (err, resp) => {
-                  if (err) {
-                    respError = GrpcService.decorateError_(err);
+        // retry-request determines if it should retry from the incoming HTTP
+        // response status. gRPC always returns an error proto message. We
+        // pass that "error" into retry-request to act as the HTTP response,
+        // so it can use the status code to determine if it should retry.
+        request(_, onResponse) {
+          respError = null;
+          return service[protoOpts.method](
+            reqOpts,
+            metadata,
+            grpcOpts,
+            (err, resp) => {
+              if (err) {
+                respError = GrpcService.decorateError_(err);
 
-                    if (respError) {
-                      onResponse(null, respError);
-                      return;
-                    }
-                    onResponse(err, resp);
-                    return;
-                  }
+                if (respError) {
+                  onResponse(null, respError);
+                  return;
+                }
+                onResponse(err, resp);
+                return;
+              }
 
-                  onResponse(null, resp);
-                });
-          },
+              onResponse(null, resp);
+            }
+          );
         },
-        protoOpts.retryOpts);
+      },
+      protoOpts.retryOpts
+    );
 
     return retryRequest(null!, retryOpts, (err, resp) => {
       if (!err && resp === respError) {
@@ -527,8 +556,9 @@ export class GrpcService extends Service {
   requestStream(reqOpts: DecorateRequestOptions): r.Request;
   requestStream(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions): Duplex;
   requestStream(
-      pOpts: ProtoOpts|DecorateRequestOptions,
-      rOpts?: DecorateRequestOptions): Duplex|r.Request {
+    pOpts: ProtoOpts | DecorateRequestOptions,
+    rOpts?: DecorateRequestOptions
+  ): Duplex | r.Request {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends
@@ -584,40 +614,42 @@ export class GrpcService extends Service {
     }
 
     const retryOpts = Object.assign(
-        {
-          retries: this.maxRetries,
-          currentRetryAttempt: 0,
-          objectMode,
-          shouldRetryFn: GrpcService.shouldRetryRequest_,
+      {
+        retries: this.maxRetries,
+        currentRetryAttempt: 0,
+        objectMode,
+        shouldRetryFn: GrpcService.shouldRetryRequest_,
 
-          request() {
-            const ee: EventEmitter =
-                service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts)
-                    .on('metadata', () => {
-                      // retry-request requires a server response before it
-                      // starts emitting data. The closest mechanism grpc
-                      // provides is a metadata event, but this does not provide
-                      // any kind of response status. So we're faking it here
-                      // with code `0` which translates to HTTP 200.
-                      //
-                      // https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1444#discussion_r71812636
-                      const grcpStatus = GrpcService.decorateStatus_({code: 0});
-                      ee.emit('response', grcpStatus);
-                    });
-            return ee;
-          },
+        request() {
+          const ee: EventEmitter = service[protoOpts.method](
+            reqOpts,
+            grpcMetadata,
+            grpcOpts
+          ).on('metadata', () => {
+            // retry-request requires a server response before it
+            // starts emitting data. The closest mechanism grpc
+            // provides is a metadata event, but this does not provide
+            // any kind of response status. So we're faking it here
+            // with code `0` which translates to HTTP 200.
+            //
+            // https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1444#discussion_r71812636
+            const grcpStatus = GrpcService.decorateStatus_({code: 0});
+            ee.emit('response', grcpStatus);
+          });
+          return ee;
         },
-        protoOpts.retryOpts);
+      },
+      protoOpts.retryOpts
+    );
 
     // tslint:disable-next-line:no-any
     return (retryRequest(null!, retryOpts) as any)
-        .on('error',
-            err => {
-              const grpcError = GrpcService.decorateError_(err);
-              stream.destroy(grpcError || err);
-            })
-        .on('request', stream.emit.bind(stream, 'request'))
-        .pipe(stream);
+      .on('error', err => {
+        const grpcError = GrpcService.decorateError_(err);
+        stream.destroy(grpcError || err);
+      })
+      .on('request', stream.emit.bind(stream, 'request'))
+      .pipe(stream);
   }
 
   /**
@@ -632,8 +664,8 @@ export class GrpcService extends Service {
    */
   requestWritableStream(protoOpts, reqOpts) {
     const stream =
-        // tslint:disable-next-line:no-any
-        (protoOpts.stream = protoOpts.stream || (duplexify as any).obj());
+      // tslint:disable-next-line:no-any
+      (protoOpts.stream = protoOpts.stream || (duplexify as any).obj());
 
     if (global['GCLOUD_SANDBOX_ENV']) {
       return stream;
@@ -673,17 +705,19 @@ export class GrpcService extends Service {
       return stream;
     }
 
-    const grpcStream =
-        service[protoOpts.method](reqOpts, grpcMetadata, grpcOpts)
-            .on('status',
-                status => {
-                  const grcpStatus = GrpcService.decorateStatus_(status);
-                  stream.emit('response', grcpStatus || status);
-                })
-            .on('error', err => {
-              const grpcError = GrpcService.decorateError_(err);
-              stream.destroy(grpcError || err);
-            });
+    const grpcStream = service[protoOpts.method](
+      reqOpts,
+      grpcMetadata,
+      grpcOpts
+    )
+      .on('status', status => {
+        const grcpStatus = GrpcService.decorateStatus_(status);
+        stream.emit('response', grcpStatus || status);
+      })
+      .on('error', err => {
+        const grpcError = GrpcService.decorateError_(err);
+        stream.destroy(grpcError || err);
+      });
 
     stream.setReadable(grpcStream);
     stream.setWritable(grpcStream);
@@ -711,7 +745,9 @@ export class GrpcService extends Service {
         return value.listValue.values.map(GrpcService.decodeValue_);
       }
 
-      default: { return value[value.kind]; }
+      default: {
+        return value[value.kind];
+      }
     }
   }
 
@@ -753,7 +789,7 @@ export class GrpcService extends Service {
    * @param {error|object} err - The grpc error.
    * @return {error|null}
    */
-  static decorateError_(err: Error): Error|null {
+  static decorateError_(err: Error): Error | null {
     const errorObj = is.error(err) ? err : {};
     return GrpcService.decorateGrpcResponse_(errorObj, err);
   }
@@ -933,8 +969,9 @@ export class GrpcService extends Service {
   private getGrpcCredentials_(callback) {
     this.authClient.getClient().then(client => {
       const credentials = grpc.credentials.combineChannelCredentials(
-          grpc.credentials.createSsl(),
-          grpc.credentials.createFromGoogleCredential(client));
+        grpc.credentials.createSsl(),
+        grpc.credentials.createFromGoogleCredential(client)
+      );
       if (!this.projectId || this.projectId === '{{projectId}}') {
         this.projectId = client.projectId!;
       }
@@ -952,8 +989,10 @@ export class GrpcService extends Service {
    * @param config - The base config for the GrpcService.
    * @return protoObject - The loaded proto object.
    */
-  private loadProtoFile(protoPath: string, config: GrpcServiceConfig):
-      PackageDefinition {
+  private loadProtoFile(
+    protoPath: string,
+    config: GrpcServiceConfig
+  ): PackageDefinition {
     const protoObjectCacheKey = [config.protosDir, protoPath].join('$');
 
     if (!GrpcService.protoObjectCache[protoObjectCacheKey]) {
@@ -964,7 +1003,7 @@ export class GrpcService extends Service {
         longs: String,
         enums: String,
         oneofs: true,
-        includeDirs: [config.protosDir]
+        includeDirs: [config.protosDir],
       });
       GrpcService.protoObjectCache[protoObjectCacheKey] = services;
     }
@@ -986,12 +1025,15 @@ export class GrpcService extends Service {
 
     if (!service) {
       service = new proto[protoOpts.service](
-          proto.baseUrl || this.baseUrl, this.grpcCredentials,
-          Object.assign(
-              {
-                'grpc.primary_user_agent': this.userAgent,
-              },
-              GRPC_SERVICE_OPTIONS));
+        proto.baseUrl || this.baseUrl,
+        this.grpcCredentials,
+        Object.assign(
+          {
+            'grpc.primary_user_agent': this.userAgent,
+          },
+          GRPC_SERVICE_OPTIONS
+        )
+      );
 
       this.activeServiceMap_.set(protoOpts.service, service);
     }

@@ -28,15 +28,15 @@ import * as sn from 'sinon';
 import * as through from 'through2';
 
 const sinon = sn.createSandbox();
-const glob = global as {} as {GCLOUD_SANDBOX_ENV: boolean | {}};
+const glob = (global as {}) as {GCLOUD_SANDBOX_ENV: boolean | {}};
 
-let getUserAgentFromPackageJsonOverride: Function|null;
+let getUserAgentFromPackageJsonOverride: Function | null;
 const fakeUtil = Object.assign({}, util, {
   getUserAgentFromPackageJson: (...args) => {
-    return (getUserAgentFromPackageJsonOverride ||
-            util.getUserAgentFromPackageJson)
-        .apply(null, args);
-  }
+    return (
+      getUserAgentFromPackageJsonOverride || util.getUserAgentFromPackageJson
+    ).apply(null, args);
+  },
 });
 
 class FakeService {
@@ -48,8 +48,10 @@ class FakeService {
 
 let replaceProjectIdTokenOverride;
 function fakeReplaceProjectIdTokenOverride() {
-  return (replaceProjectIdTokenOverride || replaceProjectIdToken)
-      .apply(null, arguments);
+  return (replaceProjectIdTokenOverride || replaceProjectIdToken).apply(
+    null,
+    arguments
+  );
 }
 
 let retryRequestOverride;
@@ -68,7 +70,7 @@ class FakeMetadata {
 
 // tslint:disable-next-line:variable-name
 let GrpcMetadataOverride;
-let grpcProtoLoadOverride: (typeof grpcProtoLoader.loadSync)|null = null;
+let grpcProtoLoadOverride: (typeof grpcProtoLoader.loadSync) | null = null;
 const fakeGrpc = {
   Metadata: FakeMetadata,
   credentials: {
@@ -102,8 +104,10 @@ const fakeGrpc = {
 const fakeGrpcProtoLoader = {
   loadSync(filename: string, options?: grpcProtoLoader.Options) {
     return (grpcProtoLoadOverride || grpcProtoLoader.loadSync)(
-        filename, options);
-  }
+      filename,
+      options
+    );
+  },
 };
 
 describe('GrpcService', () => {
@@ -153,18 +157,18 @@ describe('GrpcService', () => {
   };
 
   before(() => {
-    GrpcService =
-        proxyquire('../src/service', {
-          '@google-cloud/common': {
-            Service: FakeService,
-            util: fakeUtil,
-          },
-          grpc: fakeGrpc,
-          '@google-cloud/projectify':
-              {replaceProjectIdToken: fakeReplaceProjectIdTokenOverride},
-          '@grpc/proto-loader': fakeGrpcProtoLoader,
-          'retry-request': fakeRetryRequest,
-        }).GrpcService;
+    GrpcService = proxyquire('../src/service', {
+      '@google-cloud/common': {
+        Service: FakeService,
+        util: fakeUtil,
+      },
+      grpc: fakeGrpc,
+      '@google-cloud/projectify': {
+        replaceProjectIdToken: fakeReplaceProjectIdTokenOverride,
+      },
+      '@grpc/proto-loader': fakeGrpcProtoLoader,
+      'retry-request': fakeRetryRequest,
+    }).GrpcService;
     GrpcServiceCached = extend(true, {}, GrpcService);
     ObjectToStructConverter = GrpcService.ObjectToStructConverter;
   });
@@ -311,12 +315,9 @@ describe('GrpcService', () => {
         }
       };
 
-      const fakeGrpcMetadata = Object.assign(
-          new GrpcMetadataOverride(),
-          {
-            'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
-          },
-      );
+      const fakeGrpcMetadata = Object.assign(new GrpcMetadataOverride(), {
+        'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
+      });
 
       const config = Object.assign({}, CONFIG);
       delete config.grpcMetadata;
@@ -333,11 +334,11 @@ describe('GrpcService', () => {
       };
 
       const fakeGrpcMetadata = Object.assign(
-          new GrpcMetadataOverride(),
-          {
-            'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
-          },
-          CONFIG.grpcMetadata,
+        new GrpcMetadataOverride(),
+        {
+          'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
+        },
+        CONFIG.grpcMetadata
       );
 
       const grpcService = new GrpcService(CONFIG, OPTIONS);
@@ -362,7 +363,9 @@ describe('GrpcService', () => {
 
     it('should localize the service', () => {
       assert.deepStrictEqual(
-          Object.keys(grpcService.protos), Object.keys(CONFIG.protoServices));
+        Object.keys(grpcService.protos),
+        Object.keys(CONFIG.protoServices)
+      );
     });
 
     it('should localize an empty Map of services', () => {
@@ -385,8 +388,9 @@ describe('GrpcService', () => {
 
       for (const serviceName of Object.keys(CONFIG.protoServices)) {
         assert.strictEqual(
-            grpcService.protos[serviceName],
-            MOCK_GRPC_API[`google.${SERVICE_PATH}.${serviceName}`]);
+          grpcService.protos[serviceName],
+          MOCK_GRPC_API[`google.${SERVICE_PATH}.${serviceName}`]
+        );
       }
     });
 
@@ -478,7 +482,9 @@ describe('GrpcService', () => {
         };
       });
       assert.strictEqual(
-          GrpcService.objToStruct_(obj, options), convertedObject);
+        GrpcService.objToStruct_(obj, options),
+        convertedObject
+      );
     });
   });
 
@@ -627,8 +633,12 @@ describe('GrpcService', () => {
 
         const shouldRetryFn = retryRequestOptions.shouldRetryFn;
 
-        const retryErrors =
-            [{code: 429}, {code: 500}, {code: 502}, {code: 503}];
+        const retryErrors = [
+          {code: 429},
+          {code: 500},
+          {code: 502},
+          {code: 503},
+        ];
 
         const nonRetryErrors = [
           {code: 200},
@@ -820,7 +830,7 @@ describe('GrpcService', () => {
           for (const grpcErrorCode in GrpcService.GRPC_ERROR_CODE_TO_HTTP) {
             const grpcError = {code: grpcErrorCode};
             const httpError =
-                GrpcService.GRPC_ERROR_CODE_TO_HTTP[grpcErrorCode];
+              GrpcService.GRPC_ERROR_CODE_TO_HTTP[grpcErrorCode];
 
             grpcService.getService_ = () => {
               return {
@@ -1023,8 +1033,9 @@ describe('GrpcService', () => {
             return through.obj();
           };
 
-          grpcService.requestStream(PROTO_OPTS, REQ_OPTS)
-              .on('error', assert.ifError);
+          grpcService
+            .requestStream(PROTO_OPTS, REQ_OPTS)
+            .on('error', assert.ifError);
         });
       });
 
@@ -1066,10 +1077,11 @@ describe('GrpcService', () => {
 
       it('should use retry-request', () => {
         const reqOpts = Object.assign(
-            {
-              objectMode: true,
-            },
-            REQ_OPTS);
+          {
+            objectMode: true,
+          },
+          REQ_OPTS
+        );
 
         grpcService.requestStream(PROTO_OPTS, reqOpts);
 
@@ -1078,7 +1090,9 @@ describe('GrpcService', () => {
         assert.strictEqual(retryRequestOptions.currentRetryAttempt, 0);
         assert.strictEqual(retryRequestOptions.objectMode, true);
         assert.strictEqual(
-            retryRequestOptions.shouldRetryFn, GrpcService.shouldRetryRequest_);
+          retryRequestOptions.shouldRetryFn,
+          GrpcService.shouldRetryRequest_
+        );
       });
 
       it('should emit the metadata event as a response event', done => {
@@ -1229,11 +1243,12 @@ describe('GrpcService', () => {
         });
 
         it('should execute callback with error', done => {
-          grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS)
-              .on('error', err => {
-                assert.strictEqual(err, error);
-                done();
-              });
+          grpcService
+            .requestWritableStream(PROTO_OPTS, REQ_OPTS)
+            .on('error', err => {
+              assert.strictEqual(err, error);
+              done();
+            });
         });
       });
 
@@ -1301,11 +1316,12 @@ describe('GrpcService', () => {
             throw error;
           };
 
-          grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS)
-              .on('error', err => {
-                assert.strictEqual(err, error);
-                done();
-              });
+          grpcService
+            .requestWritableStream(PROTO_OPTS, REQ_OPTS)
+            .on('error', err => {
+              assert.strictEqual(err, error);
+              done();
+            });
         });
       });
     });
@@ -1332,16 +1348,16 @@ describe('GrpcService', () => {
           return new ProtoService();
         };
 
-        grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS)
-            .on('response',
-                status => {
-                  assert.strictEqual(status, 'foo');
-                  assert.strictEqual(GrpcService.decorateStatus_.callCount, 1);
-                  assert(GrpcService.decorateStatus_.calledWith('foo'));
-                  GrpcService.decorateStatus_.restore();
-                  done();
-                })
-            .on('error', done);
+        grpcService
+          .requestWritableStream(PROTO_OPTS, REQ_OPTS)
+          .on('response', status => {
+            assert.strictEqual(status, 'foo');
+            assert.strictEqual(GrpcService.decorateStatus_.callCount, 1);
+            assert(GrpcService.decorateStatus_.calledWith('foo'));
+            GrpcService.decorateStatus_.restore();
+            done();
+          })
+          .on('error', done);
 
         setImmediate(() => {
           stream.emit('status', 'foo');
@@ -1614,7 +1630,9 @@ describe('GrpcService', () => {
       };
 
       assert.strictEqual(
-          grpcService.decorateRequest_(reqOpts), replacedReqOpts);
+        grpcService.decorateRequest_(reqOpts),
+        replacedReqOpts
+      );
     });
   });
 
@@ -1657,7 +1675,7 @@ describe('GrpcService', () => {
         grpcService.authClient = {
           async getClient() {
             return AUTH_CLIENT;
-          }
+          },
         };
       });
 
@@ -1673,9 +1691,13 @@ describe('GrpcService', () => {
 
           const createFromGoogleCredentialArg = grpcCredentials.args[1];
           assert.strictEqual(
-              createFromGoogleCredentialArg.name, 'createFromGoogleCredential');
+            createFromGoogleCredentialArg.name,
+            'createFromGoogleCredential'
+          );
           assert.strictEqual(
-              createFromGoogleCredentialArg.args[0], AUTH_CLIENT);
+            createFromGoogleCredentialArg.args[0],
+            AUTH_CLIENT
+          );
           done();
         });
       });
@@ -1741,8 +1763,9 @@ describe('GrpcService', () => {
       };
 
       grpcProtoLoadOverride = (file, options) => {
-        assert.deepStrictEqual(
-            options!.includeDirs, [fakeMainConfig.protosDir]);
+        assert.deepStrictEqual(options!.includeDirs, [
+          fakeMainConfig.protosDir,
+        ]);
         assert.strictEqual(file, fakeProtoPath);
 
         assert.strictEqual(options!.bytes, String);
@@ -1802,16 +1825,18 @@ describe('GrpcService', () => {
               assert.strictEqual(baseUrl, grpcService.baseUrl);
               assert.strictEqual(grpcCredentials, grpcService.grpcCredentials);
               assert.deepStrictEqual(
-                  userAgent,
-                  Object.assign(
-                      {
-                        'grpc.primary_user_agent': grpcService.userAgent,
-                      },
-                      GrpcService.GRPC_SERVICE_OPTIONS));
+                userAgent,
+                Object.assign(
+                  {
+                    'grpc.primary_user_agent': grpcService.userAgent,
+                  },
+                  GrpcService.GRPC_SERVICE_OPTIONS
+                )
+              );
 
               return fakeService;
             }
-          }
+          },
         },
       };
 
@@ -1849,7 +1874,7 @@ describe('GrpcService', () => {
       grpcService.protos = {
         Service: {
           baseUrl: fakeBaseUrl,
-          Service: class Service{
+          Service: class Service {
             constructor(baseUrl) {
               assert.strictEqual(baseUrl, fakeBaseUrl);
               return fakeService;
@@ -1947,7 +1972,7 @@ describe('GrpcService', () => {
           add(obj) {
             objectAdded = obj;
           },
-          delete (obj_) {
+          delete(obj_) {
             assert.strictEqual(obj_, obj);
             assert.strictEqual(objectAdded, obj);
             done();
@@ -1979,8 +2004,9 @@ describe('GrpcService', () => {
         });
 
         assert.strictEqual(
-            objectToStructConverter.encodeValue_(buffer).blobValue.toString(),
-            'Value');
+          objectToStructConverter.encodeValue_(buffer).blobValue.toString(),
+          'Value'
+        );
       });
 
       it('should convert arrays', () => {
@@ -2045,8 +2071,9 @@ describe('GrpcService', () => {
 
             it('should replace circular reference with [Circular]', () => {
               assert.deepStrictEqual(
-                  objectToStructConverter.encodeValue_(VALUE),
-                  {stringValue: '[Circular]'});
+                objectToStructConverter.encodeValue_(VALUE),
+                {stringValue: '[Circular]'}
+              );
             });
           });
         });
@@ -2065,8 +2092,9 @@ describe('GrpcService', () => {
           const date = new Date();
 
           assert.deepStrictEqual(
-              objectToStructConverter.encodeValue_(date, OPTIONS),
-              {stringValue: String(date)});
+            objectToStructConverter.encodeValue_(date, OPTIONS),
+            {stringValue: String(date)}
+          );
         });
       });
     });
