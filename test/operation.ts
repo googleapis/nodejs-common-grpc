@@ -26,7 +26,7 @@ import {GrpcService, ProtoOpts} from '../src/service';
 
 const sandbox = Sinon.createSandbox();
 
-let decorateErrorOverride_: Function|null;
+let decorateErrorOverride_: Function | null;
 class FakeGrpcService {
   static decorateError_() {
     return (decorateErrorOverride_ || util.noop).apply(null, arguments);
@@ -53,20 +53,19 @@ describe('GrpcOperation', () => {
   let grpcOperation: operationTypes.GrpcOperation;
 
   before(() => {
-    GrpcOperation =
-        proxyquire('../src/operation', {
-          './service-object': {GrpcServiceObject: FakeGrpcServiceObject},
-          './service': {GrpcService: FakeGrpcService}
-        }).GrpcOperation;
+    GrpcOperation = proxyquire('../src/operation', {
+      './service-object': {GrpcServiceObject: FakeGrpcServiceObject},
+      './service': {GrpcService: FakeGrpcService},
+    }).GrpcOperation;
   });
 
   beforeEach(() => {
     decorateErrorOverride_ = null;
-    grpcOperation =
-        new GrpcOperation(FAKE_SERVICE as GrpcService, OPERATION_ID);
+    grpcOperation = new GrpcOperation(
+      FAKE_SERVICE as GrpcService,
+      OPERATION_ID
+    );
   });
-
-
 
   describe('instantiation', () => {
     const EXPECTED_CONFIG = {
@@ -97,8 +96,8 @@ describe('GrpcOperation', () => {
     };
 
     it('should pass GrpcServiceObject the correct config', () => {
-      const config = (grpcOperation as {} as FakeGrpcServiceObject)
-                         .grpcServiceObjectArguments_![0];
+      const config = ((grpcOperation as {}) as FakeGrpcServiceObject)
+        .grpcServiceObjectArguments_![0];
       assert.deepStrictEqual(config, EXPECTED_CONFIG);
     });
   });
@@ -107,17 +106,19 @@ describe('GrpcOperation', () => {
     it('should provide the proper request options', done => {
       grpcOperation.id = OPERATION_ID;
 
-      grpcOperation.request =
-          (protoOpts: ProtoOpts, reqOpts: {name: string},
-           callback: Function) => {
-            assert.deepStrictEqual(protoOpts, {
-              service: 'Operations',
-              method: 'cancelOperation',
-            });
+      grpcOperation.request = (
+        protoOpts: ProtoOpts,
+        reqOpts: {name: string},
+        callback: Function
+      ) => {
+        assert.deepStrictEqual(protoOpts, {
+          service: 'Operations',
+          method: 'cancelOperation',
+        });
 
-            assert.strictEqual(reqOpts.name, OPERATION_ID);
-            callback();  // done()
-          };
+        assert.strictEqual(reqOpts.name, OPERATION_ID);
+        callback(); // done()
+      };
 
       grpcOperation.cancel(done);
     });
@@ -143,31 +144,32 @@ describe('GrpcOperation', () => {
       });
       // tslint:disable-next-line no-any
       (grpcOperation as any)
-          .poll_()
-          .then((r: r.Response) => {}, assert.ifError);
+        .poll_()
+        .then((r: r.Response) => {}, assert.ifError);
     });
 
     describe('could not get metadata', () => {
       it('should callback with an error', done => {
         const error = new Error('Error.');
-        sandbox.stub(grpcOperation, 'getMetadata').callsFake((callback) => {
+        sandbox.stub(grpcOperation, 'getMetadata').callsFake(callback => {
           callback(error);
         });
         // tslint:disable-next-line no-any
-        (grpcOperation as any)
-            .poll_()
-            .then((r: r.Response) => {}, (err: Error) => {
-              assert.strictEqual(err, error);
-              done();
-            });
+        (grpcOperation as any).poll_().then(
+          (r: r.Response) => {},
+          (err: Error) => {
+            assert.strictEqual(err, error);
+            done();
+          }
+        );
       });
 
       it('should callback with the operation error', done => {
         const apiResponse = {
           error: {},
         };
-        sandbox.stub(grpcOperation, 'getMetadata').callsFake((callback) => {
-          callback(null, apiResponse, apiResponse as {} as r.Response);
+        sandbox.stub(grpcOperation, 'getMetadata').callsFake(callback => {
+          callback(null, apiResponse, (apiResponse as {}) as r.Response);
         });
 
         const decoratedGrpcStatus = {};
@@ -178,12 +180,13 @@ describe('GrpcOperation', () => {
         };
 
         // tslint:disable-next-line no-any
-        (grpcOperation as any)
-            .poll_()
-            .then((r: r.Response) => {}, (err: Error) => {
-              assert.strictEqual(err, decoratedGrpcStatus);
-              done();
-            });
+        (grpcOperation as any).poll_().then(
+          (r: r.Response) => {},
+          (err: Error) => {
+            assert.strictEqual(err, decoratedGrpcStatus);
+            done();
+          }
+        );
       });
     });
     describe('operation incomplete', () => {
