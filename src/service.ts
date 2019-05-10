@@ -39,8 +39,7 @@ import * as grpc from 'grpc';
 import * as is from 'is';
 import * as r from 'request';
 import * as retryRequest from 'retry-request';
-import {Duplex} from 'stream';
-import * as through from 'through2';
+import {Duplex, PassThrough} from 'stream';
 
 export interface ServiceRequestCallback {
   (err: Error | null, apiResponse?: r.Response): void;
@@ -571,13 +570,13 @@ export class GrpcService extends Service {
      * Hence the weird casting below.
      */
     if (global['GCLOUD_SANDBOX_ENV']) {
-      return through.obj();
+      return new PassThrough({objectMode: true});
     }
     const protoOpts = pOpts as ProtoOpts;
     let reqOpts = rOpts as DecorateRequestOptions;
 
     if (!protoOpts.stream) {
-      protoOpts.stream = through.obj();
+      protoOpts.stream = new PassThrough({objectMode: true});
     }
 
     const stream = protoOpts.stream;

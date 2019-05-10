@@ -25,7 +25,7 @@ import * as is from 'is';
 import * as proxyquire from 'proxyquire';
 import * as retryRequest from 'retry-request';
 import * as sn from 'sinon';
-import * as through from 'through2';
+import {PassThrough} from 'stream';
 
 const sinon = sn.createSandbox();
 const glob = (global as {}) as {GCLOUD_SANDBOX_ENV: boolean | {}};
@@ -893,7 +893,7 @@ describe('GrpcService', () => {
         return new ProtoService();
       };
 
-      fakeStream = through.obj();
+      fakeStream = new PassThrough({objectMode: true});
       retryRequestOverride = () => {
         return fakeStream;
       };
@@ -983,7 +983,7 @@ describe('GrpcService', () => {
         GrpcService.createDeadline_ = createDeadline;
         setImmediate(done);
 
-        return through.obj();
+        return new PassThrough({objectMode: true});
       };
 
       retryRequestOverride = (_, retryOpts) => {
@@ -997,7 +997,7 @@ describe('GrpcService', () => {
       ProtoService.prototype.method = (reqOpts, metadata) => {
         assert.strictEqual(metadata, grpcService.grpcMetadata);
         setImmediate(done);
-        return through.obj();
+        return new PassThrough({objectMode: true});
       };
 
       retryRequestOverride = (_, retryOpts) => {
@@ -1010,7 +1010,7 @@ describe('GrpcService', () => {
     describe('request option decoration', () => {
       beforeEach(() => {
         ProtoService.prototype.method = () => {
-          return through.obj();
+          return new PassThrough({objectMode: true});
         };
 
         retryRequestOverride = (reqOpts, options) => {
@@ -1030,7 +1030,7 @@ describe('GrpcService', () => {
           ProtoService.prototype.method = reqOpts => {
             assert.strictEqual(reqOpts, decoratedRequest);
             setImmediate(done);
-            return through.obj();
+            return new PassThrough({objectMode: true});
           };
 
           grpcService
@@ -1062,7 +1062,7 @@ describe('GrpcService', () => {
 
       beforeEach(() => {
         retryRequestReqOpts = retryRequestOptions = null;
-        retryStream = through.obj();
+        retryStream = new PassThrough({objectMode: true});
 
         retryRequestOverride = (reqOpts, options) => {
           retryRequestReqOpts = reqOpts;
@@ -1096,7 +1096,7 @@ describe('GrpcService', () => {
       });
 
       it('should emit the metadata event as a response event', done => {
-        const fakeStream = through.obj();
+        const fakeStream = new PassThrough({objectMode: true});
 
         ProtoService.prototype.method = () => {
           return fakeStream;
@@ -1202,7 +1202,7 @@ describe('GrpcService', () => {
         GrpcService.createDeadline_ = createDeadline;
         setImmediate(done);
 
-        return through.obj();
+        return new PassThrough({objectMode: true});
       };
 
       retryRequestOverride = (_, retryOpts) => {
@@ -1216,7 +1216,7 @@ describe('GrpcService', () => {
       ProtoService.prototype.method = (reqOpts, metadata) => {
         assert.strictEqual(metadata, grpcService.grpcMetadata);
         setImmediate(done);
-        return through.obj();
+        return new PassThrough({objectMode: true});
       };
 
       retryRequestOverride = (_, retryOpts) => {
@@ -1281,7 +1281,7 @@ describe('GrpcService', () => {
     describe('request option decoration', () => {
       beforeEach(() => {
         ProtoService.prototype.method = () => {
-          return through.obj();
+          return new PassThrough({objectMode: true});
         };
 
         retryRequestOverride = (reqOpts, options) => {
@@ -1301,7 +1301,7 @@ describe('GrpcService', () => {
           ProtoService.prototype.method = reqOpts => {
             assert.strictEqual(reqOpts, decoratedRequest);
             setImmediate(done);
-            return through.obj();
+            return new PassThrough({objectMode: true});
           };
 
           grpcService.requestWritableStream(PROTO_OPTS, REQ_OPTS);
