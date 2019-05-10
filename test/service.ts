@@ -183,13 +183,13 @@ describe('GrpcService', () => {
     };
     const grpcService = new GrpcService(
       Object.assign(
-        {grpc: fakeGrpc, grpcVersion: '1.2.3', customEndpoint: 'endpoint'},
+        {grpc: fakeGrpc, grpcVersion: 'grpc-foo/1.2.3', customEndpoint: 'endpoint'},
         CONFIG
       ),
       OPTIONS
     );
     assert.strictEqual(grpcService.grpc, fakeGrpc);
-    assert.strictEqual(grpcService.grpcVersion, '1.2.3');
+    assert.strictEqual(grpcService.grpcVersion, 'grpc-foo/1.2.3');
     assert(metadataUsed > 0);
     assert(credentialsUsed > 0);
   });
