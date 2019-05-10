@@ -20,7 +20,7 @@ import * as grpcProtoLoader from '@grpc/proto-loader';
 import * as assert from 'assert';
 import * as duplexify from 'duplexify';
 import * as extend from 'extend';
-import * as grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 import * as is from 'is';
 import * as proxyquire from 'proxyquire';
 import * as retryRequest from 'retry-request';
@@ -149,7 +149,7 @@ describe('GrpcService', () => {
   const EXPECTED_API_CLIENT_HEADER = [
     'gl-node/' + process.versions.node,
     'gccl/' + CONFIG.packageJson.version,
-    'grpc/' + require('grpc/package.json').version,
+    'grpc-js/' + require('@grpc/grpc-js/package.json').version,
   ].join(' ');
 
   const MOCK_GRPC_API: grpcProtoLoader.PackageDefinition = {
@@ -305,44 +305,39 @@ describe('GrpcService', () => {
     it('should set insecure credentials if using customEndpoint', () => {
       const config = Object.assign({}, CONFIG, {customEndpoint: true});
       const grpcService = new GrpcService(config, OPTIONS);
-      assert.strictEqual(grpcService.grpcCredentials.name, 'createInsecure');
+      assert.strictEqual(
+        grpcService.grpcCredentials.constructor.name,
+        'InsecureChannelCredentialsImpl'
+      );
     });
 
     it('should default grpcMetadata to empty metadata', () => {
-      GrpcMetadataOverride = class {
-        add(prop, val) {
-          this[prop] = val;
-        }
-      };
-
-      const fakeGrpcMetadata = Object.assign(new GrpcMetadataOverride(), {
+      const fakeGrpcMetadata = {
         'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
-      });
+      };
 
       const config = Object.assign({}, CONFIG);
       delete config.grpcMetadata;
 
       const grpcService = new GrpcService(config, OPTIONS);
-      assert.deepStrictEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
+      assert.deepStrictEqual(
+        grpcService.grpcMetadata.getMap(),
+        fakeGrpcMetadata
+      );
     });
 
     it('should create and localize grpcMetadata', () => {
-      GrpcMetadataOverride = class {
-        add(prop, val) {
-          this[prop] = val;
-        }
-      };
-
       const fakeGrpcMetadata = Object.assign(
-        new GrpcMetadataOverride(),
         {
           'x-goog-api-client': EXPECTED_API_CLIENT_HEADER,
         },
         CONFIG.grpcMetadata
       );
-
       const grpcService = new GrpcService(CONFIG, OPTIONS);
-      assert.deepStrictEqual(grpcService.grpcMetadata, fakeGrpcMetadata);
+      assert.deepStrictEqual(
+        grpcService.grpcMetadata.getMap(),
+        fakeGrpcMetadata
+      );
     });
 
     it('should localize maxRetries', () => {
@@ -1682,21 +1677,9 @@ describe('GrpcService', () => {
       it('should return grpcCredentials', done => {
         grpcService.getGrpcCredentials_((err, grpcCredentials) => {
           assert.ifError(err);
-
-          assert.strictEqual(grpcCredentials.name, 'combineChannelCredentials');
-
-          const createSslArg = grpcCredentials.args[0];
-          assert.strictEqual(createSslArg.name, 'createSsl');
-          assert.deepStrictEqual(createSslArg.args.length, 0);
-
-          const createFromGoogleCredentialArg = grpcCredentials.args[1];
           assert.strictEqual(
-            createFromGoogleCredentialArg.name,
-            'createFromGoogleCredential'
-          );
-          assert.strictEqual(
-            createFromGoogleCredentialArg.args[0],
-            AUTH_CLIENT
+            grpcCredentials.constructor.name,
+            'SecureChannelCredentialsImpl'
           );
           done();
         });

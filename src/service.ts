@@ -35,7 +35,7 @@ import {
 import * as duplexify from 'duplexify';
 import {EventEmitter} from 'events';
 import * as extend from 'extend';
-import * as grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 import * as is from 'is';
 import * as r from 'request';
 import * as retryRequest from 'retry-request';
@@ -378,7 +378,7 @@ export class GrpcService extends Service {
       [
         'gl-node/' + process.versions.node,
         'gccl/' + config.packageJson.version,
-        'grpc/' + require('grpc/package.json').version,
+        'grpc-js/' + require('@grpc/grpc-js/package.json').version,
       ].join(' ')
     );
 
