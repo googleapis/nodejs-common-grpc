@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 
 import {GrpcOperation} from './operation';
 import {GrpcService} from './service';

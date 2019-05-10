@@ -20,7 +20,7 @@ import * as grpcProtoLoader from '@grpc/proto-loader';
 import * as assert from 'assert';
 import * as duplexify from 'duplexify';
 import * as extend from 'extend';
-import * as grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 import * as is from 'is';
 import * as proxyquire from 'proxyquire';
 import * as retryRequest from 'retry-request';
@@ -149,7 +149,7 @@ describe('GrpcService', () => {
   const EXPECTED_API_CLIENT_HEADER = [
     'gl-node/' + process.versions.node,
     'gccl/' + CONFIG.packageJson.version,
-    'grpc/' + require('grpc/package.json').version,
+    'grpc-js/' + require('@grpc/grpc-js/package.json').version,
   ].join(' ');
 
   const MOCK_GRPC_API: grpcProtoLoader.PackageDefinition = {
