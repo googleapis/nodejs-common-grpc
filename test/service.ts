@@ -164,7 +164,7 @@ describe('GrpcService', () => {
     sinon.restore();
   });
 
-  it('should use grpc from config object', async () => {
+  it('should use grpc from config object', () => {
     let metadataUsed = 0;
     let credentialsUsed = 0;
     class Credentials {
@@ -183,7 +183,11 @@ describe('GrpcService', () => {
     };
     const grpcService = new GrpcService(
       Object.assign(
-        {grpc: fakeGrpc, grpcVersion: 'grpc-foo/1.2.3', customEndpoint: 'endpoint'},
+        {
+          grpc: fakeGrpc,
+          grpcVersion: 'grpc-foo/1.2.3',
+          customEndpoint: 'endpoint',
+        },
         CONFIG
       ),
       OPTIONS
@@ -194,7 +198,22 @@ describe('GrpcService', () => {
     assert(credentialsUsed > 0);
   });
 
-  it('should use @grpc/grpc-js by default', async () => {
+  it('should not use @grpc/grpc-js version if grpc object is passed', () => {
+    class Metadata {
+      add() {}
+    }
+    const fakeGrpc = {
+      Metadata,
+    };
+    const grpcService = new GrpcService(
+      Object.assign({grpc: fakeGrpc}, CONFIG),
+      OPTIONS
+    );
+    assert.strictEqual(grpcService.grpc, fakeGrpc);
+    assert.strictEqual(grpcService.grpcVersion, 'grpc/unknown');
+  });
+
+  it('should use @grpc/grpc-js by default', () => {
     const grpcService = new GrpcService(CONFIG, OPTIONS);
     assert.strictEqual(grpcService.grpcVersion, 'grpc-js/' + grpcJsVersion);
     assert.strictEqual(grpcService.grpc, grpc);
