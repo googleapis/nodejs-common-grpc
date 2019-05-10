@@ -62,9 +62,9 @@ interface GrpcOptions {
  */
 export interface GrpcServiceConfig extends ServiceConfig {
   /** gRPC implementation to use. By default, uses `@grpc/grpc-js`. */
-  grpc: typeof grpc;
+  grpc?: typeof grpc;
   /** gRPC version, to send in headers */
-  grpcVersion: string;
+  grpcVersion?: string;
   /** Metadata to send with every request. */
   grpcMetadata: grpc.Metadata;
   /** The root directory where proto files live. */
