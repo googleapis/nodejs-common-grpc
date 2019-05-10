@@ -305,7 +305,10 @@ describe('GrpcService', () => {
     it('should set insecure credentials if using customEndpoint', () => {
       const config = Object.assign({}, CONFIG, {customEndpoint: true});
       const grpcService = new GrpcService(config, OPTIONS);
-      assert.strictEqual(grpcService.grpcCredentials.constructor.name, 'InsecureChannelCredentialsImpl');
+      assert.strictEqual(
+        grpcService.grpcCredentials.constructor.name,
+        'InsecureChannelCredentialsImpl'
+      );
     });
 
     it('should default grpcMetadata to empty metadata', () => {
@@ -317,7 +320,10 @@ describe('GrpcService', () => {
       delete config.grpcMetadata;
 
       const grpcService = new GrpcService(config, OPTIONS);
-      assert.deepStrictEqual(grpcService.grpcMetadata.getMap(), fakeGrpcMetadata);
+      assert.deepStrictEqual(
+        grpcService.grpcMetadata.getMap(),
+        fakeGrpcMetadata
+      );
     });
 
     it('should create and localize grpcMetadata', () => {
@@ -328,7 +334,10 @@ describe('GrpcService', () => {
         CONFIG.grpcMetadata
       );
       const grpcService = new GrpcService(CONFIG, OPTIONS);
-      assert.deepStrictEqual(grpcService.grpcMetadata.getMap(), fakeGrpcMetadata);
+      assert.deepStrictEqual(
+        grpcService.grpcMetadata.getMap(),
+        fakeGrpcMetadata
+      );
     });
 
     it('should localize maxRetries', () => {
@@ -1668,7 +1677,10 @@ describe('GrpcService', () => {
       it('should return grpcCredentials', done => {
         grpcService.getGrpcCredentials_((err, grpcCredentials) => {
           assert.ifError(err);
-          assert.strictEqual(grpcCredentials.constructor.name, 'SecureChannelCredentialsImpl');
+          assert.strictEqual(
+            grpcCredentials.constructor.name,
+            'SecureChannelCredentialsImpl'
+          );
           done();
         });
       });
