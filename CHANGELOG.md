@@ -4,6 +4,34 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+## [1.0.0](https://www.github.com/googleapis/nodejs-common-grpc/compare/v0.10.1...v1.0.0) (2019-05-10)
+
+
+### Bug Fixes
+
+* upgrade to grpc-js ([#240](https://www.github.com/googleapis/nodejs-common-grpc/issues/240)) ([a2e03d3](https://www.github.com/googleapis/nodejs-common-grpc/commit/a2e03d3))
+* **deps:** update dependency @google-cloud/common to ^0.32.0 ([4fd67f4](https://www.github.com/googleapis/nodejs-common-grpc/commit/4fd67f4)), closes [#8203](https://www.github.com/googleapis/nodejs-common-grpc/issues/8203)
+* **deps:** update dependency @google-cloud/projectify to v1 ([#232](https://www.github.com/googleapis/nodejs-common-grpc/issues/232)) ([34fb9e7](https://www.github.com/googleapis/nodejs-common-grpc/commit/34fb9e7))
+* **deps:** update dependency @google-cloud/promisify to v1 ([#233](https://www.github.com/googleapis/nodejs-common-grpc/issues/233)) ([8e6549b](https://www.github.com/googleapis/nodejs-common-grpc/commit/8e6549b))
+* **deps:** update dependency @grpc/proto-loader to ^0.5.0 ([#224](https://www.github.com/googleapis/nodejs-common-grpc/issues/224)) ([06c736e](https://www.github.com/googleapis/nodejs-common-grpc/commit/06c736e))
+
+
+### Build System
+
+* upgrade engines field to >=8.10.0 ([#230](https://www.github.com/googleapis/nodejs-common-grpc/issues/230)) ([f3deec6](https://www.github.com/googleapis/nodejs-common-grpc/commit/f3deec6))
+
+
+### Features
+
+* allow passing grpc in service constructor ([#241](https://www.github.com/googleapis/nodejs-common-grpc/issues/241)) ([1815d40](https://www.github.com/googleapis/nodejs-common-grpc/commit/1815d40))
+
+
+### BREAKING CHANGES
+
+* switches from grpc to @grpc/grpc-js. @grpc/grpc-js is a functionally equivalent pure-JS implementation, but does have some differences in its API surface. Also, @grpc/grpc-js requires http2 support so only works in Node.js v8.9+.
+* upgrade to grpc-js (#240)
+* upgrade engines field to >=8.10.0 (#230)
+
 ## v0.10.1
 
 03-13-2019 21:40 PDT
@@ -120,4 +148,3 @@ This patch release includes a variety of TypeScript type fixes.
 - chore(deps): update dependency gts to ^0.8.0 (#88)
 - Configure Renovate (#83)
 - refactor: drop repo-tool as an exec wrapper (#85)
-
