@@ -71,35 +71,6 @@ class FakeMetadata {
 // tslint:disable-next-line:variable-name
 let GrpcMetadataOverride;
 let grpcProtoLoadOverride: (typeof grpcProtoLoader.loadSync) | null = null;
-const fakeGrpc = {
-  Metadata: FakeMetadata,
-  credentials: {
-    combineChannelCredentials() {
-      return {
-        name: 'combineChannelCredentials',
-        args: arguments,
-      };
-    },
-    createSsl() {
-      return {
-        name: 'createSsl',
-        args: arguments,
-      };
-    },
-    createFromGoogleCredential() {
-      return {
-        name: 'createFromGoogleCredential',
-        args: arguments,
-      };
-    },
-    createInsecure() {
-      return {
-        name: 'createInsecure',
-        args: arguments,
-      };
-    },
-  },
-};
 
 const fakeGrpcProtoLoader = {
   loadSync(filename: string, options?: grpcProtoLoader.Options) {
@@ -146,10 +117,12 @@ describe('GrpcService', () => {
     maxRetries: 3,
   };
 
+  const grpcJsVersion = require('@grpc/grpc-js/package.json').version;
+
   const EXPECTED_API_CLIENT_HEADER = [
     'gl-node/' + process.versions.node,
     'gccl/' + CONFIG.packageJson.version,
-    'grpc-js/' + require('@grpc/grpc-js/package.json').version,
+    'grpc-js/' + grpcJsVersion,
   ].join(' ');
 
   const MOCK_GRPC_API: grpcProtoLoader.PackageDefinition = {
@@ -162,7 +135,6 @@ describe('GrpcService', () => {
         Service: FakeService,
         util: fakeUtil,
       },
-      grpc: fakeGrpc,
       '@google-cloud/projectify': {
         replaceProjectIdToken: fakeReplaceProjectIdTokenOverride,
       },
@@ -190,6 +162,61 @@ describe('GrpcService', () => {
     // across tests.
     GrpcService['protoObjectCache'] = {};
     sinon.restore();
+  });
+
+  it('should use grpc from config object', () => {
+    let metadataUsed = 0;
+    let credentialsUsed = 0;
+    class Credentials {
+      createInsecure() {
+        ++credentialsUsed;
+      }
+    }
+    class Metadata {
+      add() {
+        ++metadataUsed;
+      }
+    }
+    const fakeGrpc = {
+      Metadata,
+      credentials: new Credentials(),
+    };
+    const grpcService = new GrpcService(
+      Object.assign(
+        {
+          grpc: fakeGrpc,
+          grpcVersion: 'grpc-foo/1.2.3',
+          customEndpoint: 'endpoint',
+        },
+        CONFIG
+      ),
+      OPTIONS
+    );
+    assert.strictEqual(grpcService.grpc, fakeGrpc);
+    assert.strictEqual(grpcService.grpcVersion, 'grpc-foo/1.2.3');
+    assert(metadataUsed > 0);
+    assert(credentialsUsed > 0);
+  });
+
+  it('should not use @grpc/grpc-js version if grpc object is passed', () => {
+    class Metadata {
+      add() {}
+    }
+    const fakeGrpc = {
+      Metadata,
+    };
+    const grpcService = new GrpcService(
+      Object.assign({grpc: fakeGrpc}, CONFIG),
+      OPTIONS
+    );
+    assert.strictEqual(grpcService.grpc, fakeGrpc);
+    assert.strictEqual(grpcService.grpcVersion, 'grpc/unknown');
+  });
+
+  it('should use @grpc/grpc-js by default', () => {
+    const grpcService = new GrpcService(CONFIG, OPTIONS);
+    assert.strictEqual(grpcService.grpcVersion, 'grpc-js/' + grpcJsVersion);
+    assert.strictEqual(grpcService.grpc, grpc);
   });
 
   describe('grpc error to http error map', () => {

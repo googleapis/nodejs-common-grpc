@@ -61,6 +61,10 @@ interface GrpcOptions {
  * Configuration object for GrpcService.
  */
 export interface GrpcServiceConfig extends ServiceConfig {
+  /** gRPC implementation to use. By default, uses `@grpc/grpc-js`. */
+  grpc?: typeof grpc;
+  /** gRPC version, to send in headers */
+  grpcVersion?: string;
   /** Metadata to send with every request. */
   grpcMetadata: grpc.Metadata;
   /** The root directory where proto files live. */
@@ -329,6 +333,8 @@ export class ObjectToStructConverter {
 }
 
 export class GrpcService extends Service {
+  grpc?: typeof grpc;
+  grpcVersion?: string;
   grpcCredentials?: {};
   grpcMetadata?: {add: Function};
   maxRetries?: number;
@@ -366,22 +372,27 @@ export class GrpcService extends Service {
       // https://github.com/GoogleCloudPlatform/google-cloud-node/pull/1137#issuecomment-193315047
       return global['GCLOUD_SANDBOX_ENV'];
     }
-
+    if (config.grpc) {
+      this.grpc = config.grpc;
+      this.grpcVersion = config.grpcVersion || 'grpc/unknown';
+    } else {
+      this.grpc = grpc;
+      this.grpcVersion =
+        'grpc-js/' + require('@grpc/grpc-js/package.json').version;
+    }
     if (config.customEndpoint) {
-      this.grpcCredentials = grpc.credentials.createInsecure();
+      this.grpcCredentials = this.grpc.credentials.createInsecure();
     }
 
-    this.grpcMetadata = new grpc.Metadata();
-
+    this.grpcMetadata = new this.grpc.Metadata();
     this.grpcMetadata.add(
       'x-goog-api-client',
       [
         'gl-node/' + process.versions.node,
         'gccl/' + config.packageJson.version,
-        'grpc-js/' + require('@grpc/grpc-js/package.json').version,
+        this.grpcVersion,
       ].join(' ')
     );
-
     if (config.grpcMetadata) {
       for (const prop in config.grpcMetadata) {
         if (config.grpcMetadata.hasOwnProperty(prop)) {
@@ -967,9 +978,9 @@ export class GrpcService extends Service {
    */
   private getGrpcCredentials_(callback) {
     this.authClient.getClient().then(client => {
-      const credentials = grpc.credentials.combineChannelCredentials(
-        grpc.credentials.createSsl(),
-        grpc.credentials.createFromGoogleCredential(client)
+      const credentials = this.grpc!.credentials.combineChannelCredentials(
+        this.grpc!.credentials.createSsl(),
+        this.grpc!.credentials.createFromGoogleCredential(client)
       );
       if (!this.projectId || this.projectId === '{{projectId}}') {
         this.projectId = client.projectId!;
