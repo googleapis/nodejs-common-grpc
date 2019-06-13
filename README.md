@@ -14,7 +14,7 @@
 Common components for Cloud APIs Node.js Client Libraries that require gRPC
 
 
-
+* [Google Cloud Common gRPC Node.js Client API Reference][client-docs]
 
 * [github.com/googleapis/nodejs-common-grpc](https://github.com/googleapis/nodejs-common-grpc)
 
@@ -65,6 +65,9 @@ has instructions for running the samples.
 
 
 
+The [Google Cloud Common gRPC Node.js Client API Reference][client-docs] documentation
+also contains samples.
+
 ## Versioning
 
 This library follows [Semantic Versioning](http://semver.org/).
@@ -94,7 +97,7 @@ Apache Version 2.0
 
 See [LICENSE](https://github.com/googleapis/nodejs-common-grpc/blob/master/LICENSE)
 
-
+[client-docs]: https://googleapis.dev/nodejs/common-grpc/latest
 
 [shell_img]: https://gstatic.com/cloudssh/images/open-btn.png
 [projects]: https://console.cloud.google.com/project

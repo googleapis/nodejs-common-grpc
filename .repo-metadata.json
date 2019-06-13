@@ -4,5 +4,6 @@
   "release_level": "ga",
   "language": "nodejs",
   "repo": "googleapis/nodejs-common-grpc",
-  "distribution_name": "@google-cloud/common-grpc"
+  "distribution_name": "@google-cloud/common-grpc",
+  "client_documentation": "https://googleapis.dev/nodejs/common-grpc/latest"
 }
