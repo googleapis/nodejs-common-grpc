@@ -26,10 +26,11 @@ import {
   ServiceObjectConfig,
   SetMetadataResponse,
   util,
+  BodyResponseCallback,
 } from '@google-cloud/common';
 import {promisifyAll} from '@google-cloud/promisify';
 import * as extend from 'extend';
-import * as r from 'request';
+import {Options} from 'teeny-request';
 
 export class GrpcServiceObject extends ServiceObject {
   parent!: GrpcServiceObject;
@@ -55,9 +56,9 @@ export class GrpcServiceObject extends ServiceObject {
    * @param {function=} callback - The callback function.
    * @param {?error} callback.err - An error returned while making this request.
    */
-  delete(): Promise<[r.Response]>;
-  delete(callback: r.RequestCallback): void;
-  delete(callback?: r.RequestCallback): void | Promise<[r.Response]> {
+  delete(): Promise<[Metadata]>;
+  delete(callback: BodyResponseCallback): void;
+  delete(callback?: BodyResponseCallback): void | Promise<[Metadata]> {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.delete as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.delete);
@@ -77,7 +78,7 @@ export class GrpcServiceObject extends ServiceObject {
     // tslint:disable-next-line:no-any
     const protoOpts = (this.methods.getMetadata as any).protoOpts;
     const reqOpts = this.getOpts(this.methods.getMetadata);
-    this.request(protoOpts, reqOpts, (err: Error, resp: r.Response) => {
+    this.request(protoOpts, reqOpts, (err, resp) => {
       if (err) {
         callback!(err, null, resp);
         return;
@@ -139,7 +140,7 @@ export class GrpcServiceObject extends ServiceObject {
     return (this.parent as any).requestWritableStream.apply(this.parent, args);
   }
 
-  private getOpts(metadata: boolean | {reqOpts?: r.CoreOptions}) {
+  private getOpts(metadata: boolean | {reqOpts?: Options}) {
     return typeof metadata === 'boolean' ? {} : metadata.reqOpts || {};
   }
 }

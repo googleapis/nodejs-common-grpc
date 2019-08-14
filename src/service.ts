@@ -25,6 +25,7 @@ import {
   Service,
   ServiceConfig,
   util,
+  Metadata,
 } from '@google-cloud/common';
 import {replaceProjectIdToken} from '@google-cloud/projectify';
 import {
@@ -37,12 +38,12 @@ import {EventEmitter} from 'events';
 import * as extend from 'extend';
 import * as grpc from '@grpc/grpc-js';
 import * as is from 'is';
-import * as r from 'request';
 import * as retryRequest from 'retry-request';
 import {Duplex, PassThrough} from 'stream';
+import {Request, Response} from 'teeny-request';
 
 export interface ServiceRequestCallback {
-  (err: Error | null, apiResponse?: r.Response): void;
+  (err: Error | null, apiResponse?: Metadata): void;
 }
 
 export interface ProtoOpts {
@@ -436,7 +437,7 @@ export class GrpcService extends Service {
    * @param {object} reqOpts - The request options.
    * @param {function=} callback - The callback function.
    */
-  request(reqOpts: DecorateRequestOptions): Promise<r.Response>;
+  request(reqOpts: DecorateRequestOptions): Promise<Response>;
   request(
     reqOpts: DecorateRequestOptions,
     callback: BodyResponseCallback
@@ -444,7 +445,7 @@ export class GrpcService extends Service {
   request(
     reqOpts: DecorateRequestOptions,
     callback?: BodyResponseCallback
-  ): void | Promise<r.Response>;
+  ): void | Promise<Response>;
   request(
     protoOpts: ProtoOpts,
     reqOpts: DecorateRequestOptions,
@@ -454,7 +455,7 @@ export class GrpcService extends Service {
     pOpts: ProtoOpts | DecorateRequestOptions,
     rOpts?: DecorateRequestOptions | BodyResponseCallback,
     callback?: ServiceRequestCallback
-  ): Abortable | void | Promise<r.Response> {
+  ): Abortable | void | Promise<Response> {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends
@@ -563,12 +564,12 @@ export class GrpcService extends Service {
    *     request cancel.
    * @param {object} reqOpts - The request options.
    */
-  requestStream(reqOpts: DecorateRequestOptions): r.Request;
+  requestStream(reqOpts: DecorateRequestOptions): Request;
   requestStream(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions): Duplex;
   requestStream(
     pOpts: ProtoOpts | DecorateRequestOptions,
     rOpts?: DecorateRequestOptions
-  ): Duplex | r.Request {
+  ): Duplex | Request {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends

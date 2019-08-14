@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {util} from '@google-cloud/common';
+import {util, Metadata} from '@google-cloud/common';
 import * as assert from 'assert';
 import {EventEmitter} from 'events';
 import * as proxyquire from 'proxyquire';
-import * as r from 'request';
 import * as Sinon from 'sinon';
 
 import * as operationTypes from '../src/operation';
@@ -143,9 +142,7 @@ describe('GrpcOperation', () => {
         done();
       });
       // tslint:disable-next-line no-any
-      (grpcOperation as any)
-        .poll_()
-        .then((r: r.Response) => {}, assert.ifError);
+      (grpcOperation as any).poll_().then((r: {}) => {}, assert.ifError);
     });
 
     describe('could not get metadata', () => {
@@ -156,7 +153,7 @@ describe('GrpcOperation', () => {
         });
         // tslint:disable-next-line no-any
         (grpcOperation as any).poll_().then(
-          (r: r.Response) => {},
+          r => {},
           (err: Error) => {
             assert.strictEqual(err, error);
             done();
@@ -169,7 +166,7 @@ describe('GrpcOperation', () => {
           error: {},
         };
         sandbox.stub(grpcOperation, 'getMetadata').callsFake(callback => {
-          callback(null, apiResponse, (apiResponse as {}) as r.Response);
+          callback(null, apiResponse, apiResponse as Metadata);
         });
 
         const decoratedGrpcStatus = {};
@@ -181,7 +178,7 @@ describe('GrpcOperation', () => {
 
         // tslint:disable-next-line no-any
         (grpcOperation as any).poll_().then(
-          (r: r.Response) => {},
+          r => {},
           (err: Error) => {
             assert.strictEqual(err, decoratedGrpcStatus);
             done();
@@ -200,7 +197,7 @@ describe('GrpcOperation', () => {
 
       it('should callback with no arguments', async () => {
         // tslint:disable-next-line no-any
-        return (grpcOperation as any).poll_().then((resp: r.Response) => {
+        return (grpcOperation as any).poll_().then(resp => {
           assert.strictEqual(resp, undefined);
         }, assert.ifError);
       });
@@ -217,7 +214,7 @@ describe('GrpcOperation', () => {
 
       it('should emit complete with metadata', async () => {
         // tslint:disable-next-line no-any
-        return (grpcOperation as any).poll_().then((resp: r.Response) => {
+        return (grpcOperation as any).poll_().then(resp => {
           assert.strictEqual(resp, apiResponse);
         }, assert.ifError);
       });
