@@ -19,7 +19,7 @@
  */
 
 import {Metadata, ServiceObjectConfig, util} from '@google-cloud/common';
-import * as r from 'request';
+import {Response} from 'teeny-request';
 
 /**
  * @type {module:commonGrpc/service}
@@ -107,7 +107,7 @@ export class GrpcOperation extends GrpcServiceObject {
    *     request.
    * @param {object} callback.apiResponse - The full API response.
    */
-  cancel(callback: (err: Error | null, apiResponse?: r.Response) => void) {
+  cancel(callback: (err: Error | null, apiResponse?: Response) => void) {
     const protoOpts = {
       service: 'Operations',
       method: 'cancelOperation',
