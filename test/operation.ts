@@ -143,9 +143,7 @@ describe('GrpcOperation', () => {
         done();
       });
       // tslint:disable-next-line no-any
-      (grpcOperation as any)
-        .poll_()
-        .then((r: Response) => {}, assert.ifError);
+      (grpcOperation as any).poll_().then((r: Response) => {}, assert.ifError);
     });
 
     describe('could not get metadata', () => {

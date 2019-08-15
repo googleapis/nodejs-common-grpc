@@ -46,12 +46,13 @@ export interface ServiceRequestCallback {
 }
 
 interface RetryOptions {
-  objectMode?: boolean,
-  request?: any,
-  retries?: number,
-  noResponseRetries?: number,
-  currentRetryAttempt?: number,
-  shouldRetryFn?: (response: Response) => boolean
+  objectMode?: boolean;
+  // tslint:disable-next-line:no-any
+  request?: any;
+  retries?: number;
+  noResponseRetries?: number;
+  currentRetryAttempt?: number;
+  shouldRetryFn?: (response: Response) => boolean;
 }
 
 export interface ProtoOpts {
@@ -553,7 +554,7 @@ export class GrpcService extends Service {
       protoOpts.retryOpts
     );
 
-    return retryRequest(null!, retryOpts, (err, resp: any) => {
+    return retryRequest(null!, retryOpts, (err, resp: object) => {
       if (!err && resp === respError) {
         err = respError;
         resp = null!;
