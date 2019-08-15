@@ -45,11 +45,20 @@ export interface ServiceRequestCallback {
   (err: Error | null, apiResponse?: Response): void;
 }
 
+interface RetryOptions {
+  objectMode?: boolean,
+  request?: any,
+  retries?: number,
+  noResponseRetries?: number,
+  currentRetryAttempt?: number,
+  shouldRetryFn?: (response: Response) => boolean
+}
+
 export interface ProtoOpts {
   service: string;
   method: string;
   timeout?: number;
-  retryOpts?: retryRequest.Options;
+  retryOpts?: RetryOptions;
   stream?: Duplex;
 }
 
