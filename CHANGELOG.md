@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+### [1.0.5](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.4...v1.0.5) (2019-08-15)
+
+
+### Bug Fixes
+
+* **types:** use types from teeny-request rather than @types/request ([#264](https://www.github.com/googleapis/nodejs-common-grpc/issues/264)) ([1d242d5](https://www.github.com/googleapis/nodejs-common-grpc/commit/1d242d5))
+
 ### [1.0.4](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.3...v1.0.4) (2019-07-29)
 
 
