@@ -1,5 +1,5 @@
 /*!
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2015 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,19 +37,29 @@ import {EventEmitter} from 'events';
 import * as extend from 'extend';
 import * as grpc from '@grpc/grpc-js';
 import * as is from 'is';
-import * as r from 'request';
+import {Request, Response} from 'teeny-request';
 import * as retryRequest from 'retry-request';
 import {Duplex, PassThrough} from 'stream';
 
 export interface ServiceRequestCallback {
-  (err: Error | null, apiResponse?: r.Response): void;
+  (err: Error | null, apiResponse?: Response): void;
+}
+
+interface RetryOptions {
+  objectMode?: boolean;
+  // tslint:disable-next-line:no-any
+  request?: any;
+  retries?: number;
+  noResponseRetries?: number;
+  currentRetryAttempt?: number;
+  shouldRetryFn?: (response: Response) => boolean;
 }
 
 export interface ProtoOpts {
   service: string;
   method: string;
   timeout?: number;
-  retryOpts?: retryRequest.Options;
+  retryOpts?: RetryOptions;
   stream?: Duplex;
 }
 
@@ -436,7 +446,7 @@ export class GrpcService extends Service {
    * @param {object} reqOpts - The request options.
    * @param {function=} callback - The callback function.
    */
-  request(reqOpts: DecorateRequestOptions): Promise<r.Response>;
+  request(reqOpts: DecorateRequestOptions): Promise<Response>;
   request(
     reqOpts: DecorateRequestOptions,
     callback: BodyResponseCallback
@@ -444,7 +454,7 @@ export class GrpcService extends Service {
   request(
     reqOpts: DecorateRequestOptions,
     callback?: BodyResponseCallback
-  ): void | Promise<r.Response>;
+  ): void | Promise<Response>;
   request(
     protoOpts: ProtoOpts,
     reqOpts: DecorateRequestOptions,
@@ -454,7 +464,7 @@ export class GrpcService extends Service {
     pOpts: ProtoOpts | DecorateRequestOptions,
     rOpts?: DecorateRequestOptions | BodyResponseCallback,
     callback?: ServiceRequestCallback
-  ): Abortable | void | Promise<r.Response> {
+  ): Abortable | void | Promise<Response> {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends
@@ -544,12 +554,12 @@ export class GrpcService extends Service {
       protoOpts.retryOpts
     );
 
-    return retryRequest(null!, retryOpts, (err, resp) => {
+    return retryRequest(null!, retryOpts, (err, resp: object) => {
       if (!err && resp === respError) {
         err = respError;
         resp = null!;
       }
-      callback!(err, resp);
+      callback!(err, resp as Response);
     });
   }
 
@@ -563,12 +573,12 @@ export class GrpcService extends Service {
    *     request cancel.
    * @param {object} reqOpts - The request options.
    */
-  requestStream(reqOpts: DecorateRequestOptions): r.Request;
+  requestStream(reqOpts: DecorateRequestOptions): Request;
   requestStream(protoOpts: ProtoOpts, reqOpts: DecorateRequestOptions): Duplex;
   requestStream(
     pOpts: ProtoOpts | DecorateRequestOptions,
     rOpts?: DecorateRequestOptions
-  ): Duplex | r.Request {
+  ): Duplex | Request {
     /**
      * The function signature above is a little funky.  This is due to the way
      * method overloading in TypeScript operates.  Since this class extends

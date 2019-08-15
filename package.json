@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "test": "npm run cover",
-    "cover": "nyc --reporter=lcov mocha build/test && nyc report",
+    "cover": "nyc --reporter=lcov mocha --exit build/test && nyc report",
     "test-no-cover": "mocha build/test",
     "docs": "compodoc src/",
     "lint": "gts check",
@@ -39,7 +39,8 @@
     "duplexify": "^4.0.0",
     "extend": "^3.0.2",
     "is": "^3.2.1",
-    "retry-request": "^4.0.0"
+    "retry-request": "^4.0.0",
+    "teeny-request": "^5.2.1"
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.1.7",
@@ -49,7 +50,7 @@
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.5.3",
     "@types/proxyquire": "^1.3.28",
-    "@types/request": "^2.47.1",
+    "@types/request": "^2.48.2",
     "@types/sinon": "^7.0.0",
     "codecov": "^3.0.4",
     "gts": "^1.0.0",
