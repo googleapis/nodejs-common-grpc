@@ -34,7 +34,7 @@
     "@google-cloud/common": "^2.0.0",
     "@google-cloud/projectify": "^1.0.0",
     "@google-cloud/promisify": "^1.0.0",
-    "@grpc/grpc-js": "^0.5.0",
+    "@grpc/grpc-js": "^0.6.0",
     "@grpc/proto-loader": "^0.5.0",
     "duplexify": "^4.0.0",
     "extend": "^3.0.2",
