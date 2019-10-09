@@ -1706,7 +1706,7 @@ describe('GrpcService', () => {
           assert.ifError(err);
           assert.strictEqual(
             grpcCredentials.constructor.name,
-            'SecureChannelCredentialsImpl'
+            'ComposedChannelCredentialsImpl'
           );
           done();
         });
