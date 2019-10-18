@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+### [1.0.8](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.7...v1.0.8) (2019-10-18)
+
+
+### Bug Fixes
+
+* **deps:** make sure we are on the newest @grpc/grpc-js@0.6.9 ([#282](https://www.github.com/googleapis/nodejs-common-grpc/issues/282)) ([67a4280](https://www.github.com/googleapis/nodejs-common-grpc/commit/67a4280ce693aa4bf804078e3aca705c38450d9b))
+
 ### [1.0.7](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.6...v1.0.7) (2019-10-11)
 
 
