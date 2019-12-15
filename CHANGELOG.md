@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+### [1.0.9](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.8...v1.0.9) (2019-12-05)
+
+
+### Bug Fixes
+
+* **deps:** pin TypeScript below 3.7.0 ([#291](https://www.github.com/googleapis/nodejs-common-grpc/issues/291)) ([040d8c6](https://www.github.com/googleapis/nodejs-common-grpc/commit/040d8c62750a9646f29e5576ded3420b493da76c))
+
 ### [1.0.8](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.7...v1.0.8) (2019-10-18)
 
 
