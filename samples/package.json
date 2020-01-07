@@ -11,7 +11,7 @@
     "test": "mocha system-test"
   },
   "dependencies": {
-    "@google-cloud/common-grpc": "^1.0.10"
+    "@google-cloud/common-grpc": "^1.0.9"
   },
   "devDependencies": {
     "mocha": "^7.0.0"
