@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+### [1.0.10](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.9...v1.0.10) (2020-01-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency teeny-request to v6 ([#306](https://www.github.com/googleapis/nodejs-common-grpc/issues/306)) ([6042619](https://www.github.com/googleapis/nodejs-common-grpc/commit/60426191d804ca25c1380845bc4d400fe42292d7))
+* **docs:** add jsdoc-region-tag plugin ([#287](https://www.github.com/googleapis/nodejs-common-grpc/issues/287)) ([bdac2f0](https://www.github.com/googleapis/nodejs-common-grpc/commit/bdac2f0a78a87f4ebe5f65fa18d4359ea88a8383))
+
 ### [1.0.10](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.9...v1.0.10) (2020-01-03)
 
 
