@@ -4,6 +4,17 @@
 
 [1]: https://www.npmjs.com/package/nodejs-common-grpc?activeTab=versions
 
+## [2.0.0](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.10...v2.0.0) (2021-09-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* deprecate the module (#318)
+
+### Features
+
+* deprecate the module ([#318](https://www.github.com/googleapis/nodejs-common-grpc/issues/318)) ([79a7054](https://www.github.com/googleapis/nodejs-common-grpc/commit/79a70541cbb319f958791bf80700f0511785fa42))
+
 ### [1.0.10](https://www.github.com/googleapis/nodejs-common-grpc/compare/v1.0.9...v1.0.10) (2020-01-21)
 
 
